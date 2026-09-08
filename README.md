@@ -10,6 +10,21 @@ System Manajemen Gudang (WMS) berbasis **Laravel 7** yang dirancang untuk mengel
 
 ---
 
+## 🌐 Repository Git
+
+Proyek ini tersimpan dan disinkronisasikan pada **GitLab**:
+- **Repository Remote URL**: `https://gitlab.com/suryoatm/wms-indraco.git`
+- **Web Link Project**: [https://gitlab.com/suryoatm/wms-indraco](https://gitlab.com/suryoatm/wms-indraco)
+- **Main Branch**: `main`
+
+### 🔄 Perintah Clone & Sync:
+```bash
+git clone https://gitlab.com/suryoatm/wms-indraco.git
+git checkout main
+```
+
+---
+
 ## 📌 1. Aturan Bisnis Utama (Business Rules)
 
 1. **Struktur Hierarki Lokasi 7-Tingkat**:
