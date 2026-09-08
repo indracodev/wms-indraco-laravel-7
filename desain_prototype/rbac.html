@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role &amp; Hak Akses (RBAC) - WMS Indraco</title>
+    <meta name="description" content="Konfigurasi matriks Role-Based Access Control (RBAC) WMS Indraco.">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkblue: {
+                            950: '#070a13',
+                            900: '#0b0f19',
+                            800: '#0f172a',
+                            700: '#1e293b',
+                            600: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=3.9">
+    <style>
+        @media (max-width: 767.98px) {
+            /* Hide standard table headers */
+            .rbac-matrix-table thead {
+                display: none !important;
+            }
+            .rbac-matrix-table, 
+            .rbac-matrix-table tbody, 
+            .rbac-matrix-table tr, 
+            .rbac-matrix-table td {
+                display: block !important;
+                width: 100% !important;
+                text-align: left !important;
+                background: transparent !important;
+                border: none !important;
+            }
+            
+            /* --- LIGHT MODE CARD STYLES (Default) --- */
+            .rbac-matrix-table tr {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 12px !important;
+                padding: 16px !important;
+                margin-bottom: 16px !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            }
+            .rbac-matrix-table tr:last-child {
+                margin-bottom: 0 !important;
+            }
+            /* Module Header Row */
+            .rbac-matrix-table td:first-child {
+                font-size: 14px !important;
+                font-weight: 800 !important;
+                color: #0369a1 !important; /* Darker Blue color in light mode for contrast */
+                border-bottom: 1px solid #cbd5e1 !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 12px !important;
+            }
+            /* Permission Rows */
+            .rbac-matrix-table td:not(:first-child) {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                padding: 8px 0 !important;
+                font-size: 12px !important;
+            }
+            /* Add pseudo labels (Light Theme - High Contrast) */
+            .rbac-matrix-table td:nth-child(2)::before {
+                content: "Akses BACA (Read)";
+                color: #0f172a !important; /* Bold black text for clear legibility */
+                font-weight: 700;
+            }
+            .rbac-matrix-table td:nth-child(3)::before {
+                content: "Akses TAMBAH (Create)";
+                color: #0f172a !important;
+                font-weight: 700;
+            }
+            .rbac-matrix-table td:nth-child(4)::before {
+                content: "Akses UBAH (Update)";
+                color: #0f172a !important;
+                font-weight: 700;
+            }
+            .rbac-matrix-table td:nth-child(5)::before {
+                content: "Akses HAPUS (Delete)";
+                color: #0f172a !important;
+                font-weight: 700;
+            }
+            
+            /* --- DARK MODE CARD STYLES (body.dark overrides) --- */
+            body.dark .rbac-matrix-table tr {
+                background: rgba(15, 23, 42, 0.4) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                box-shadow: none !important;
+            }
+            body.dark .rbac-matrix-table td:first-child {
+                color: #38bdf8 !important; /* Sky Blue (Dark Theme) */
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+            body.dark .rbac-matrix-table td:nth-child(2)::before {
+                color: #cbd5e1 !important;
+                font-weight: 600;
+            }
+            body.dark .rbac-matrix-table td:nth-child(3)::before {
+                color: #cbd5e1 !important;
+                font-weight: 600;
+            }
+            body.dark .rbac-matrix-table td:nth-child(4)::before {
+                color: #cbd5e1 !important;
+                font-weight: 600;
+            }
+            body.dark .rbac-matrix-table td:nth-child(5)::before {
+                color: #cbd5e1 !important;
+                font-weight: 600;
+            }
+            
+            /* Checkbox size adjustments for mobile touch-targets */
+            .rbac-matrix-table .form-check-input {
+                width: 1.35rem !important;
+                height: 1.35rem !important;
+                margin-top: 0 !important;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body class="bg-darkblue-950 text-slate-100 min-h-screen flex flex-col" data-page="rbac">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="notification-container"></div>
+
+    <!-- FLOATING IMPERSONATION BANNER -->
+    <div id="impersonate-banner" class="impersonate-banner hidden">
+        <div class="flex items-center gap-2">
+            <i class="bi bi-incognito text-lg"></i>
+            <span>Anda sedang masuk sebagai user: <strong id="impersonated-user-display">-</strong> (<span id="impersonated-role-display">-</span>).</span>
+        </div>
+        <button onclick="revertImpersonation()" class="btn btn-dark btn-xs text-xs py-1 px-3 bg-darkblue-950 border-none hover:bg-darkblue-900 font-bold flex items-center gap-1.5 text-white">
+            <i class="bi bi-arrow-left-circle-fill text-amber-400"></i> Kembali ke Super Admin
+        </button>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div id="app-container" class="flex-grow flex flex-col md:flex-row min-h-screen">
+
+        <!-- Sidebar Backdrop for mobile -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out flex flex-col shrink-0 bg-darkblue-900 border-r border-slate-700/50">
+            <!-- Header Brand -->
+            <div class="p-6 border-b border-slate-700/50 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                        <i class="bi bi-boxes text-xl text-darkblue-900"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-white leading-tight">WMS Indraco</h2>
+                        <span class="text-xxs text-sky-400 font-medium">Console v2.0</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar(false)" class="btn-close btn-close-white text-xs block md:hidden" aria-label="Close"></button>
+            </div>
+
+            <!-- Scrollable Navigation Items -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mb-2 tracking-wider">Main Modul</div>
+                <a href="dashboard.html" id="nav-dashboard" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="master-data.html" id="nav-master-data" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-database"></i>
+                    <span>Data Master CRUD</span>
+                </a>
+                <a href="detail-data.html" id="nav-detail-data" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Data Detail Inventory</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Fitur Pelacak</div>
+                <a href="scanner.html" id="nav-scanner" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-qr-code-scan"></i>
+                    <span>Barcode Scanner Sim</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Keamanan &amp; Kontrol</div>
+                <a href="users.html" id="nav-users" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-people"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="rbac.html" id="nav-rbac" class="sidebar-link active text-decoration-none">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Role &amp; Hak Akses</span>
+                </a>
+                <a href="logs.html" id="nav-logs" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Audit Trail History</span>
+                </a>
+                <a href="settings.html" id="nav-settings" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-sliders animate-spin-hover"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="profile.html" id="nav-profile" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-person-bounding-box"></i>
+                    <span>Profile User</span>
+                </a>
+            </nav>
+
+            <!-- Bottom User Session Panel (Desktop) -->
+            <div class="p-4 border-t border-slate-700/50 bg-slate-950/20 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="user-avatar-circle" id="sidebar-avatar-letters">A</div>
+                        <div>
+                            <div class="font-bold text-white leading-none" id="sidebar-username">Active User</div>
+                            <span class="text-xxs text-slate-400 font-medium" id="sidebar-role">Role</span>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="btn btn-link text-rose-400 hover:text-rose-300 p-0 text-decoration-none" title="Keluar dari sistem">
+                        <i class="bi bi-box-arrow-left text-lg"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center text-xxs text-slate-500 border-t border-slate-800/80 pt-2 mt-2">
+                    <span>Shift Kerja: <strong class="text-slate-300" id="sidebar-shift-val">1</strong></span>
+                    <span class="flex items-center gap-1"><span class="pulse-status pulse-green"></span> Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow flex flex-col min-w-0">
+            <!-- Navbar Header -->
+            <header class="bg-darkblue-900 border-b border-slate-700/50 h-16 flex items-center justify-between px-6 z-10 sticky top-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar(true)" class="btn btn-link text-slate-400 hover:text-white p-0 me-1 block md:hidden" id="mobile-hamburger-btn">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                    <span class="text-xs font-semibold text-slate-400 hidden sm:inline">Gudang Aktif:</span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary custom-input dropdown-toggle text-xs py-1 px-3 font-semibold text-sky-400 hover:text-white" type="button" data-bs-toggle="dropdown" id="active-wh-btn">
+                            Gudang Gresik Utama
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl" id="wh-dropdown-list">
+                            <!-- Loaded Dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Header Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn btn-link text-slate-400 hover:text-white p-0 border-none flex items-center justify-center h-8 w-8 rounded-lg hover:bg-slate-800/50 transition-colors" title="Ubah Tema Light/Dark" id="theme-toggle-btn">
+                        <i class="bi bi-moon-fill text-base" id="theme-icon"></i>
+                    </button>
+                    <div class="border-l border-slate-800 h-6"></div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-decoration-none p-0 flex items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-circle" id="header-avatar-letters">A</div>
+                            <span class="text-xs font-bold text-white hidden sm:inline" id="header-user-display">Active User</span>
+                            <i class="bi bi-chevron-down text-xxs text-slate-400"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl py-1 mt-2">
+                            <li class="px-3 py-2 border-b border-slate-800 mb-1">
+                                <div class="font-bold text-white" id="header-dropdown-name">Active User</div>
+                                <span class="text-xxs text-sky-400" id="header-dropdown-role">Role</span>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="profile.html">
+                                    <i class="bi bi-person-circle text-sky-400"></i> Profile Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="settings.html">
+                                    <i class="bi bi-gear-fill text-emerald-400"></i> Pengaturan Sistem
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider border-slate-700"></li>
+                            <li>
+                                <a class="dropdown-item text-xs text-rose-400 hover:text-white hover:bg-rose-500/10 py-2 px-3 flex items-center gap-2" href="#" onclick="handleLogout()">
+                                    <i class="bi bi-box-arrow-left"></i> Logout Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Workspace Content Section -->
+            <main class="flex-grow p-4 pb-28 md:p-6 md:pb-6 overflow-y-auto space-y-4">
+                <!-- TAB: RBAC MATRIX -->
+                <section id="tab-rbac" class="space-y-4">
+                    <!-- Page Header -->
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                        <div>
+                            <h2 class="text-base font-bold text-white leading-tight">Role &amp; Hak Akses (RBAC)</h2>
+                            <p class="text-xxs text-slate-400 mt-0.5 leading-snug">Kelola izin baca, tambah, ubah, dan hapus modul sistem.</p>
+                        </div>
+                    </div>
+
+                    <!-- Role Selector Row -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-300">Pilih Role Peran:</span>
+                            <select id="rbac-role-select" onchange="loadRolePermissionsMatrix(this.value)" class="form-select custom-input py-1 px-3 text-xs w-auto rounded-lg">
+                                <option value="Super Admin">Super Admin</option>
+                                <option value="Warehouse Supervisor">Warehouse Supervisor</option>
+                                <option value="Operator Gudang">Operator Gudang</option>
+                            </select>
+                        </div>
+                        <button onclick="saveRolePermissions()" id="btn-rbac-save" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-950 font-bold text-xs py-2 px-4 rounded-lg flex items-center justify-center gap-1.5">
+                            <i class="bi bi-save-fill"></i> Simpan Matriks Hak Akses
+                        </button>
+                    </div>
+
+                    <!-- Permissions Table / Mobile Card Grid -->
+                    <div class="glass-panel-mobile-clean p-4">
+                        <table class="table table-dark align-middle custom-table text-xs rbac-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama Modul / Fitur</th>
+                                    <th class="text-center" style="width: 15%">BACA (Read)</th>
+                                    <th class="text-center" style="width: 15%">TAMBAH (Create)</th>
+                                    <th class="text-center" style="width: 15%">UBAH (Update)</th>
+                                    <th class="text-center" style="width: 15%">HAPUS (Delete)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rbac-matrix-tbody">
+                                <!-- Dynamic Permissions Matrix Rows loaded via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Mobile Bottom Spacer to prevent Nav collision -->
+                    <div class="h-16 block md:hidden"></div>
+                </section>
+            </main>
+
+            <!-- Mobile Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 h-16 bg-darkblue-900 border-t border-slate-800 flex items-center justify-around z-30 block md:hidden px-4 shadow-lg">
+                <a href="dashboard.html" id="bottom-nav-dashboard" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-grid-1x2 text-lg"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="detail-data.html" id="bottom-nav-detail-data" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-journal-text text-lg"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="scanner.html" id="bottom-nav-scanner" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-qr-code-scan text-lg"></i>
+                    <span>Scanner</span>
+                </a>
+                <a href="profile.html" id="bottom-nav-profile" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-person-bounding-box text-lg"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core JS -->
+    <script src="app.js?v=3.9"></script>
+</body>
+</html>

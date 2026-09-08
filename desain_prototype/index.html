@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS Indraco - Router</title>
+    <meta name="description" content="Mengalihkan ke halaman login atau dashboard WMS Indraco.">
+    <script>
+        // Check session and redirect to appropriate page
+        try {
+            const state = JSON.parse(localStorage.getItem('WMS_INDRACO_STATE') || '{}');
+            if (state.session && state.session.isLoggedIn) {
+                window.location.replace('dashboard.html');
+            } else {
+                window.location.replace('login.html');
+            }
+        } catch (e) {
+            window.location.replace('login.html');
+        }
+    </script>
+</head>
+<body style="background-color: #070a13; color: #cbd5e1; font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <div style="text-align: center;">
+        <h2 style="margin: 0 0 10px 0; color: #fff; font-weight: 700;">WMS INDRACO</h2>
+        <p style="margin: 0; font-size: 13px; color: #38bdf8; letter-spacing: 0.05em;">MENGARAHKAN HALAMAN...</p>
+    </div>
+</body>
+</html>

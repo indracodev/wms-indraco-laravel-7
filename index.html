@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS Indraco - Warehouse Management System</title>
+    <meta name="description" content="Sistem Informasi Warehouse Management System (WMS) Indraco. Kelola gudang, rak, BIN, palet, inbound, outbound, transfer, dan hak akses secara presisi.">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkblue: {
+                            900: '#0b0f19',
+                            800: '#0f172a',
+                            700: '#1e293b',
+                            600: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-darkblue-900 text-slate-100 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="notification-container"></div>
+
+    <!-- Sidebar Section -->
+    <aside class="w-full md:w-64 bg-darkblue-800 border-r border-slate-700/50 flex flex-col shrink-0 md:sticky md:top-0 md:h-screen">
+        <!-- Logo Header -->
+        <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-lg bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                <i class="bi bi-box-seam-fill text-xl text-darkblue-900"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white leading-tight">WMS Indraco</h1>
+                <span class="text-xs text-sky-400 font-medium">Enterprise Suite</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <div class="text-slate-500 text-xxs font-bold uppercase px-3 mb-2 tracking-wider">Main Modul</div>
+            
+            <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-link active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard Overview</span>
+            </a>
+            
+            <a href="#" onclick="switchTab('stock-locator')" id="nav-stock-locator" class="sidebar-link">
+                <i class="bi bi-geo-alt"></i>
+                <span>Cari & Rekap Lokasi</span>
+            </a>
+
+            <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-6 mb-2 tracking-wider">Transaksi Barang</div>
+
+            <a href="#" onclick="switchTab('inbound')" id="nav-inbound" class="sidebar-link">
+                <i class="bi bi-arrow-down-left-circle"></i>
+                <span>Barang Masuk (In)</span>
+            </a>
+
+            <a href="#" onclick="switchTab('outbound')" id="nav-outbound" class="sidebar-link">
+                <i class="bi bi-arrow-up-right-circle"></i>
+                <span>Barang Keluar (Out)</span>
+            </a>
+
+            <a href="#" onclick="switchTab('transfer')" id="nav-transfer" class="sidebar-link">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transfer / Move</span>
+            </a>
+
+            <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-6 mb-2 tracking-wider">Sistem & Keamanan</div>
+
+            <a href="#" onclick="switchTab('rbac')" id="nav-rbac" class="sidebar-link">
+                <i class="bi bi-shield-lock"></i>
+                <span>Hak Akses (RBAC)</span>
+            </a>
+
+            <a href="#" onclick="switchTab('logs')" id="nav-logs" class="sidebar-link">
+                <i class="bi bi-clock-history"></i>
+                <span>Log Riwayat</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer (System Status) -->
+        <div class="p-4 border-t border-slate-700/50 bg-slate-900/30 text-xs text-slate-400">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="pulse-status pulse-green"></span>
+                <span>Database Sync: Online</span>
+            </div>
+            <div>Shift Aktif: <span id="sidebar-active-shift" class="text-white font-medium">1</span></div>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- Top Navbar -->
+        <header class="bg-darkblue-800/80 backdrop-blur border-b border-slate-700/50 h-16 flex items-center justify-between px-6 z-10 sticky top-0">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-semibold text-slate-300 hidden md:inline">Dashboard Lokasi Gudang:</span>
+                <select id="active-warehouse-select" onchange="changeWarehouse(this.value)" class="form-select custom-input text-xs py-1 px-3 border-slate-600 w-44">
+                    <!-- Loaded dynamically -->
+                </select>
+            </div>
+
+            <!-- Active User Switcher / Simulator -->
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs text-slate-400">PIC Aktif (Simulator):</div>
+                    <div class="text-sm font-semibold text-white flex items-center justify-end gap-1.5">
+                        <span id="header-user-name">Gilang</span>
+                        <span id="header-user-role-badge" class="badge bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xxs font-normal">Operator</span>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary custom-input btn-sm border-slate-700 flex items-center gap-2 py-1.5 px-3 dropdown-toggle text-xs" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="dropdownUserSim">
+                        <i class="bi bi-person-fill-gear text-sky-400"></i>
+                        <span>Ganti User</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end bg-darkblue-800 border border-slate-700/50 shadow-2xl" aria-labelledby="dropdownUserSim" id="user-simulator-list">
+                        <!-- Loaded dynamically -->
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="flex-grow p-6 overflow-y-auto">
+
+            <!-- SECTION 1: DASHBOARD OVERVIEW -->
+            <section id="tab-dashboard" class="space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Dashboard Ringkasan Gudang</h2>
+                        <p class="text-sm text-slate-400">Visualisasi data stok, occupancy rate BIN, dan log pergerakan real-time gudang.</p>
+                    </div>
+                    <div class="text-xs text-slate-400 bg-darkblue-800/80 py-2 px-3 border border-slate-700/50 rounded-lg">
+                        Server Time: <span id="dashboard-clock" class="font-mono text-sky-400">2026-07-21 09:00:00</span>
+                    </div>
+                </div>
+
+                <!-- Stats Cards Group -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-panel p-5 flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center text-2xl border border-sky-500/20">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 uppercase tracking-wider">Total Palet Aktif</div>
+                            <div class="text-2xl font-bold text-white mt-1" id="stat-active-pallets">8 Palet</div>
+                            <div class="text-xxs text-slate-400 mt-1">Tersebar di berbagai BIN</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-5 flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/20">
+                            <i class="bi bi-pie-chart"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 uppercase tracking-wider">Occupancy Rate BIN</div>
+                            <div class="text-2xl font-bold text-white mt-1" id="stat-occupancy-rate">57%</div>
+                            <div class="text-xxs text-emerald-400 mt-1 flex items-center gap-1">
+                                <i class="bi bi-info-circle-fill"></i> Maksimal 2 palet / BIN
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-5 flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/20">
+                            <i class="bi bi-arrow-down-left"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 uppercase tracking-wider">Inbound Hari Ini</div>
+                            <div class="text-2xl font-bold text-white mt-1" id="stat-inbound-today">8 Transaksi</div>
+                            <div class="text-xxs text-slate-400 mt-1">Data masuk valid</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-5 flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl border border-rose-500/20">
+                            <i class="bi bi-arrow-up-right"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 uppercase tracking-wider">Outbound Hari Ini</div>
+                            <div class="text-2xl font-bold text-white mt-1" id="stat-outbound-today">4 Transaksi</div>
+                            <div class="text-xxs text-slate-400 mt-1">Data pengeluaran barang</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="glass-panel p-5 lg:col-span-2 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-base font-semibold text-white">Grafik Alur Barang (Masuk vs Keluar)</h3>
+                            <span class="text-xs text-slate-400">Minggu Ini</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="bar-chart-inout"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-5 space-y-4">
+                        <h3 class="text-base font-semibold text-white">Occupancy BIN Terpakai</h3>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="pie-chart-occupancy"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Occupied BINs and Quick Rules Alert -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 space-y-4">
+                        <h3 class="text-base font-semibold text-white">Status BIN Terisi Penuh (2 Palet)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table table-dark table-hover align-middle custom-table text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Kode Rak / BIN</th>
+                                        <th>Jenis Palet</th>
+                                        <th>Detail Palet Terdaftar</th>
+                                        <th>Status Rak</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-full-bins-body">
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel p-5 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-white mb-3">Pusat Aturan Bisnis & Validasi</h3>
+                            <div class="space-y-3 text-xs text-slate-300">
+                                <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                    <i class="bi bi-exclamation-triangle-fill text-amber-400 mt-0.5"></i>
+                                    <div>
+                                        <strong class="text-amber-400">Aturan Kapasitas BIN:</strong> Setiap nomor BIN (misal B.10.2) dibatasi maksimal **2 palet** aktif. Form Inbound/Move akan otomatis memvalidasi dan memblokir jika melebihi batas.
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/20">
+                                    <i class="bi bi-info-circle-fill text-sky-400 mt-0.5"></i>
+                                    <div>
+                                        <strong class="text-sky-400">Format Rak:</strong> Terdiri dari 3 bagian: `[Nama Rak].[Nomor Kolom].[SAP/Tingkat]` (contoh: `B.10.2` Rak B, Kolom 10, Tingkat/SAP 2).
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                    <i class="bi bi-check-circle-fill text-emerald-400 mt-0.5"></i>
+                                    <div>
+                                        <strong class="text-emerald-400">Log History Otomatis:</strong> Setiap pembuatan, pemindahan (transfer), dan pengeluaran barang akan mencatat log audit lengkap secara real-time.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-700/50 flex gap-2 justify-end">
+                            <button onclick="switchTab('stock-locator')" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none btn-xs text-xs px-3 py-1.5 text-darkblue-900 font-semibold">Cari Lokasi Barang <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 2: STOCK LOCATOR (CARI LOKASI & REKAP STOK) -->
+            <section id="tab-stock-locator" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Pencarian Lokasi & Rekap Stok</h2>
+                        <p class="text-sm text-slate-400">Modul untuk mencari koordinat barang secara detail dan menampilkan lembar rekapulasi bin location (Gambar 1 & Gambar 2).</p>
+                    </div>
+                </div>
+
+                <!-- Search Filter Form -->
+                <div class="glass-panel p-4 flex flex-wrap gap-3 items-center justify-between">
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <i class="bi bi-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                            <input type="text" id="locator-search-query" onkeyup="filterStock()" placeholder="Cari Nama Barang / Rak..." class="form-control custom-input pl-9 text-xs py-2 w-full">
+                        </div>
+                        <select id="locator-filter-status-rak" onchange="filterStock()" class="form-select custom-input text-xs py-2 w-full sm:w-44">
+                            <option value="">Semua Status Rak</option>
+                            <option value="Terisi">Terisi</option>
+                            <option value="Kosong">Kosong</option>
+                        </select>
+                        <select id="locator-filter-jenis-palet" onchange="filterStock()" class="form-select custom-input text-xs py-2 w-full sm:w-44">
+                            <option value="">Semua Jenis Palet</option>
+                            <option value="Loscam">Loscam</option>
+                            <option value="Kayu 125x125">Kayu 125x125</option>
+                            <option value="Kayu 135x125">Kayu 135x125</option>
+                            <option value="Plastik">Plastik</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 w-full lg:w-auto justify-end">
+                        <button onclick="resetLocatorFilters()" class="btn btn-outline-secondary custom-input text-xs py-2 px-3 flex items-center gap-1.5"><i class="bi bi-x-circle"></i> Reset</button>
+                        <button onclick="exportToExcelSimulated()" class="btn btn-success bg-emerald-500 hover:bg-emerald-600 border-none text-darkblue-900 font-semibold text-xs py-2 px-3 flex items-center gap-1.5"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                    </div>
+                </div>
+
+                <!-- Custom Tabs Inside Locator -->
+                <ul class="nav nav-tabs border-b border-slate-700/50" id="locator-subtabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active bg-transparent text-slate-400 border-none px-4 py-2 text-xs font-semibold" id="rekap-tab-btn" onclick="toggleLocatorView('rekap')" type="button">REKAP DATA BIN LOCATION</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link bg-transparent text-slate-400 border-none px-4 py-2 text-xs font-semibold" id="tarikan-tab-btn" onclick="toggleLocatorView('tarikan')" type="button">TARIKAN DATA LOG TRANSAKSI</button>
+                    </li>
+                </ul>
+
+                <!-- TAB CONTENT 1: REKAP DATA BIN LOCATION -->
+                <div id="locator-view-rekap" class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider">Contoh Rekap Data Bin Location (Berdasarkan Gambar 2)</h3>
+                        <span class="text-xs text-slate-400" id="rekap-total-rows">Menampilkan 14 baris data</span>
+                    </div>
+                    <div class="glass-panel p-4 overflow-x-auto">
+                        <table class="table table-dark table-hover align-middle custom-table text-xs">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-700/50">
+                                    <th>Nama Barang</th>
+                                    <th>Expired Date</th>
+                                    <th>Kode Mesin</th>
+                                    <th class="text-emerald-400">Status</th>
+                                    <th class="text-emerald-400">Kode Rak (In)</th>
+                                    <th class="text-emerald-400 text-center">Qty (In)</th>
+                                    <th class="text-rose-400">Status</th>
+                                    <th class="text-rose-400">Kode Rak (Out)</th>
+                                    <th class="text-rose-400 text-center">Qty (Out)</th>
+                                    <th class="text-sky-400 text-center font-bold">Qty Akhir</th>
+                                    <th>Status Rak</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekap-bin-table-body">
+                                <!-- Dynamically Rendered -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT 2: TARIKAN DATA LOG TRANSAKSI -->
+                <div id="locator-view-tarikan" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider">Contoh Tarikan Data Bin Location (Berdasarkan Gambar 1)</h3>
+                        <span class="text-xs text-slate-400" id="tarikan-total-rows">Menampilkan 12 baris data</span>
+                    </div>
+                    <div class="glass-panel p-4 overflow-x-auto">
+                        <table class="table table-dark table-hover align-middle custom-table text-xs">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-700/50">
+                                    <th>Nomor</th>
+                                    <th>PIC Input</th>
+                                    <th>Shift</th>
+                                    <th>Tanggal Input</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-center">Qty</th>
+                                    <th>Satuan</th>
+                                    <th>Expired Date</th>
+                                    <th>Kode Mesin</th>
+                                    <th>Kode Rak</th>
+                                    <th>Status</th>
+                                    <th>Jenis Palet</th>
+                                    <th>Gudang</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tarikan-bin-table-body">
+                                <!-- Dynamically Rendered -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 3: BARANG MASUK (INBOUND) -->
+            <section id="tab-inbound" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Pencatatan Barang Masuk (Inbound / Receipt)</h2>
+                        <p class="text-sm text-slate-400">Catat penerimaan barang baru, masukkan ke palet, dan tempatkan pada nomor BIN Rak tertentu.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form Card -->
+                    <div class="glass-panel p-5 space-y-4 h-fit">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2 flex items-center gap-2">
+                            <i class="bi bi-plus-square-fill text-sky-400"></i> Form Receipt Inbound
+                        </h3>
+                        <form id="inbound-form" onsubmit="handleInboundSubmit(event)" class="space-y-3 text-xs">
+                            <div>
+                                <label class="form-label text-slate-400 mb-1">PIC Input & Shift</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" id="inbound-pic" readonly class="form-control custom-input py-2 text-slate-400" placeholder="PIC">
+                                    <input type="number" id="inbound-shift" readonly class="form-control custom-input py-2 text-slate-400" placeholder="Shift">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label text-slate-300 mb-1">Nama Barang / Varian Product</label>
+                                <select id="inbound-product-select" class="form-select custom-input py-2" required>
+                                    <!-- Dynamic -->
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Jumlah (Qty)</label>
+                                    <input type="number" id="inbound-qty" min="1" value="1" class="form-control custom-input py-2" required>
+                                </div>
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Satuan Barang</label>
+                                    <select id="inbound-satuan" class="form-select custom-input py-2" required>
+                                        <option value="Karton">Karton</option>
+                                        <option value="Bag">Bag</option>
+                                        <option value="Box">Box</option>
+                                        <option value="Pcs">Pcs</option>
+                                        <option value="Kg">Kg</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Expired Date</label>
+                                    <input type="date" id="inbound-expired" class="form-control custom-input py-2" required>
+                                </div>
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Kode Mesin</label>
+                                    <input type="text" id="inbound-mesin" class="form-control custom-input py-2" placeholder="e.g. 1I0PB01" required>
+                                </div>
+                            </div>
+                            
+                            <hr class="border-slate-700/50">
+                            
+                            <div>
+                                <label class="form-label text-slate-300 mb-1">Pilih Gudang & Lokasi Rak / BIN</label>
+                                <select id="inbound-bin-select" class="form-select custom-input py-2" required>
+                                    <!-- Dynamic -->
+                                </select>
+                                <span class="text-xxs text-amber-400 mt-1 block" id="inbound-bin-occupancy-note">Pilih BIN untuk mengecek kapasitas (Max 2 Palet)</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Barcode Palet</label>
+                                    <input type="text" id="inbound-pallet-code" class="form-control custom-input py-2" placeholder="e.g. PLT-0013" required>
+                                </div>
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Jenis Palet</label>
+                                    <select id="inbound-pallet-type" class="form-select custom-input py-2" required>
+                                        <option value="Loscam">Loscam</option>
+                                        <option value="Kayu 125x125">Kayu 125x125</option>
+                                        <option value="Kayu 135x125">Kayu 135x125</option>
+                                        <option value="Plastik">Plastik</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btn-inbound-submit" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-900 font-semibold w-full py-2.5 mt-3 text-xs flex justify-center items-center gap-1.5">
+                                <i class="bi bi-check-circle-fill"></i> Simpan Barang Masuk
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- List Table Inbound -->
+                    <div class="glass-panel p-5 lg:col-span-2 space-y-4">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2">Riwayat Transaksi Inbound Hari Ini</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table table-dark table-hover align-middle custom-table text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>PIC / Shift</th>
+                                        <th>Nama Barang</th>
+                                        <th>Qty / Satuan</th>
+                                        <th>Kode Mesin</th>
+                                        <th>Rak Location</th>
+                                        <th>Palet</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inbound-history-body">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 4: BARANG KELUAR (OUTBOUND) -->
+            <section id="tab-outbound" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Pencatatan Barang Keluar (Outbound / Issue)</h2>
+                        <p class="text-sm text-slate-400">Catat pemindahan barang keluar dari lokasi rak tertentu ke area dispatch pengiriman.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form Card Outbound -->
+                    <div class="glass-panel p-5 space-y-4 h-fit">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2 flex items-center gap-2">
+                            <i class="bi bi-dash-square-fill text-rose-400"></i> Form Issue Outbound
+                        </h3>
+                        <form id="outbound-form" onsubmit="handleOutboundSubmit(event)" class="space-y-3 text-xs">
+                            <div>
+                                <label class="form-label text-slate-400 mb-1">PIC Input & Shift</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" id="outbound-pic" readonly class="form-control custom-input py-2 text-slate-400">
+                                    <input type="number" id="outbound-shift" readonly class="form-control custom-input py-2 text-slate-400">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label text-slate-300 mb-1">Pilih Lokasi & Palet Barang</label>
+                                <select id="outbound-pallet-select" onchange="handleOutboundPalletChange(this.value)" class="form-select custom-input py-2" required>
+                                    <!-- Dynamic load from active pallets -->
+                                </select>
+                            </div>
+                            <div class="p-3 bg-slate-900/50 rounded-lg space-y-2 border border-slate-700/30 text-xxs text-slate-300">
+                                <div class="flex justify-between"><span>Nama Barang:</span> <span id="out-info-name" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Qty Tersedia:</span> <span id="out-info-qty" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Expired Date:</span> <span id="out-info-exp" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Kode Mesin:</span> <span id="out-info-mesin" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Lokasi Rak / Gudang:</span> <span id="out-info-location" class="font-semibold text-sky-400">-</span></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Qty Keluar</label>
+                                    <input type="number" id="outbound-qty-input" min="1" class="form-control custom-input py-2" required>
+                                </div>
+                                <div>
+                                    <label class="form-label text-slate-300 mb-1">Satuan</label>
+                                    <input type="text" id="outbound-satuan-display" readonly class="form-control custom-input py-2 text-slate-400">
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-outbound-submit" class="btn btn-danger bg-rose-500 hover:bg-rose-600 border-none text-white font-semibold w-full py-2.5 mt-3 text-xs flex justify-center items-center gap-1.5">
+                                <i class="bi bi-dash-circle-fill"></i> Simpan Barang Keluar
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- List Table Outbound -->
+                    <div class="glass-panel p-5 lg:col-span-2 space-y-4">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2">Riwayat Transaksi Outbound Hari Ini</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table table-dark table-hover align-middle custom-table text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>PIC / Shift</th>
+                                        <th>Nama Barang</th>
+                                        <th>Qty / Satuan</th>
+                                        <th>Kode Mesin</th>
+                                        <th>Rak Location</th>
+                                        <th>Palet</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="outbound-history-body">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 5: TRANSFER / MOVE -->
+            <section id="tab-transfer" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Transfer & Relokasi Barang (Move)</h2>
+                        <p class="text-sm text-slate-400">Pindahkan palet secara utuh atau box produk antar lokasi rak. Sistem akan otomatis memvalidasi sisa kapasitas BIN tujuan.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form Move -->
+                    <div class="glass-panel p-5 space-y-4 h-fit">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2 flex items-center gap-2">
+                            <i class="bi bi-arrows-move text-sky-400"></i> Form Transfer Lokasi
+                        </h3>
+                        <form id="transfer-form" onsubmit="handleTransferSubmit(event)" class="space-y-3 text-xs">
+                            <div>
+                                <label class="form-label text-slate-300 mb-1">Pilih Palet yang Dipindahkan</label>
+                                <select id="transfer-pallet-select" onchange="handleTransferPalletChange(this.value)" class="form-select custom-input py-2" required>
+                                    <!-- Dynamic -->
+                                </select>
+                            </div>
+                            <div class="p-3 bg-slate-900/50 rounded-lg space-y-1.5 border border-slate-700/30 text-xxs text-slate-300">
+                                <div class="flex justify-between"><span>Nama Barang:</span> <span id="trans-info-name" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Stok / Satuan:</span> <span id="trans-info-qty" class="font-semibold text-white">-</span></div>
+                                <div class="flex justify-between"><span>Lokasi BIN Asal:</span> <span id="trans-info-location" class="font-semibold text-rose-400">-</span></div>
+                                <div class="flex justify-between"><span>Jenis Palet:</span> <span id="trans-info-pallet-type" class="font-semibold text-white">-</span></div>
+                            </div>
+                            
+                            <hr class="border-slate-700/50">
+                            
+                            <div>
+                                <label class="form-label text-slate-300 mb-1">Pilih BIN Tujuan</label>
+                                <select id="transfer-bin-select" class="form-select custom-input py-2" required>
+                                    <!-- Dynamic -->
+                                </select>
+                                <span class="text-xxs text-amber-400 mt-1 block" id="transfer-bin-occupancy-note">Kapasitas BIN akan divalidasi (Max 2 Palet)</span>
+                            </div>
+
+                            <button type="submit" id="btn-transfer-submit" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-900 font-semibold w-full py-2.5 mt-3 text-xs flex justify-center items-center gap-1.5">
+                                <i class="bi bi-arrow-left-right"></i> Jalankan Transfer Lokasi
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- History Move -->
+                    <div class="glass-panel p-5 lg:col-span-2 space-y-4">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2">Log Perpindahan Barang (Move Log)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table table-dark table-hover align-middle custom-table text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>PIC</th>
+                                        <th>Palet Code</th>
+                                        <th>Barang</th>
+                                        <th>Lokasi Asal</th>
+                                        <th>Lokasi Baru</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transfer-history-body">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 6: HAK AKSES (RBAC) -->
+            <section id="tab-rbac" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Manajemen Hak Akses & Pengguna (RBAC)</h2>
+                        <p class="text-sm text-slate-400">Kelola role (peran) sistem, edit hak akses modul untuk tambah, edit, dan hapus data (CRUD).</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Config Modul Access Matrix -->
+                    <div class="glass-panel p-5 lg:col-span-2 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+                            <h3 class="text-base font-semibold text-white">Matriks Izin Modul Per Role</h3>
+                            <select id="rbac-role-select" onchange="loadRolePermissionsMatrix(this.value)" class="form-select custom-input text-xs py-1.5 w-44">
+                                <option value="Super Admin">Super Admin</option>
+                                <option value="Warehouse Supervisor">Warehouse Supervisor</option>
+                                <option value="Operator Gudang">Operator Gudang</option>
+                            </select>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark align-middle text-xs custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Modul Sistem</th>
+                                        <th class="text-center">Buka Modul (Read)</th>
+                                        <th class="text-center">Tambah (Create)</th>
+                                        <th class="text-center">Ubah (Update)</th>
+                                        <th class="text-center">Hapus (Delete)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rbac-permissions-matrix-body">
+                                    <!-- Dynamic check boxes -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="saveRolePermissions()" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-900 font-semibold text-xs py-2 px-4">
+                                <i class="bi bi-save"></i> Simpan Hak Akses Role
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- User Account Manager -->
+                    <div class="glass-panel p-5 space-y-4">
+                        <h3 class="text-base font-semibold text-white border-b border-slate-700/50 pb-2">Pengguna WMS Terdaftar</h3>
+                        
+                        <div class="space-y-3" id="rbac-users-list">
+                            <!-- Dynamic rendering of user list -->
+                        </div>
+
+                        <button data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-outline-primary border-slate-700 custom-input text-xs w-full py-2 flex items-center justify-center gap-1.5">
+                            <i class="bi bi-person-plus-fill"></i> Tambah User Baru
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 7: AUDIT LOGS (HISTORY) -->
+            <section id="tab-logs" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Log Aktivitas & Audit Trail</h2>
+                        <p class="text-sm text-slate-400">Daftar riwayat audit dari semua aktivitas penambahan, pengubahan, pemindahan lokas, serta perubahan hak akses oleh pengguna.</p>
+                    </div>
+                    <button onclick="clearAllLogsSimulated()" class="btn btn-outline-danger custom-input text-xs py-2 px-3 flex items-center gap-1.5"><i class="bi bi-trash"></i> Bersihkan Log</button>
+                </div>
+
+                <!-- Log filter and table -->
+                <div class="glass-panel p-4 flex flex-wrap gap-3 items-center justify-between">
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <select id="log-filter-module" onchange="filterLogs()" class="form-select custom-input text-xs py-2 w-full sm:w-44">
+                            <option value="">Semua Modul</option>
+                            <option value="INBOUND">Inbound</option>
+                            <option value="OUTBOUND">Outbound</option>
+                            <option value="TRANSFER">Transfer/Move</option>
+                            <option value="RBAC">RBAC/User</option>
+                            <option value="SYSTEM">System</option>
+                        </select>
+                        <select id="log-filter-action" onchange="filterLogs()" class="form-select custom-input text-xs py-2 w-full sm:w-44">
+                            <option value="">Semua Aksi</option>
+                            <option value="CREATE">CREATE</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="MOVE">MOVE</option>
+                        </select>
+                    </div>
+                    <span class="text-xs text-slate-400" id="logs-count">Total: 25 Log Terdeteksi</span>
+                </div>
+
+                <div class="glass-panel p-5 overflow-x-auto">
+                    <table class="table table-dark table-hover align-middle custom-table text-xs">
+                        <thead>
+                            <tr>
+                                <th>Waktu Kejadian</th>
+                                <th>User / PIC</th>
+                                <th>Modul</th>
+                                <th>Jenis Aksi</th>
+                                <th>Deskripsi Perubahan Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <!-- Dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Bootstrap Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-glass text-slate-100">
+                <div class="modal-header modal-header-glass border-slate-700">
+                    <h5 class="modal-title font-semibold text-white" id="addUserModalLabel">Pendaftaran User WMS Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="add-user-form" onsubmit="handleAddUserSubmit(event)" class="text-xs">
+                    <div class="modal-body space-y-3">
+                        <div>
+                            <label class="form-label text-slate-300">Nama Lengkap PIC</label>
+                            <input type="text" id="new-user-name" class="form-control custom-input" placeholder="e.g. Diana" required>
+                        </div>
+                        <div>
+                            <label class="form-label text-slate-300">Pilih Peran (Role)</label>
+                            <select id="new-user-role" class="form-select custom-input" required>
+                                <option value="Operator Gudang">Operator Gudang</option>
+                                <option value="Warehouse Supervisor">Warehouse Supervisor</option>
+                                <option value="Super Admin">Super Admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-slate-300">Shift Kerja</label>
+                            <select id="new-user-shift" class="form-select custom-input" required>
+                                <option value="1">Shift 1 (Pagi)</option>
+                                <option value="2">Shift 2 (Siang-Sore)</option>
+                                <option value="3">Shift 3 (Malam)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer modal-footer-glass border-slate-700">
+                        <button type="button" class="btn btn-secondary bg-slate-700 border-none btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-900 font-semibold btn-sm">Simpan User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ChartJS and App Logic script files -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core WMS Application JS -->
+    <script src="app.js"></script>
+</body>
+</html>

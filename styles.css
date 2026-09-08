@@ -1,0 +1,257 @@
+/* Custom Styles for WMS Indraco Premium Dashboard */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #0f172a;
+    --secondary-color: #1e293b;
+    --accent-color: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #0b0f19;
+    color: #f1f5f9;
+    overflow-x: hidden;
+}
+
+/* Glassmorphism elements */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+}
+
+.glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(56, 189, 248, 0.2);
+}
+
+/* Table customizations */
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    background: transparent;
+}
+
+.custom-table thead th {
+    background: rgba(15, 23, 42, 0.6);
+    border: none;
+    color: #94a3b8;
+    font-weight: 500;
+    padding: 1rem;
+}
+
+.custom-table tbody tr {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    transition: all 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+    background: rgba(30, 41, 59, 0.6);
+    transform: scale(1.005);
+}
+
+.custom-table tbody td {
+    padding: 1rem;
+    border: none;
+    color: #cbd5e1;
+    vertical-align: middle;
+}
+
+.custom-table tbody tr td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.custom-table tbody tr td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Sidebar Styling */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link i {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-link:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-link.active {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+    border-left-color: #38bdf8;
+    font-weight: 500;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0f19;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
+
+/* Custom badges */
+.badge-in {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-out {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-terisi {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    font-weight: 600;
+}
+
+.badge-kosong {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.badge-penuh {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Custom animate pulse on status elements */
+.pulse-status {
+    position: relative;
+    display: inline-flex;
+    border-radius: 50%;
+    height: 8px;
+    width: 8px;
+}
+
+.pulse-green {
+    background-color: #10b981;
+}
+
+.pulse-orange {
+    background-color: #f59e0b;
+}
+
+/* Form Styling */
+.custom-input {
+    background: rgba(15, 23, 42, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #f1f5f9 !important;
+    border-radius: 0.5rem !important;
+}
+
+.custom-input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.15) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+}
+
+.custom-input option {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+/* Modal Premium Overrides */
+.modal-content-glass {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-header-glass {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.modal-footer-glass {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Notifications toast */
+.notification-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.wms-toast {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

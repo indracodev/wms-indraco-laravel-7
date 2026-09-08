@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Detail Inventory - WMS Indraco</title>
+    <meta name="description" content="Manajemen data detail palet dan box karton di WMS Indraco.">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkblue: {
+                            950: '#070a13',
+                            900: '#0b0f19',
+                            800: '#0f172a',
+                            700: '#1e293b',
+                            600: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=3.9">
+</head>
+<body class="bg-darkblue-950 text-slate-100 min-h-screen flex flex-col" data-page="detail-data">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="notification-container"></div>
+
+    <!-- FLOATING IMPERSONATION BANNER -->
+    <div id="impersonate-banner" class="impersonate-banner hidden">
+        <div class="flex items-center gap-2">
+            <i class="bi bi-incognito text-lg"></i>
+            <span>Anda sedang masuk sebagai user: <strong id="impersonated-user-display">-</strong> (<span id="impersonated-role-display">-</span>).</span>
+        </div>
+        <button onclick="revertImpersonation()" class="btn btn-dark btn-xs text-xs py-1 px-3 bg-darkblue-950 border-none hover:bg-darkblue-900 font-bold flex items-center gap-1.5 text-white">
+            <i class="bi bi-arrow-left-circle-fill text-amber-400"></i> Kembali ke Super Admin
+        </button>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div id="app-container" class="flex-grow flex flex-col md:flex-row min-h-screen">
+
+        <!-- Sidebar Backdrop for mobile -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out flex flex-col shrink-0 bg-darkblue-900 border-r border-slate-700/50">
+            <!-- Header Brand -->
+            <div class="p-6 border-b border-slate-700/50 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                        <i class="bi bi-boxes text-xl text-darkblue-900"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-white leading-tight">WMS Indraco</h2>
+                        <span class="text-xxs text-sky-400 font-medium">Console v2.0</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar(false)" class="btn-close btn-close-white text-xs block md:hidden" aria-label="Close"></button>
+            </div>
+
+            <!-- Scrollable Navigation Items -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mb-2 tracking-wider">Main Modul</div>
+                <a href="dashboard.html" id="nav-dashboard" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="master-data.html" id="nav-master-data" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-database"></i>
+                    <span>Data Master CRUD</span>
+                </a>
+                <a href="detail-data.html" id="nav-detail-data" class="sidebar-link active text-decoration-none">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Data Detail Inventory</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Fitur Pelacak</div>
+                <a href="scanner.html" id="nav-scanner" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-qr-code-scan"></i>
+                    <span>Barcode Scanner Sim</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Keamanan &amp; Kontrol</div>
+                <a href="users.html" id="nav-users" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-people"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="rbac.html" id="nav-rbac" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Role &amp; Hak Akses</span>
+                </a>
+                <a href="logs.html" id="nav-logs" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Audit Trail History</span>
+                </a>
+                <a href="settings.html" id="nav-settings" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-sliders animate-spin-hover"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="profile.html" id="nav-profile" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-person-bounding-box"></i>
+                    <span>Profile User</span>
+                </a>
+            </nav>
+
+            <!-- Bottom User Session Panel (Desktop) -->
+            <div class="p-4 border-t border-slate-700/50 bg-slate-950/20 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="user-avatar-circle" id="sidebar-avatar-letters">A</div>
+                        <div>
+                            <div class="font-bold text-white leading-none" id="sidebar-username">Active User</div>
+                            <span class="text-xxs text-slate-400 font-medium" id="sidebar-role">Role</span>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="btn btn-link text-rose-400 hover:text-rose-300 p-0 text-decoration-none" title="Keluar dari sistem">
+                        <i class="bi bi-box-arrow-left text-lg"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center text-xxs text-slate-500 border-t border-slate-800/80 pt-2 mt-2">
+                    <span>Shift Kerja: <strong class="text-slate-300" id="sidebar-shift-val">1</strong></span>
+                    <span class="flex items-center gap-1"><span class="pulse-status pulse-green"></span> Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow flex flex-col min-w-0">
+            <!-- Navbar Header -->
+            <header class="bg-darkblue-900 border-b border-slate-700/50 h-16 flex items-center justify-between px-6 z-10 sticky top-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar(true)" class="btn btn-link text-slate-400 hover:text-white p-0 me-1 block md:hidden" id="mobile-hamburger-btn">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                    <span class="text-xs font-semibold text-slate-400 hidden sm:inline">Gudang Aktif:</span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary custom-input dropdown-toggle text-xs py-1 px-3 font-semibold text-sky-400 hover:text-white" type="button" data-bs-toggle="dropdown" id="active-wh-btn">
+                            Gudang Gresik Utama
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl" id="wh-dropdown-list">
+                            <!-- Loaded Dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Header Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn btn-link text-slate-400 hover:text-white p-0 border-none flex items-center justify-center h-8 w-8 rounded-lg hover:bg-slate-800/50 transition-colors" title="Ubah Tema Light/Dark" id="theme-toggle-btn">
+                        <i class="bi bi-moon-fill text-base" id="theme-icon"></i>
+                    </button>
+                    <div class="border-l border-slate-800 h-6"></div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-decoration-none p-0 flex items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-circle" id="header-avatar-letters">A</div>
+                            <span class="text-xs font-bold text-white hidden sm:inline" id="header-user-display">Active User</span>
+                            <i class="bi bi-chevron-down text-xxs text-slate-400"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl py-1 mt-2">
+                            <li class="px-3 py-2 border-b border-slate-800 mb-1">
+                                <div class="font-bold text-white" id="header-dropdown-name">Active User</div>
+                                <span class="text-xxs text-sky-400" id="header-dropdown-role">Role</span>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="profile.html">
+                                    <i class="bi bi-person-circle text-sky-400"></i> Profile Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="settings.html">
+                                    <i class="bi bi-gear-fill text-emerald-400"></i> Pengaturan Sistem
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider border-slate-700"></li>
+                            <li>
+                                <a class="dropdown-item text-xs text-rose-400 hover:text-white hover:bg-rose-500/10 py-2 px-3 flex items-center gap-2" href="#" onclick="handleLogout()">
+                                    <i class="bi bi-box-arrow-left"></i> Logout Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Workspace Content Section -->
+            <main class="flex-grow p-4 pb-28 md:p-6 md:pb-6 overflow-y-auto space-y-4">
+                <!-- TAB: DETAIL DATA -->
+                <section id="tab-detail" class="space-y-4">
+                    <!-- Sub Tabs Navigation Bar -->
+                    <div id="detail-subtabs" class="flex flex-wrap gap-1 border-b border-slate-800 pb-2">
+                        <button onclick="switchDetailTab('pallets')" class="btn btn-sm text-xxs font-bold py-1.5 px-3 rounded-lg active bg-sky-500 text-darkblue-950">Palet Gudang</button>
+                        <button onclick="switchDetailTab('boxes')" class="btn btn-sm text-xxs font-bold py-1.5 px-3 rounded-lg text-slate-400">Box Karton</button>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-sm font-bold text-white mb-0" id="detail-table-title">Daftar Inventory</h2>
+                        <button onclick="openCreateDetailModal()" id="btn-detail-create" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-950 font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-1">
+                            <i class="bi bi-plus-circle-fill"></i> Tambah Data
+                        </button>
+                    </div>
+
+                    <!-- Table List (Desktop) -->
+                    <div class="glass-panel p-4 overflow-x-auto hidden md:block">
+                        <table class="table table-dark align-middle custom-table text-xs">
+                            <thead id="detail-thead">
+                                <!-- Loaded Dynamically -->
+                            </thead>
+                            <tbody id="detail-tbody">
+                                <!-- Loaded Dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Card List (Mobile) -->
+                    <div id="detail-mobile-cards" class="space-y-3 block md:hidden text-xs">
+                        <!-- Loaded Dynamically -->
+                    </div>
+
+                    <!-- Mobile Bottom Spacer to prevent Nav collision -->
+                    <div class="h-16 block md:hidden"></div>
+                </section>
+            </main>
+
+            <!-- Mobile Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 h-16 bg-darkblue-900 border-t border-slate-800 flex items-center justify-around z-30 block md:hidden px-4 shadow-lg">
+                <a href="dashboard.html" id="bottom-nav-dashboard" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-grid-1x2 text-lg"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="detail-data.html" id="bottom-nav-detail-data" class="flex flex-col items-center justify-center text-slate-300 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-journal-text text-lg text-sky-400"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="scanner.html" id="bottom-nav-scanner" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-qr-code-scan text-lg"></i>
+                    <span>Scanner</span>
+                </a>
+                <a href="profile.html" id="bottom-nav-profile" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-person-bounding-box text-lg"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRUD MODAL -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-glass text-slate-100">
+                <div class="modal-header modal-header-glass border-slate-800">
+                    <h5 class="modal-title font-bold text-white" id="detailModalLabel">Form Detail Inventory</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="detail-form" onsubmit="handleDetailFormSubmit(event)" class="text-xs">
+                    <input type="hidden" id="detail-form-action" value="create">
+                    <input type="hidden" id="detail-form-target-id" value="">
+
+                    <div class="modal-body space-y-3" id="detail-form-fields-container">
+                        <!-- Fields are generated dynamically by buildDetailFormFields() -->
+                    </div>
+
+                    <div class="modal-footer modal-footer-glass border-slate-800">
+                        <button type="button" class="btn btn-secondary bg-slate-700 border-none btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary bg-sky-500 hover:bg-sky-600 border-none text-darkblue-950 font-bold btn-sm">Simpan Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAMERA SCANNER MODAL -->
+    <div class="modal fade" id="cameraScannerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content modal-content-glass text-slate-100">
+                <div class="modal-header modal-header-glass border-slate-800">
+                    <h5 class="modal-title font-bold text-white flex items-center gap-2">
+                        <i class="bi bi-camera-fill text-sky-400"></i> Kamera Barcode Scanner
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="stopCameraScan()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 relative overflow-hidden bg-black flex flex-col items-center justify-center" style="height: 280px;">
+                    <!-- Video stream -->
+                    <video id="scanner-video" class="w-full h-full object-cover" autoplay playsinline></video>
+                    
+                    <!-- Scanner overlay layer -->
+                    <div class="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none">
+                        <!-- Top corners -->
+                        <div class="flex justify-between">
+                            <div class="w-6 h-6 border-t-2 border-l-2 border-sky-400"></div>
+                            <div class="w-6 h-6 border-t-2 border-r-2 border-sky-400"></div>
+                        </div>
+                        
+                        <!-- Middle scanning laser line -->
+                        <div class="w-full h-0.5 bg-red-500 shadow-md shadow-red-500 animate-pulse relative">
+                            <div class="absolute inset-0 bg-red-400 animate-ping"></div>
+                        </div>
+                        
+                        <!-- Bottom corners -->
+                        <div class="flex justify-between">
+                            <div class="w-6 h-6 border-b-2 border-l-2 border-sky-400"></div>
+                            <div class="w-6 h-6 border-b-2 border-r-2 border-sky-400"></div>
+                        </div>
+                    </div>
+
+                    <!-- Scanning status/instructions badge -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 py-1 px-3 rounded-full text-xxs font-semibold text-sky-300 flex items-center gap-1.5 shadow-lg">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Mengarahkan Kamera...
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-glass border-slate-800 flex-col gap-2">
+                    <button type="button" id="camera-simulate-btn" class="btn btn-xs w-full py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 rounded font-bold text-xxs flex items-center justify-center gap-1" onclick="simulateCameraScanCapture()">
+                        <i class="bi bi-qr-code-scan"></i> Deteksi &amp; Masukkan Kode Otomatis
+                    </button>
+                    <button type="button" class="btn btn-secondary bg-slate-700 border-none btn-xs w-full py-1.5" onclick="stopCameraScan()">Tutup Kamera</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core JS -->
+    <script src="app.js?v=3.9"></script>
+</body>
+</html>

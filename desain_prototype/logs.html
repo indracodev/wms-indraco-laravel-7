@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail History - WMS Indraco</title>
+    <meta name="description" content="Riwayat log aktivitas pengguna dan audit trail sistem.">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkblue: {
+                            950: '#070a13',
+                            900: '#0b0f19',
+                            800: '#0f172a',
+                            700: '#1e293b',
+                            600: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=3.9">
+    <style>
+        @media (max-width: 767.98px) {
+            /* Hide standard table headers */
+            .logs-matrix-table thead {
+                display: none !important;
+            }
+            
+            .logs-matrix-table, 
+            .logs-matrix-table tbody, 
+            .logs-matrix-table tr, 
+            .logs-matrix-table td {
+                display: block !important;
+                width: 100% !important;
+                text-align: left !important;
+                background: transparent !important;
+                border: none !important;
+            }
+
+            /* --- LIGHT MODE CARD STYLES (Default) --- */
+            .logs-matrix-table tr {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 12px !important;
+                padding: 16px !important;
+                margin-bottom: 16px !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            }
+            .logs-matrix-table tr:last-child {
+                margin-bottom: 0 !important;
+            }
+
+            /* Cells formatting */
+            /* 1. Timestamp (Top sub-header) */
+            .logs-matrix-table td:nth-child(1) {
+                font-size: 11px !important;
+                color: #334155 !important; /* Dark slate gray for high contrast */
+                margin-bottom: 8px !important;
+                padding: 0 !important;
+                font-weight: 600 !important;
+            }
+            
+            /* 2. User PIC (Header of the card) */
+            .logs-matrix-table td:nth-child(2) {
+                font-size: 13px !important;
+                padding: 0 0 8px 0 !important;
+                border-bottom: 1px solid #cbd5e1 !important;
+                margin-bottom: 8px !important;
+            }
+            .logs-matrix-table td:nth-child(2) strong {
+                color: #0f172a !important; /* Pure black text */
+            }
+            .logs-matrix-table td:nth-child(2) span {
+                color: #334155 !important; /* High contrast username text */
+                font-weight: 600 !important;
+            }
+
+            /* 3 & 4. Badges (Module & Action Type) - Inline */
+            .logs-matrix-table td:nth-child(3),
+            .logs-matrix-table td:nth-child(4) {
+                display: inline-block !important;
+                width: auto !important;
+                padding: 0 !important;
+                margin-right: 8px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            /* 5. Description (Body text) */
+            .logs-matrix-table td:nth-child(5) {
+                font-size: 12px !important;
+                color: #0f172a !important; /* Pure black text for ultimate readability */
+                font-weight: 600 !important;
+                line-height: 1.4 !important;
+                padding: 4px 0 0 0 !important;
+                margin: 0 !important;
+            }
+
+            /* --- DARK MODE CARD STYLES (body.dark overrides) --- */
+            body.dark .logs-matrix-table tr {
+                background: rgba(15, 23, 42, 0.4) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                box-shadow: none !important;
+            }
+            body.dark .logs-matrix-table td:nth-child(1) {
+                color: #94a3b8 !important;
+                font-weight: normal !important;
+            }
+            body.dark .logs-matrix-table td:nth-child(2) {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            body.dark .logs-matrix-table td:nth-child(2) strong {
+                color: #ffffff !important;
+            }
+            body.dark .logs-matrix-table td:nth-child(2) span {
+                color: #94a3b8 !important;
+                font-weight: normal !important;
+            }
+            body.dark .logs-matrix-table td:nth-child(5) {
+                color: #cbd5e1 !important; /* Silver light text in dark mode */
+                font-weight: normal !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-darkblue-950 text-slate-100 min-h-screen flex flex-col" data-page="logs">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="notification-container"></div>
+
+    <!-- FLOATING IMPERSONATION BANNER -->
+    <div id="impersonate-banner" class="impersonate-banner hidden">
+        <div class="flex items-center gap-2">
+            <i class="bi bi-incognito text-lg"></i>
+            <span>Anda sedang masuk sebagai user: <strong id="impersonated-user-display">-</strong> (<span id="impersonated-role-display">-</span>).</span>
+        </div>
+        <button onclick="revertImpersonation()" class="btn btn-dark btn-xs text-xs py-1 px-3 bg-darkblue-950 border-none hover:bg-darkblue-900 font-bold flex items-center gap-1.5 text-white">
+            <i class="bi bi-arrow-left-circle-fill text-amber-400"></i> Kembali ke Super Admin
+        </button>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div id="app-container" class="flex-grow flex flex-col md:flex-row min-h-screen">
+
+        <!-- Sidebar Backdrop for mobile -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out flex flex-col shrink-0 bg-darkblue-900 border-r border-slate-700/50">
+            <!-- Header Brand -->
+            <div class="p-6 border-b border-slate-700/50 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                        <i class="bi bi-boxes text-xl text-darkblue-900"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-white leading-tight">WMS Indraco</h2>
+                        <span class="text-xxs text-sky-400 font-medium">Console v2.0</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar(false)" class="btn-close btn-close-white text-xs block md:hidden" aria-label="Close"></button>
+            </div>
+
+            <!-- Scrollable Navigation Items -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mb-2 tracking-wider">Main Modul</div>
+                <a href="dashboard.html" id="nav-dashboard" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="master-data.html" id="nav-master-data" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-database"></i>
+                    <span>Data Master CRUD</span>
+                </a>
+                <a href="detail-data.html" id="nav-detail-data" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Data Detail Inventory</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Fitur Pelacak</div>
+                <a href="scanner.html" id="nav-scanner" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-qr-code-scan"></i>
+                    <span>Barcode Scanner Sim</span>
+                </a>
+
+                <div class="text-slate-500 text-xxs font-bold uppercase px-3 mt-4 mb-2 tracking-wider">Keamanan &amp; Kontrol</div>
+                <a href="users.html" id="nav-users" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-people"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="rbac.html" id="nav-rbac" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Role &amp; Hak Akses</span>
+                </a>
+                <a href="logs.html" id="nav-logs" class="sidebar-link active text-decoration-none">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Audit Trail History</span>
+                </a>
+                <a href="settings.html" id="nav-settings" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-sliders animate-spin-hover"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="profile.html" id="nav-profile" class="sidebar-link text-decoration-none">
+                    <i class="bi bi-person-bounding-box"></i>
+                    <span>Profile User</span>
+                </a>
+            </nav>
+
+            <!-- Bottom User Session Panel (Desktop) -->
+            <div class="p-4 border-t border-slate-700/50 bg-slate-950/20 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="user-avatar-circle" id="sidebar-avatar-letters">A</div>
+                        <div>
+                            <div class="font-bold text-white leading-none" id="sidebar-username">Active User</div>
+                            <span class="text-xxs text-slate-400 font-medium" id="sidebar-role">Role</span>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="btn btn-link text-rose-400 hover:text-rose-300 p-0 text-decoration-none" title="Keluar dari sistem">
+                        <i class="bi bi-box-arrow-left text-lg"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center text-xxs text-slate-500 border-t border-slate-800/80 pt-2 mt-2">
+                    <span>Shift Kerja: <strong class="text-slate-300" id="sidebar-shift-val">1</strong></span>
+                    <span class="flex items-center gap-1"><span class="pulse-status pulse-green"></span> Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow flex flex-col min-w-0">
+            <!-- Navbar Header -->
+            <header class="bg-darkblue-900 border-b border-slate-700/50 h-16 flex items-center justify-between px-6 z-10 sticky top-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar(true)" class="btn btn-link text-slate-400 hover:text-white p-0 me-1 block md:hidden" id="mobile-hamburger-btn">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                    <span class="text-xs font-semibold text-slate-400 hidden sm:inline">Gudang Aktif:</span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary custom-input dropdown-toggle text-xs py-1 px-3 font-semibold text-sky-400 hover:text-white" type="button" data-bs-toggle="dropdown" id="active-wh-btn">
+                            Gudang Gresik Utama
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl" id="wh-dropdown-list">
+                            <!-- Loaded Dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Header Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn btn-link text-slate-400 hover:text-white p-0 border-none flex items-center justify-center h-8 w-8 rounded-lg hover:bg-slate-800/50 transition-colors" title="Ubah Tema Light/Dark" id="theme-toggle-btn">
+                        <i class="bi bi-moon-fill text-base" id="theme-icon"></i>
+                    </button>
+                    <div class="border-l border-slate-800 h-6"></div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-decoration-none p-0 flex items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-circle" id="header-avatar-letters">A</div>
+                            <span class="text-xs font-bold text-white hidden sm:inline" id="header-user-display">Active User</span>
+                            <i class="bi bi-chevron-down text-xxs text-slate-400"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-darkblue-900 border border-slate-700/50 text-xs shadow-xl py-1 mt-2">
+                            <li class="px-3 py-2 border-b border-slate-800 mb-1">
+                                <div class="font-bold text-white" id="header-dropdown-name">Active User</div>
+                                <span class="text-xxs text-sky-400" id="header-dropdown-role">Role</span>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="profile.html">
+                                    <i class="bi bi-person-circle text-sky-400"></i> Profile Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 py-2 px-3 flex items-center gap-2" href="settings.html">
+                                    <i class="bi bi-gear-fill text-emerald-400"></i> Pengaturan Sistem
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider border-slate-700"></li>
+                            <li>
+                                <a class="dropdown-item text-xs text-rose-400 hover:text-white hover:bg-rose-500/10 py-2 px-3 flex items-center gap-2" href="#" onclick="handleLogout()">
+                                    <i class="bi bi-box-arrow-left"></i> Logout Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Workspace Content Section -->
+            <main class="flex-grow p-4 pb-28 md:p-6 md:pb-6 overflow-y-auto space-y-4">
+                <!-- TAB: AUDIT LOGS -->
+                <section id="tab-logs" class="space-y-4">
+                    <!-- Page Header -->
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                        <div>
+                            <h2 class="text-base font-bold text-white leading-tight">Audit Trail History</h2>
+                            <p class="text-xxs text-slate-400 mt-0.5 leading-snug">Laporan pelacakan aktivitas global di sistem WMS Indraco.</p>
+                        </div>
+                        <button onclick="clearAuditLogs()" id="btn-logs-clear" class="btn btn-sm btn-outline-danger text-xxs font-bold flex items-center gap-1.5 h-9 px-3 rounded-lg flex-shrink-0">
+                            <i class="bi bi-trash-fill"></i> Kosongkan Log
+                        </button>
+                    </div>
+
+                    <!-- Search & Filter Bar -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <div class="flex items-center gap-2 flex-1">
+                            <select id="log-filter-module" onchange="filterAuditLogs()" class="form-select custom-input py-2 px-2 text-xs rounded-lg flex-1">
+                                <option value="">Semua Modul</option>
+                                <option value="AUTH">AUTH (Autentikasi)</option>
+                                <option value="MASTER">MASTER (Data Master)</option>
+                                <option value="DETAIL">DETAIL (Inventory)</option>
+                                <option value="SCANNER">SCANNER (Pemindaian)</option>
+                                <option value="USERS">USERS (Manajemen Pengguna)</option>
+                                <option value="RBAC">RBAC (Hak Akses)</option>
+                                <option value="SETTINGS">SETTINGS (Pengaturan)</option>
+                                <option value="PROFILE">PROFILE (Profil Personal)</option>
+                            </select>
+                            <select id="log-filter-action" onchange="filterAuditLogs()" class="form-select custom-input py-2 px-2 text-xs rounded-lg flex-1">
+                                <option value="">Semua Jenis Aksi</option>
+                                <option value="CREATE">CREATE (Tambah Data)</option>
+                                <option value="UPDATE">UPDATE (Edit/Ubah Data)</option>
+                                <option value="DELETE">DELETE (Hapus/Reset Data)</option>
+                                <option value="LOGIN">LOGIN (Masuk)</option>
+                                <option value="LOGOUT">LOGOUT (Keluar)</option>
+                                <option value="IMPERSONATE">IMPERSONATE (Incognito)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Result Count -->
+                    <p id="logs-count-display" class="text-xxs text-slate-500"></p>
+
+                    <!-- Table Display -->
+                    <div class="glass-panel-mobile-clean p-4">
+                        <table class="table table-dark align-middle custom-table text-xs logs-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%">Waktu &amp; Tanggal</th>
+                                    <th style="width: 15%">User PIC</th>
+                                    <th style="width: 15%">Modul</th>
+                                    <th style="width: 15%">Aksi</th>
+                                    <th>Deskripsi Detail Operasional</th>
+                                </tr>
+                            </thead>
+                            <tbody id="global-logs-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Bottom Spacer to prevent Nav collision -->
+                    <div class="h-16 block md:hidden"></div>
+                </section>
+            </main>
+
+            <!-- Mobile Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 h-16 bg-darkblue-900 border-t border-slate-800 flex items-center justify-around z-30 block md:hidden px-4 shadow-lg">
+                <a href="dashboard.html" id="bottom-nav-dashboard" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-grid-1x2 text-lg"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="detail-data.html" id="bottom-nav-detail-data" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-journal-text text-lg"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="scanner.html" id="bottom-nav-scanner" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-qr-code-scan text-lg"></i>
+                    <span>Scanner</span>
+                </a>
+                <a href="profile.html" id="bottom-nav-profile" class="flex flex-col items-center justify-center text-slate-500 text-xxs gap-1 py-1 w-12 text-decoration-none">
+                    <i class="bi bi-person-bounding-box text-lg"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core JS -->
+    <script src="app.js?v=3.9"></script>
+</body>
+</html>
