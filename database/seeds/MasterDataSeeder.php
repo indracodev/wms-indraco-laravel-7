@@ -7,6 +7,7 @@ use App\Models\Warehouse;
 use App\Models\Rack;
 use App\Models\Bin;
 use App\Models\PalletType;
+use App\Models\Uom;
 use App\Models\Product;
 use App\Models\Pallet;
 use App\Models\Box;
@@ -66,6 +67,21 @@ class MasterDataSeeder extends Seeder
         ];
         foreach ($palletTypes as $pt) {
             PalletType::updateOrCreate(['id' => $pt['id']], $pt);
+        }
+
+        // 6b. UOM Inventory (Base Unit)
+        $uoms = [
+            ['id' => 'BOX', 'name' => 'Box', 'description' => 'Satuan kemasan kotak / dus kardus utama'],
+            ['id' => 'PCS', 'name' => 'PCS', 'description' => 'Satuan pieces / satuan tunggal eceran'],
+            ['id' => 'KG', 'name' => 'KG', 'description' => 'Satuan berat kilogram'],
+            ['id' => 'SACHET', 'name' => 'Sachet', 'description' => 'Satuan kemasan sachet kecil'],
+            ['id' => 'CAN', 'name' => 'Can', 'description' => 'Satuan kemasan kaleng'],
+            ['id' => 'BAG', 'name' => 'Bag', 'description' => 'Satuan kemasan kantong / bag'],
+            ['id' => 'KARTON', 'name' => 'Karton', 'description' => 'Satuan karton pengiriman'],
+            ['id' => 'PIECES', 'name' => 'Pieces', 'description' => 'Satuan pieces produk'],
+        ];
+        foreach ($uoms as $u) {
+            Uom::updateOrCreate(['id' => $u['id']], $u);
         }
 
         // 7. Products (Run ProductMasterSeeder from Excel)

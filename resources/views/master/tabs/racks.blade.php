@@ -43,19 +43,64 @@
                             <th class="p-3">Nama Gudang</th>
                             <th class="p-3">Nama Rak</th>
                             <th class="p-3">Jumlah Slot BIN</th>
+                            <th class="p-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         @forelse($racks as $rk)
+                            @php
+                                $rkData = [
+                                    'id' => $rk->id,
+                                    'warehouse_id' => $rk->warehouse_id,
+                                    'warehouse' => $rk->warehouse ? ['id' => $rk->warehouse->id, 'name' => $rk->warehouse->name] : null,
+                                    'rack_name' => $rk->rack_name,
+                                    'created_at' => $rk->created_at ? $rk->created_at->format('d M Y H:i') : '-',
+                                    'bins' => $rk->bins ? $rk->bins->map(function($b) {
+                                        return [
+                                            'id' => $b->id,
+                                            'column_no' => $b->column_no,
+                                            'level_no' => $b->level_no,
+                                            'max_pallet' => $b->max_pallet
+                                        ];
+                                    })->values() : []
+                                ];
+                            @endphp
                             <tr class="hover:bg-slate-800/50 transition">
                                 <td class="p-3 font-mono font-bold text-indigo-400">{{ $rk->id }}</td>
                                 <td class="p-3 font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded">{{ $rk->warehouse_id }}</td>
                                 <td class="p-3 text-slate-300">{{ $rk->warehouse->name ?? '-' }}</td>
                                 <td class="p-3 font-medium text-white">Rak {{ $rk->rack_name }}</td>
                                 <td class="p-3 font-bold text-emerald-400">{{ $rk->bins_count }} BIN</td>
+                                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                    <button type="button" 
+                                            data-rack="{{ json_encode($rkData) }}" 
+                                            onclick="window.openDetailRackModal(this)" 
+                                            class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                            title="Show Detail Rak">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    @canAccessModule('master', 'update')
+                                        <button type="button" 
+                                                data-rack="{{ json_encode($rkData) }}" 
+                                                onclick="window.openEditRackModal(this)" 
+                                                class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                                title="Edit Rak">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    @endcanAccessModule
+                                    @canAccessModule('master', 'delete')
+                                        <form action="{{ route('master.rack.destroy', $rk->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Rak">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                    @endcanAccessModule
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="p-6 text-center text-slate-500">Tidak ada data rak.</td></tr>
+                            <tr><td colspan="6" class="p-6 text-center text-slate-500">Tidak ada data rak.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -64,16 +109,62 @@
             <!-- Mobile Flat Card List -->
             <div class="space-y-2.5 md:hidden">
                 @forelse($racks as $rk)
-                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-mono font-bold text-indigo-400">{{ $rk->id }}</div>
-                            <div class="font-bold text-white text-sm mt-0.5">Rak {{ $rk->rack_name }}</div>
-                            <div class="text-[11px] text-amber-300 font-mono mt-1">Kode Gudang: {{ $rk->warehouse_id }} ({{ $rk->warehouse->name ?? '-' }})</div>
+                    @php
+                        $rkData = [
+                            'id' => $rk->id,
+                            'warehouse_id' => $rk->warehouse_id,
+                            'warehouse' => $rk->warehouse ? ['id' => $rk->warehouse->id, 'name' => $rk->warehouse->name] : null,
+                            'rack_name' => $rk->rack_name,
+                            'created_at' => $rk->created_at ? $rk->created_at->format('d M Y H:i') : '-',
+                            'bins' => $rk->bins ? $rk->bins->map(function($b) {
+                                return [
+                                    'id' => $b->id,
+                                    'column_no' => $b->column_no,
+                                    'level_no' => $b->level_no,
+                                    'max_pallet' => $b->max_pallet
+                                ];
+                            })->values() : []
+                        ];
+                    @endphp
+                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-mono font-bold text-indigo-400">{{ $rk->id }}</div>
+                                <div class="font-bold text-white text-sm mt-0.5">Rak {{ $rk->rack_name }}</div>
+                                <div class="text-[11px] text-amber-300 font-mono mt-1">Kode Gudang: {{ $rk->warehouse_id }} ({{ $rk->warehouse->name ?? '-' }})</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-300 font-bold rounded text-[11px]">
+                                    {{ $rk->bins_count }} BIN
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-300 font-bold rounded text-[11px]">
-                                {{ $rk->bins_count }} BIN
-                            </span>
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                            <button type="button" 
+                                    data-rack="{{ json_encode($rkData) }}" 
+                                    onclick="window.openDetailRackModal(this)" 
+                                    class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Detail</span>
+                            </button>
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-rack="{{ json_encode($rkData) }}" 
+                                        onclick="window.openEditRackModal(this)" 
+                                        class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                            @endcanAccessModule
+                            @canAccessModule('master', 'delete')
+                                <form action="{{ route('master.rack.destroy', $rk->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Rak">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endcanAccessModule
                         </div>
                     </div>
                 @empty

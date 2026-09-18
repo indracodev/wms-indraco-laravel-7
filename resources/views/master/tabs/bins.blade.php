@@ -42,11 +42,35 @@
                             <th class="p-3">Rak & Gudang</th>
                             <th class="p-3">Posisi (Kolom & Level)</th>
                             <th class="p-3">Kapasitas Palet</th>
+                            <th class="p-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         @forelse($bins as $bn)
-                            @php $activePalletsCount = $bn->active_pallets_count ?? 0; @endphp
+                            @php
+                                $activePalletsCount = $bn->active_pallets_count ?? 0;
+                                $bnData = [
+                                    'id' => $bn->id,
+                                    'rack_id' => $bn->rack_id,
+                                    'rack' => $bn->rack ? [
+                                        'id' => $bn->rack->id,
+                                        'warehouse_id' => $bn->rack->warehouse_id,
+                                        'warehouse' => $bn->rack->warehouse ? ['id' => $bn->rack->warehouse->id, 'name' => $bn->rack->warehouse->name] : null
+                                    ] : null,
+                                    'column_no' => $bn->column_no,
+                                    'level_no' => $bn->level_no,
+                                    'max_pallet' => $bn->max_pallet,
+                                    'active_pallets_count' => $activePalletsCount,
+                                    'created_at' => $bn->created_at ? $bn->created_at->format('d M Y H:i') : '-',
+                                    'pallets' => $bn->pallets ? $bn->pallets->map(function($p) {
+                                        return [
+                                            'id' => $p->id,
+                                            'pallet_type_id' => $p->pallet_type_id,
+                                            'max_box' => $p->max_box
+                                        ];
+                                    })->values() : []
+                                ];
+                            @endphp
                             <tr class="hover:bg-slate-800/50 transition">
                                 <td class="p-3 font-mono font-bold text-amber-400">{{ $bn->id }}</td>
                                 <td class="p-3 text-slate-300">Rak {{ $bn->rack_id }} (Gudang: {{ $bn->rack->warehouse_id ?? '-' }})</td>
@@ -56,9 +80,36 @@
                                         {{ $activePalletsCount }} / {{ $bn->max_pallet }} Palet {{ $activePalletsCount >= $bn->max_pallet ? '(FULL)' : '' }}
                                     </span>
                                 </td>
+                                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                    <button type="button" 
+                                            data-bin="{{ json_encode($bnData) }}" 
+                                            onclick="window.openDetailBinModal(this)" 
+                                            class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                            title="Show Detail BIN">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    @canAccessModule('master', 'update')
+                                        <button type="button" 
+                                                data-bin="{{ json_encode($bnData) }}" 
+                                                onclick="window.openEditBinModal(this)" 
+                                                class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                                title="Edit BIN">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    @endcanAccessModule
+                                    @canAccessModule('master', 'delete')
+                                        <form action="{{ route('master.bin.destroy', $bn->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus BIN">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                    @endcanAccessModule
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="p-6 text-center text-slate-500">Tidak ada data BIN.</td></tr>
+                            <tr><td colspan="5" class="p-6 text-center text-slate-500">Tidak ada data BIN.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -67,17 +118,69 @@
             <!-- Mobile Flat Card List -->
             <div class="space-y-2.5 md:hidden">
                 @forelse($bins as $bn)
-                    @php $activePalletsCount = $bn->active_pallets_count ?? 0; @endphp
-                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-mono font-bold text-amber-400">{{ $bn->id }}</div>
-                            <div class="text-slate-300 mt-0.5">Rak {{ $bn->rack_id }}</div>
-                            <div class="text-[11px] text-slate-400 mt-1">Kolom {{ $bn->column_no }} • Level {{ $bn->level_no }}</div>
+                    @php
+                        $activePalletsCount = $bn->active_pallets_count ?? 0;
+                        $bnData = [
+                            'id' => $bn->id,
+                            'rack_id' => $bn->rack_id,
+                            'rack' => $bn->rack ? [
+                                'id' => $bn->rack->id,
+                                'warehouse_id' => $bn->rack->warehouse_id,
+                                'warehouse' => $bn->rack->warehouse ? ['id' => $bn->rack->warehouse->id, 'name' => $bn->rack->warehouse->name] : null
+                            ] : null,
+                            'column_no' => $bn->column_no,
+                            'level_no' => $bn->level_no,
+                            'max_pallet' => $bn->max_pallet,
+                            'active_pallets_count' => $activePalletsCount,
+                            'created_at' => $bn->created_at ? $bn->created_at->format('d M Y H:i') : '-',
+                            'pallets' => $bn->pallets ? $bn->pallets->map(function($p) {
+                                return [
+                                    'id' => $p->id,
+                                    'pallet_type_id' => $p->pallet_type_id,
+                                    'max_box' => $p->max_box
+                                ];
+                            })->values() : []
+                        ];
+                    @endphp
+                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-mono font-bold text-amber-400">{{ $bn->id }}</div>
+                                <div class="text-slate-300 mt-0.5">Rak {{ $bn->rack_id }}</div>
+                                <div class="text-[11px] text-slate-400 mt-1">Kolom {{ $bn->column_no }} • Level {{ $bn->level_no }}</div>
+                            </div>
+                            <div class="text-right font-bold">
+                                <span class="px-2 py-1 rounded text-[11px] {{ $activePalletsCount >= $bn->max_pallet ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300' }}">
+                                    {{ $activePalletsCount }}/{{ $bn->max_pallet }} Palet
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right font-bold">
-                            <span class="px-2 py-1 rounded text-[11px] {{ $activePalletsCount >= $bn->max_pallet ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300' }}">
-                                {{ $activePalletsCount }}/{{ $bn->max_pallet }} Palet
-                            </span>
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                            <button type="button" 
+                                    data-bin="{{ json_encode($bnData) }}" 
+                                    onclick="window.openDetailBinModal(this)" 
+                                    class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Detail</span>
+                            </button>
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-bin="{{ json_encode($bnData) }}" 
+                                        onclick="window.openEditBinModal(this)" 
+                                        class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                            @endcanAccessModule
+                            @canAccessModule('master', 'delete')
+                                <form action="{{ route('master.bin.destroy', $bn->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus BIN">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endcanAccessModule
                         </div>
                     </div>
                 @empty

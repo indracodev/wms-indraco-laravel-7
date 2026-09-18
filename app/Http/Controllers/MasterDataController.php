@@ -9,6 +9,7 @@ use App\Models\Warehouse;
 use App\Models\Rack;
 use App\Models\Bin;
 use App\Models\PalletType;
+use App\Models\Uom;
 use App\Models\Product;
 use App\Models\ProductUomConversion;
 use App\Services\AuditLogger;
@@ -31,6 +32,7 @@ class MasterDataController extends Controller
         $warehouses = $emptyPaginator;
         $racks = $emptyPaginator;
         $bins = $emptyPaginator;
+        $uoms = $emptyPaginator;
         $palletTypes = $emptyPaginator;
         $products = $emptyPaginator;
 
@@ -44,13 +46,14 @@ class MasterDataController extends Controller
         $allWarehouses = collect();
         $allRacks = collect();
         $allPalletTypes = collect();
+        $allUoms = Uom::select('id', 'name', 'description')->orderBy('name', 'asc')->get();
 
         // OPTIMIZED QUERY DISPATCH: Execute database queries ONLY for the active tab!
         switch ($tab) {
             case 'branches':
                 $allOffices = Office::select('id', 'name')->orderBy('name', 'asc')->get();
 
-                $branchQuery = Branch::with('office');
+                $branchQuery = Branch::with('office')->withCount('warehouses')->with('warehouses');
                 if ($request->filled('office_filter')) {
                     $branchQuery->where('office_id', $request->office_filter);
                 }
@@ -70,7 +73,7 @@ class MasterDataController extends Controller
             case 'warehouses':
                 $allBranches = Branch::select('id', 'name')->orderBy('name', 'asc')->get();
 
-                $whQuery = Warehouse::with('branch');
+                $whQuery = Warehouse::with('branch')->withCount('racks')->with('racks');
                 if ($request->filled('branch_filter')) {
                     $whQuery->where('branch_id', $request->branch_filter);
                 }
@@ -89,8 +92,7 @@ class MasterDataController extends Controller
             case 'racks':
                 $allWarehouses = Warehouse::select('id', 'name')->orderBy('name', 'asc')->get();
 
-                // Optimized withCount('bins') instead of loading all bin relations
-                $rackQuery = Rack::with('warehouse')->withCount('bins');
+                $rackQuery = Rack::with('warehouse')->withCount('bins')->with('bins');
                 if ($request->filled('wh_filter')) {
                     $rackQuery->where('warehouse_id', $request->wh_filter);
                 }
@@ -110,8 +112,7 @@ class MasterDataController extends Controller
             case 'bins':
                 $allRacks = Rack::select('id', 'warehouse_id')->orderBy('id', 'asc')->get();
 
-                // Optimized withCount active pallets instead of loading all pallet collections
-                $binQuery = Bin::with('rack.warehouse')->withCount(['pallets as active_pallets_count' => function($q) {
+                $binQuery = Bin::with(['rack.warehouse', 'pallets' => function($q) { $q->where('is_active', true); }])->withCount(['pallets as active_pallets_count' => function($q) {
                     $q->where('is_active', true);
                 }]);
                 if ($request->filled('rack_filter')) {
@@ -124,8 +125,23 @@ class MasterDataController extends Controller
                           ->orWhere('rack_id', 'like', "%{$s}%");
                     });
                 }
-                $bins = $binQuery->orderBy('id', $sortDir)
+                $bins = $binQuery->orderBy($idCol = 'id', $sortDir)
                                  ->paginate(15, ['*'], 'bins_page')
+                                 ->withQueryString();
+                break;
+
+            case 'uoms':
+                $uomQuery = Uom::withCount('products');
+                if ($request->filled('search_uom')) {
+                    $s = $request->search_uom;
+                    $uomQuery->where(function($q) use ($s) {
+                        $q->where('id', 'like', "%{$s}%")
+                          ->orWhere('name', 'like', "%{$s}%")
+                          ->orWhere('description', 'like', "%{$s}%");
+                    });
+                }
+                $uoms = $uomQuery->orderBy($sortBy === 'name' ? 'name' : 'id', $sortDir)
+                                 ->paginate(15, ['*'], 'uoms_page')
                                  ->withQueryString();
                 break;
 
@@ -196,7 +212,7 @@ class MasterDataController extends Controller
             case 'offices':
             default:
                 $tab = 'offices';
-                $officeQuery = Office::withCount('branches');
+                $officeQuery = Office::withCount('branches')->with('branches');
                 if ($request->filled('search_office')) {
                     $s = $request->search_office;
                     $officeQuery->where(function($q) use ($s) {
@@ -214,8 +230,8 @@ class MasterDataController extends Controller
         // AJAX / JSON SPA Response
         if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             $html = view('master.tabs.' . $tab, compact(
-                'offices', 'branches', 'warehouses', 'racks', 'bins', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
-                'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes',
+                'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
+                'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
                 'tab', 'sortBy', 'sortDir'
             ))->render();
 
@@ -227,8 +243,8 @@ class MasterDataController extends Controller
         }
 
         return view('master.index', compact(
-            'offices', 'branches', 'warehouses', 'racks', 'bins', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
-            'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes',
+            'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
+            'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
             'tab', 'sortBy', 'sortDir'
         ));
     }
@@ -351,6 +367,364 @@ class MasterDataController extends Controller
                 'status' => 'success',
                 'message' => $msg,
                 'tab' => 'bins'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function updateOffice(Request $request, $id)
+    {
+        $office = Office::findOrFail($id);
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'address' => 'nullable|string',
+        ]);
+
+        $office->update($data);
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Kantor: {$office->name} ({$office->id})");
+        $msg = "Kantor {$office->name} ({$office->id}) berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'offices'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function destroyOffice(Request $request, $id)
+    {
+        $office = Office::findOrFail($id);
+        $isSuperAdmin = auth()->user() && auth()->user()->role_id === 'super_admin';
+        $branchCount = $office->branches()->count();
+
+        if ($branchCount > 0 && !$isSuperAdmin) {
+            $errMsg = "Gagal menghapus: Kantor {$office->name} ({$office->id}) masih memiliki {$branchCount} Plant terdaftar!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $office->delete();
+        $auditMsg = "Menghapus Kantor: {$office->name} ({$office->id})" . ($branchCount > 0 ? " (Otorisasi Super Admin, {$branchCount} Plant terkait)" : "");
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', $auditMsg);
+        $msg = "Kantor {$office->name} ({$office->id}) berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'offices'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function updateBranch(Request $request, $id)
+    {
+        $branch = Branch::findOrFail($id);
+        $data = $request->validate([
+            'office_id' => 'required|exists:offices,id',
+            'name' => 'required|string|max:100',
+            'city' => 'nullable|string|max:100',
+        ]);
+
+        $branch->update($data);
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Plant: {$branch->name} ({$branch->id})");
+        $msg = "Plant {$branch->name} ({$branch->id}) berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'branches'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function destroyBranch(Request $request, $id)
+    {
+        $branch = Branch::findOrFail($id);
+        $isSuperAdmin = auth()->user() && auth()->user()->role_id === 'super_admin';
+        $whCount = $branch->warehouses()->count();
+
+        if ($whCount > 0 && !$isSuperAdmin) {
+            $errMsg = "Gagal menghapus: Plant {$branch->name} ({$branch->id}) masih memiliki {$whCount} Gudang terdaftar!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $branch->delete();
+        $auditMsg = "Menghapus Plant: {$branch->name} ({$branch->id})" . ($whCount > 0 ? " (Otorisasi Super Admin, {$whCount} Gudang terkait)" : "");
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', $auditMsg);
+        $msg = "Plant {$branch->name} ({$branch->id}) berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'branches'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function updateWarehouse(Request $request, $id)
+    {
+        $warehouse = Warehouse::findOrFail($id);
+        $data = $request->validate([
+            'branch_id' => 'required|exists:branches,id',
+            'name' => 'required|string|max:100',
+            'address' => 'nullable|string',
+        ]);
+
+        $warehouse->update($data);
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Gudang: {$warehouse->name} ({$warehouse->id})");
+        $msg = "Gudang {$warehouse->name} ({$warehouse->id}) berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'warehouses'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function destroyWarehouse(Request $request, $id)
+    {
+        $warehouse = Warehouse::findOrFail($id);
+        $isSuperAdmin = auth()->user() && auth()->user()->role_id === 'super_admin';
+        $rackCount = $warehouse->racks()->count();
+
+        if ($rackCount > 0 && !$isSuperAdmin) {
+            $errMsg = "Gagal menghapus: Gudang {$warehouse->name} ({$warehouse->id}) masih memiliki {$rackCount} Rak terdaftar!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $warehouse->delete();
+        $auditMsg = "Menghapus Gudang: {$warehouse->name} ({$warehouse->id})" . ($rackCount > 0 ? " (Otorisasi Super Admin, {$rackCount} Rak terkait)" : "");
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', $auditMsg);
+        $msg = "Gudang {$warehouse->name} ({$warehouse->id}) berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'warehouses'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function updateRack(Request $request, $id)
+    {
+        $rack = Rack::findOrFail($id);
+        $data = $request->validate([
+            'warehouse_id' => 'required|exists:warehouses,id',
+            'rack_name' => 'required|string|max:50',
+        ]);
+
+        $rack->update($data);
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Rak: {$rack->rack_name} ({$rack->id})");
+        $msg = "Rak {$rack->rack_name} ({$rack->id}) berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'racks'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function destroyRack(Request $request, $id)
+    {
+        $rack = Rack::findOrFail($id);
+        $isSuperAdmin = auth()->user() && auth()->user()->role_id === 'super_admin';
+        $binCount = $rack->bins()->count();
+
+        if ($binCount > 0 && !$isSuperAdmin) {
+            $errMsg = "Gagal menghapus: Rak {$rack->rack_name} ({$rack->id}) masih memiliki {$binCount} Slot BIN terdaftar!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $rack->delete();
+        $auditMsg = "Menghapus Rak: {$rack->rack_name} ({$rack->id})" . ($binCount > 0 ? " (Otorisasi Super Admin, {$binCount} BIN terkait)" : "");
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', $auditMsg);
+        $msg = "Rak {$rack->rack_name} ({$rack->id}) berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'racks'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function updateBin(Request $request, $id)
+    {
+        $bin = Bin::findOrFail($id);
+        $data = $request->validate([
+            'rack_id' => 'required|exists:racks,id',
+            'column_no' => 'required|integer|min:1',
+            'level_no' => 'required|integer|min:1',
+            'max_pallet' => 'required|integer|min:1|max:5',
+        ]);
+
+        $bin->update($data);
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah BIN: {$bin->id} (Max {$bin->max_pallet} Palet)");
+        $msg = "BIN {$bin->id} berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'bins'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function destroyBin(Request $request, $id)
+    {
+        $bin = Bin::findOrFail($id);
+        $activePalletsCount = $bin->pallets()->where('is_active', true)->count();
+
+        if ($activePalletsCount > 0) {
+            $errMsg = "Gagal menghapus: BIN {$bin->id} masih ditempati oleh {$activePalletsCount} Palet aktif di gudang!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $bin->delete();
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', "Menghapus BIN: {$bin->id}");
+        $msg = "BIN {$bin->id} berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'bins'
+            ]);
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function storeUom(Request $request)
+    {
+        $data = $request->validate([
+            'id' => 'required|string|max:50|unique:uoms,id',
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string',
+        ]);
+
+        $data['id'] = strtoupper(trim($data['id']));
+
+        Uom::create($data);
+        AuditLogger::log(auth()->id(), 'master', 'CREATE', "Menambah UOM: {$data['name']} ({$data['id']})");
+
+        $msg = "Satuan UOM {$data['name']} ({$data['id']}) berhasil ditambahkan.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'uoms'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function updateUom(Request $request, $id)
+    {
+        $uom = Uom::findOrFail($id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string',
+        ]);
+
+        $oldName = $uom->name;
+        $newName = trim($data['name']);
+
+        DB::transaction(function () use ($uom, $oldName, $newName, $data) {
+            $uom->update([
+                'name' => $newName,
+                'description' => $data['description'] ?? null,
+            ]);
+
+            // Sinkronisasi jika nama satuan berubah pada data produk & konversi
+            if ($oldName !== $newName) {
+                Product::where('uom_inventory', $oldName)->update(['uom_inventory' => $newName]);
+                ProductUomConversion::where('uom_convert', $oldName)->update(['uom_convert' => $newName]);
+                ProductUomConversion::where('uom_base', $oldName)->update(['uom_base' => $newName]);
+            }
+        });
+
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Satuan UOM: {$uom->name} ({$uom->id})");
+
+        $msg = "Satuan UOM {$uom->name} ({$uom->id}) berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'uoms'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function destroyUom(Request $request, $id)
+    {
+        $uom = Uom::findOrFail($id);
+        $isSuperAdmin = auth()->user() && auth()->user()->role_id === 'super_admin';
+
+        $inUseCount = Product::where('uom_inventory', $uom->name)->orWhere('uom_inventory', $uom->id)->count();
+        if ($inUseCount > 0 && !$isSuperAdmin) {
+            $errMsg = "Gagal menghapus: Satuan UOM {$uom->name} ({$uom->id}) masih digunakan oleh {$inUseCount} produk SKU!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $errMsg
+                ], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $uom->delete();
+        $auditMsg = "Menghapus Satuan UOM: {$uom->name} ({$uom->id})" . ($inUseCount > 0 ? " (Otorisasi Super Admin, {$inUseCount} produk terkait)" : "");
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', $auditMsg);
+
+        $msg = "Satuan UOM {$uom->name} ({$uom->id}) berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'uoms'
             ]);
         }
 

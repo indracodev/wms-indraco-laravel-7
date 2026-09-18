@@ -41,17 +41,58 @@
                             <th class="p-3">Kode Gudang</th>
                             <th class="p-3">Plant</th>
                             <th class="p-3">Nama Gudang</th>
+                            <th class="p-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         @forelse($warehouses as $wh)
+                            @php
+                                $whData = [
+                                    'id' => $wh->id,
+                                    'branch_id' => $wh->branch_id,
+                                    'branch' => $wh->branch ? ['id' => $wh->branch->id, 'name' => $wh->branch->name] : null,
+                                    'name' => $wh->name,
+                                    'address' => $wh->address,
+                                    'created_at' => $wh->created_at ? $wh->created_at->format('d M Y H:i') : '-',
+                                    'racks' => $wh->racks ? $wh->racks->map(function($r) {
+                                        return ['id' => $r->id, 'rack_name' => $r->rack_name];
+                                    })->values() : []
+                                ];
+                            @endphp
                             <tr class="hover:bg-slate-800/50 transition">
                                 <td class="p-3 font-mono font-bold text-indigo-400">{{ $wh->id }}</td>
                                 <td class="p-3 text-slate-300">{{ $wh->branch->name ?? $wh->branch_id }}</td>
-                                <td class="p-3 font-medium text-white">{{ $wh->name }}</td>
+                                <td class="p-3 font-medium text-slate-800 dark:text-white">{{ $wh->name }}</td>
+                                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                    <button type="button" 
+                                            data-warehouse="{{ json_encode($whData) }}" 
+                                            onclick="window.openDetailWhModal(this)" 
+                                            class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                            title="Show Detail Gudang">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    @canAccessModule('master', 'update')
+                                        <button type="button" 
+                                                data-warehouse="{{ json_encode($whData) }}" 
+                                                onclick="window.openEditWhModal(this)" 
+                                                class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                                title="Edit Gudang">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    @endcanAccessModule
+                                    @canAccessModule('master', 'delete')
+                                        <form action="{{ route('master.warehouse.destroy', $wh->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Gudang">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                    @endcanAccessModule
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="3" class="p-6 text-center text-slate-500">Tidak ada data gudang.</td></tr>
+                            <tr><td colspan="4" class="p-6 text-center text-slate-500">Tidak ada data gudang.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -60,13 +101,55 @@
             <!-- Mobile Flat Card List -->
             <div class="space-y-2.5 md:hidden">
                 @forelse($warehouses as $wh)
-                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-mono font-bold text-indigo-400">{{ $wh->id }}</div>
-                            <div class="font-bold text-white text-sm mt-0.5">{{ $wh->name }}</div>
+                    @php
+                        $whData = [
+                            'id' => $wh->id,
+                            'branch_id' => $wh->branch_id,
+                            'branch' => $wh->branch ? ['id' => $wh->branch->id, 'name' => $wh->branch->name] : null,
+                            'name' => $wh->name,
+                            'address' => $wh->address,
+                            'created_at' => $wh->created_at ? $wh->created_at->format('d M Y H:i') : '-',
+                            'racks' => $wh->racks ? $wh->racks->map(function($r) {
+                                return ['id' => $r->id, 'rack_name' => $r->rack_name];
+                            })->values() : []
+                        ];
+                    @endphp
+                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-mono font-bold text-indigo-400">{{ $wh->id }}</div>
+                                <div class="font-bold text-white text-sm mt-0.5">{{ $wh->name }}</div>
+                            </div>
+                            <div class="text-right text-slate-300 font-medium">
+                                Plant: {{ $wh->branch->name ?? $wh->branch_id }}
+                            </div>
                         </div>
-                        <div class="text-right text-slate-300 font-medium">
-                            Plant: {{ $wh->branch->name ?? $wh->branch_id }}
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                            <button type="button" 
+                                    data-warehouse="{{ json_encode($whData) }}" 
+                                    onclick="window.openDetailWhModal(this)" 
+                                    class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Detail</span>
+                            </button>
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-warehouse="{{ json_encode($whData) }}" 
+                                        onclick="window.openEditWhModal(this)" 
+                                        class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                            @endcanAccessModule
+                            @canAccessModule('master', 'delete')
+                                <form action="{{ route('master.warehouse.destroy', $wh->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Gudang">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endcanAccessModule
                         </div>
                     </div>
                 @empty

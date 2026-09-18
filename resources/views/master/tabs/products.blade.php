@@ -1,5 +1,5 @@
 <!-- ========================================================================= -->
-<!-- TAB 6: PRODUCTS (PRODUK SKU)                                              -->
+<!-- TAB 7: PRODUCTS (PRODUK SKU)                                              -->
 <!-- ========================================================================= -->
 <div class="glass-panel p-6 rounded-2xl space-y-6">
     <div class="flex items-center justify-between">
@@ -8,7 +8,7 @@
             <span>Master Katalog Produk SKU</span>
         </h3>
         @canAccessModule('master', 'create')
-            <button type="button" @click="showAddProductModal = true; $nextTick(() => initMasterTomSelect('select_is_active'))" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center space-x-1.5 cursor-pointer">
+            <button type="button" @click="showAddProductModal = true; $nextTick(() => { initMasterTomSelect('select_is_active'); initMasterTomSelect('select_uom_inventory'); })" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center space-x-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus"></i>
                 <span>Tambah Produk SKU Baru</span>
             </button>
@@ -69,7 +69,7 @@
                 @forelse($flatProducts as $fp)
                     <tr class="hover:bg-slate-800/50 transition">
                         <td class="p-3 font-mono font-bold text-indigo-400">{{ $fp->id }}</td>
-                        <td class="p-3 font-bold text-white">{{ $fp->name }}</td>
+                        <td class="p-3 font-bold text-slate-800 dark:text-white">{{ $fp->name }}</td>
                         <td class="p-3 text-slate-400 text-[11px]">{{ $fp->item_group ?? '-' }}</td>
                         <td class="p-3 font-bold text-emerald-400">{{ $fp->uom_inventory }}</td>
                         <td class="p-3 text-slate-300 font-mono">{{ $fp->uom_group ?? '-' }}</td>
@@ -85,7 +85,47 @@
                         <td class="p-3 font-bold text-sky-300 font-mono">{{ $fp->uom_convert }}</td>
                         <td class="p-3 font-mono font-bold text-indigo-300">{{ number_format($fp->qty_convert) }}</td>
                         <td class="p-3 font-mono text-slate-400">{{ $fp->uom_base }}</td>
-                        <td class="p-3 text-center space-x-1">
+                        <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                            @php
+                                $p = $fp->product;
+                                $prodData = [
+                                    'id' => $p->id,
+                                    'name' => $p->name,
+                                    'item_group' => $p->item_group,
+                                    'uom_inventory' => $p->uom_inventory,
+                                    'uom_group' => $p->uom_group,
+                                    'qty_per_uom_group' => $p->qty_per_uom_group,
+                                    'brand' => $p->brand,
+                                    'is_active' => (bool)$p->is_active,
+                                    'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-',
+                                    'conversions' => $p->conversions ? $p->conversions->map(function($c) {
+                                        return [
+                                            'uom_convert' => $c->uom_convert,
+                                            'qty_convert' => $c->qty_convert,
+                                            'uom_base' => $c->uom_base,
+                                        ];
+                                    })->values() : []
+                                ];
+                            @endphp
+
+                            <button type="button" 
+                                    data-product="{{ json_encode($prodData) }}" 
+                                    onclick="window.openDetailProductModal(this)" 
+                                    class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                    title="Show Detail Produk SKU">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-product="{{ json_encode($prodData) }}" 
+                                        onclick="window.openEditProductModal(this)" 
+                                        class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                        title="Edit Produk SKU">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                            @endcanAccessModule
+
                             @canAccessModule('master', 'delete')
                                 <form action="{{ route('master.product.destroy', $fp->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
                                     @csrf
@@ -107,6 +147,26 @@
     <!-- Mobile Flat Card List -->
     <div class="space-y-3 md:hidden">
         @forelse($products as $p)
+            @php
+                $mobileProdData = [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'item_group' => $p->item_group,
+                    'uom_inventory' => $p->uom_inventory,
+                    'uom_group' => $p->uom_group,
+                    'qty_per_uom_group' => $p->qty_per_uom_group,
+                    'brand' => $p->brand,
+                    'is_active' => (bool)$p->is_active,
+                    'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-',
+                    'conversions' => $p->conversions ? $p->conversions->map(function($c) {
+                        return [
+                            'uom_convert' => $c->uom_convert,
+                            'qty_convert' => $c->qty_convert,
+                            'uom_base' => $c->uom_base,
+                        ];
+                    })->values() : []
+                ];
+            @endphp
             <div class="bg-slate-800/80 border border-slate-700/70 p-4 rounded-xl space-y-2 text-xs">
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
                     <div class="font-mono font-bold text-indigo-400 text-sm">{{ $p->id }}</div>
@@ -114,10 +174,37 @@
                         {{ $p->is_active ? 'Active' : 'Inactive' }}
                     </span>
                 </div>
-                <div class="font-bold text-white text-sm">{{ $p->name }}</div>
+                <div class="font-bold text-slate-800 dark:text-white text-sm">{{ $p->name }}</div>
                 <div class="flex items-center justify-between text-slate-400">
-                    <span>Brand: <strong class="text-white">{{ $p->brand ?? '-' }}</strong></span>
+                    <span>Brand: <strong class="text-slate-800 dark:text-white">{{ $p->brand ?? '-' }}</strong></span>
                     <span>Base UOM: <strong class="text-emerald-400 font-mono">{{ $p->uom_inventory }}</strong></span>
+                </div>
+                <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                    <button type="button" 
+                            data-product="{{ json_encode($mobileProdData) }}" 
+                            onclick="window.openDetailProductModal(this)" 
+                            class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                        <i class="fa-solid fa-eye text-xs"></i>
+                        <span>Detail</span>
+                    </button>
+                    @canAccessModule('master', 'update')
+                        <button type="button" 
+                                data-product="{{ json_encode($mobileProdData) }}" 
+                                onclick="window.openEditProductModal(this)" 
+                                class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            <span>Edit</span>
+                        </button>
+                    @endcanAccessModule
+                    @canAccessModule('master', 'delete')
+                        <form action="{{ route('master.product.destroy', $p->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Produk SKU">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </form>
+                    @endcanAccessModule
                 </div>
             </div>
         @empty

@@ -45,6 +45,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Custom Styles -->
     <style>
+        [x-cloak] { display: none !important; }
         .glass-panel {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -111,6 +112,15 @@
 
         html.light .text-slate-500 {
             color: #475569 !important;
+        }
+
+        /* Ensure table data with text-white is dark and legible in Light Mode */
+        html.light table tbody td.text-white,
+        html.light table tbody td .text-white,
+        html.light table tbody td span.text-white,
+        html.light table tbody td div.text-white,
+        html.light .table-cell-title {
+            color: #0f172a !important;
         }
 
         /* Ensure elements with blue / indigo / vibrant backgrounds ALWAYS have WHITE text */

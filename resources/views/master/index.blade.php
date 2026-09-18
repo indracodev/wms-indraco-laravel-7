@@ -55,7 +55,7 @@
 <!-- Toast Container for Floating Alerts -->
 <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2 pointer-events-none"></div>
 
-<div class="space-y-6" x-data="masterDataForm('{{ $tab }}')">
+<div id="master-data-root" class="space-y-6" x-data="masterDataForm('{{ $tab }}')">
     <!-- Header Title -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -63,7 +63,7 @@
                 <i class="fa-solid fa-sitemap text-indigo-400"></i>
                 <span>Manajemen Master Data System</span>
             </h2>
-            <p class="text-sm text-slate-400">Struktur Hirarki Lokasi (Kantor &rarr; Plant &rarr; Gudang &rarr; Rak &rarr; BIN) dan Katalog Produk SKU</p>
+            <p class="text-sm text-slate-400">Struktur Hirarki Lokasi (Kantor &rarr; Plant &rarr; Gudang &rarr; Rak &rarr; BIN), Master UOM, dan Katalog Produk SKU</p>
         </div>
     </div>
 
@@ -94,9 +94,14 @@
             <span>5. BIN</span>
         </a>
 
+        <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'uoms' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="uoms">
+            <i class="fa-solid fa-scale-balanced text-sm"></i>
+            <span>6. UOM Inventory</span>
+        </a>
+
         <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="products">
             <i class="fa-solid fa-boxes-stacked text-sm"></i>
-            <span>6. Produk SKU</span>
+            <span>7. Produk SKU</span>
         </a>
     </div>
 
@@ -143,7 +148,12 @@
 
                     <div>
                         <label class="block text-slate-300 font-semibold mb-1">UOM Inventory (Base Unit) <span class="text-rose-400">*</span></label>
-                        <input type="text" name="uom_inventory" required placeholder="Sachet / Box / PCS" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <select id="select_uom_inventory" name="uom_inventory" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="">-- Pilih Satuan UOM --</option>
+                            @foreach($allUoms as $u)
+                                <option value="{{ $u->name }}">{{ $u->name }} ({{ $u->id }})</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div>
@@ -169,6 +179,234 @@
             </form>
         </div>
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL POPUP: EDIT SATUAN UOM                                              -->
+    <!-- ========================================================================= -->
+    <div x-show="showEditUomModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+        <div class="glass-panel w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5 border border-amber-500/40 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                <div class="flex items-center space-x-2 text-amber-400">
+                    <i class="fa-solid fa-pen-to-square text-xl"></i>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white">Edit Satuan UOM Inventory</h3>
+                </div>
+                <button type="button" @click="showEditUomModal = false" class="text-slate-400 hover:text-white text-xl p-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form :action="'{{ url('/master-data/uom') }}/' + editUomForm.id" method="POST" onsubmit="MasterDataApp.submitCreateForm(event, this)" class="space-y-4 text-xs">
+                @csrf
+                <input type="hidden" name="_method" value="PUT">
+                
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Kode Satuan (ID)</label>
+                    <input type="text" :value="editUomForm.id" readonly disabled class="w-full p-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-indigo-400 font-mono font-bold cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Nama Satuan UOM <span class="text-rose-400">*</span></label>
+                    <input type="text" name="name" x-model="editUomForm.name" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="misal: Box / Pieces / Kilogram">
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Keterangan / Fungsi</label>
+                    <textarea name="description" x-model="editUomForm.description" rows="3" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Catatan fungsi atau standar kemasan..."></textarea>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-700/60">
+                    <button type="button" @click="showEditUomModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <span class="btn-text">Perbarui Satuan UOM</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL POPUP: DETAIL PRODUK SKU                                            -->
+    <!-- ========================================================================= -->
+    <div x-show="showDetailProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-sky-500/40 max-h-[90vh] overflow-y-auto" @click.away="showDetailProductModal = false">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                <div class="flex items-center space-x-2 text-sky-400">
+                    <i class="fa-solid fa-circle-info text-xl"></i>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white">Detail Produk SKU</h3>
+                </div>
+                <button type="button" @click="showDetailProductModal = false" class="text-slate-400 hover:text-white text-xl p-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <template x-if="detailProduct">
+                <div class="space-y-4 text-xs">
+                    <!-- Header Info Card -->
+                    <div class="p-4 bg-slate-900/80 border border-slate-800 rounded-xl flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-slate-400 text-[11px]">Kode SKU</div>
+                            <div class="text-base font-mono font-bold text-indigo-400" x-text="detailProduct.id"></div>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2.5 py-1 rounded-full font-bold text-xs" :class="detailProduct.is_active ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'" x-text="detailProduct.is_active ? 'Aktif (Active)' : 'Non-Aktif (Inactive)'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid Info -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">Nama Produk</div>
+                            <div class="font-bold text-slate-800 dark:text-white text-sm" x-text="detailProduct.name"></div>
+                        </div>
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">Item Group</div>
+                            <div class="font-medium text-slate-700 dark:text-slate-200" x-text="detailProduct.item_group || '-'"></div>
+                        </div>
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">Brand</div>
+                            <div class="font-medium text-slate-700 dark:text-slate-200" x-text="detailProduct.brand || '-'"></div>
+                        </div>
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">UOM Inventory (Base Unit)</div>
+                            <div class="font-bold font-mono text-emerald-400 text-sm" x-text="detailProduct.uom_inventory"></div>
+                        </div>
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">UOM Group / Kemasan</div>
+                            <div class="font-medium font-mono text-slate-700 dark:text-slate-200" x-text="detailProduct.uom_group || '-'"></div>
+                        </div>
+                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                            <div class="text-slate-400 text-[11px] mb-1">Qty per UOM Group</div>
+                            <div class="font-bold text-amber-400" x-text="detailProduct.qty_per_uom_group || '-'"></div>
+                        </div>
+                    </div>
+
+                    <!-- UOM Conversions Table -->
+                    <div class="space-y-2">
+                        <div class="font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-sky-400"></i>
+                            <span>Daftar Konversi Satuan UOM</span>
+                        </div>
+                        <div class="border border-slate-800 rounded-xl overflow-hidden">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-2.5">Satuan Konversi</th>
+                                        <th class="p-2.5">Qty Konversi</th>
+                                        <th class="p-2.5">Satuan Dasar (Base)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 bg-slate-900/40">
+                                    <template x-for="(c, idx) in detailProduct.conversions" :key="idx">
+                                        <tr class="hover:bg-slate-800/40">
+                                            <td class="p-2.5 font-bold font-mono text-sky-400" x-text="c.uom_convert"></td>
+                                            <td class="p-2.5 font-bold font-mono text-indigo-300" x-text="c.qty_convert"></td>
+                                            <td class="p-2.5 font-mono text-slate-400" x-text="c.uom_base"></td>
+                                        </tr>
+                                    </template>
+                                    <template x-if="!detailProduct.conversions || detailProduct.conversions.length === 0">
+                                        <tr>
+                                            <td colspan="3" class="p-3 text-center text-slate-500 italic">Hanya satuan dasar (1 : 1 base unit).</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-700/60 text-slate-400 text-[11px]">
+                        <span>Dibuat: <strong class="text-slate-300" x-text="detailProduct.created_at"></strong></span>
+                        <button type="button" @click="showDetailProductModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Tutup</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL POPUP: EDIT PRODUK SKU                                              -->
+    <!-- ========================================================================= -->
+    <div x-show="showEditProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+        <div class="glass-panel w-full max-w-xl p-6 rounded-2xl shadow-2xl space-y-5 border border-amber-500/40 max-h-[90vh] overflow-y-auto" @click.away="showEditProductModal = false">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                <div class="flex items-center space-x-2 text-amber-400">
+                    <i class="fa-solid fa-pen-to-square text-xl"></i>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white">Edit Produk SKU</h3>
+                </div>
+                <button type="button" @click="showEditProductModal = false" class="text-slate-400 hover:text-white text-xl p-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form :action="'{{ url('/master-data/product') }}/' + editProductForm.id" method="POST" onsubmit="MasterDataApp.submitCreateForm(event, this)" class="space-y-4 text-xs">
+                @csrf
+                <input type="hidden" name="_method" value="PUT">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Kode SKU (ID)</label>
+                        <input type="text" :value="editProductForm.id" readonly disabled class="w-full p-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-indigo-400 font-mono font-bold cursor-not-allowed">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Nama Item Produk <span class="text-rose-400">*</span></label>
+                        <input type="text" name="name" x-model="editProductForm.name" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Nama Produk">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Group Item</label>
+                        <input type="text" name="item_group" x-model="editProductForm.item_group" placeholder="misal: FINISHED GOODS (MANUFAKTUR)" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">UOM Inventory (Base Unit) <span class="text-rose-400">*</span></label>
+                        <select id="select_edit_uom_inventory" name="uom_inventory" x-model="editProductForm.uom_inventory" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="">-- Pilih Satuan UOM --</option>
+                            @foreach($allUoms as $u)
+                                <option value="{{ $u->name }}">{{ $u->name }} ({{ $u->id }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">UOM Group / Kemasan</label>
+                        <input type="text" name="uom_group" x-model="editProductForm.uom_group" placeholder="misal: BOX / CTN" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Qty per UOM Group <span class="text-rose-400">*</span></label>
+                        <input type="number" step="any" min="0" name="qty_per_uom_group" x-model="editProductForm.qty_per_uom_group" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Brand</label>
+                        <input type="text" name="brand" x-model="editProductForm.brand" placeholder="misal: BaliCafé / Excelso" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Status Keaktifan <span class="text-rose-400">*</span></label>
+                        <select id="select_edit_is_active" name="is_active" x-model="editProductForm.is_active" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="1">Aktif (Yes)</option>
+                            <option value="0">Non-Aktif (No)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-700/60">
+                    <button type="button" @click="showEditProductModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <span class="btn-text">Perbarui Produk SKU</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sub-Modals for Office, Branch, Warehouse, Rack, and Bin -->
+    @include('master.modals.offices')
+    @include('master.modals.branches')
+    @include('master.modals.warehouses')
+    @include('master.modals.racks')
+    @include('master.modals.bins')
 </div>
 
 @section('scripts')
@@ -201,7 +439,9 @@
             'select_branch_filter', 'select_branch_id', 
             'select_wh_filter', 'select_warehouse_id', 
             'select_rack_filter', 'select_rack_id', 
-            'select_brand_filter', 'select_group_filter', 'select_is_active'
+            'select_brand_filter', 'select_group_filter', 'select_is_active',
+            'select_uom_inventory',
+            'select_edit_uom_inventory', 'select_edit_is_active'
         ];
         masterSelectIds.forEach(id => {
             initMasterTomSelect(id);
@@ -288,6 +528,9 @@
                     if (container) {
                         container.innerHTML = data.html;
                         container.style.opacity = '1';
+                        if (window.Alpine) {
+                            Alpine.initTree(container);
+                        }
                     }
                     window.history.pushState({}, '', url);
                     initAllMasterTomSelects();
@@ -344,12 +587,23 @@
                     this.showToast('success', data.message);
                     formEl.reset();
                     
-                    // Close product modal if AlpineJS context exists
-                    if (window.Alpine) {
-                        const app = document.querySelector('[x-data]');
-                        if (app && app._x_dataStack && app._x_dataStack[0]) {
-                            app._x_dataStack[0].showAddProductModal = false;
-                        }
+                    // Close modals if AlpineJS context exists
+                    const masterAlpine = getMasterAlpine();
+                    if (masterAlpine) {
+                        masterAlpine.showAddProductModal = false;
+                        masterAlpine.showEditUomModal = false;
+                        masterAlpine.showEditProductModal = false;
+                        masterAlpine.showDetailProductModal = false;
+                        masterAlpine.showDetailOfficeModal = false;
+                        masterAlpine.showEditOfficeModal = false;
+                        masterAlpine.showDetailBranchModal = false;
+                        masterAlpine.showEditBranchModal = false;
+                        masterAlpine.showDetailWhModal = false;
+                        masterAlpine.showEditWhModal = false;
+                        masterAlpine.showDetailRackModal = false;
+                        masterAlpine.showEditRackModal = false;
+                        masterAlpine.showDetailBinModal = false;
+                        masterAlpine.showEditBinModal = false;
                     }
 
                     // Reload active tab data seamlessly
@@ -425,6 +679,179 @@
         }
     };
 
+    // Helper to get master data Alpine instance (avoids body x-data collision)
+    function getMasterAlpine() {
+        const root = document.getElementById('master-data-root');
+        if (!root) return null;
+        if (window.Alpine && typeof window.Alpine.$data === 'function') {
+            return window.Alpine.$data(root);
+        }
+        return root._x_dataStack ? root._x_dataStack[0] : null;
+    }
+
+    // Global helper modal triggers (resilient to DOM replacements and SPA navigation)
+    window.openDetailProductModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-product');
+            const prod = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailProduct = prod;
+                alpine.showDetailProductModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail product modal:', e);
+        }
+    };
+
+    window.openEditProductModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-product');
+            const prod = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditProductModal(prod);
+            }
+        } catch (e) {
+            console.error('Error opening edit product modal:', e);
+        }
+    };
+
+    // Offices
+    window.openDetailOfficeModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-office');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailOffice = data;
+                alpine.showDetailOfficeModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail office modal:', e);
+        }
+    };
+    window.openEditOfficeModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-office');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditOfficeModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit office modal:', e);
+        }
+    };
+
+    // Branches
+    window.openDetailBranchModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-branch');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailBranch = data;
+                alpine.showDetailBranchModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail branch modal:', e);
+        }
+    };
+    window.openEditBranchModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-branch');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditBranchModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit branch modal:', e);
+        }
+    };
+
+    // Warehouses
+    window.openDetailWhModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-warehouse');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailWh = data;
+                alpine.showDetailWhModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail warehouse modal:', e);
+        }
+    };
+    window.openEditWhModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-warehouse');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditWhModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit warehouse modal:', e);
+        }
+    };
+
+    // Racks
+    window.openDetailRackModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-rack');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailRack = data;
+                alpine.showDetailRackModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail rack modal:', e);
+        }
+    };
+    window.openEditRackModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-rack');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditRackModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit rack modal:', e);
+        }
+    };
+
+    // Bins
+    window.openDetailBinModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-bin');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailBin = data;
+                alpine.showDetailBinModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail bin modal:', e);
+        }
+    };
+    window.openEditBinModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-bin');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditBinModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit bin modal:', e);
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         initAllMasterTomSelects();
         MasterDataApp.bindPaginationLinks();
@@ -441,12 +868,157 @@
         return {
             activeTab: initialTab || 'offices',
             showAddProductModal: false,
+            showEditUomModal: false,
+            showDetailProductModal: false,
+            showEditProductModal: false,
+            detailProduct: null,
+            editProductForm: {
+                id: '',
+                name: '',
+                item_group: '',
+                uom_inventory: '',
+                uom_group: '',
+                qty_per_uom_group: 1,
+                brand: '',
+                is_active: '1'
+            },
+
+            openDetailProductModal(prod) {
+                this.detailProduct = prod;
+                this.showDetailProductModal = true;
+            },
+
+            openEditProductModal(prod) {
+                this.editProductForm.id = prod.id;
+                this.editProductForm.name = prod.name;
+                this.editProductForm.item_group = prod.item_group || '';
+                this.editProductForm.uom_inventory = prod.uom_inventory || '';
+                this.editProductForm.uom_group = prod.uom_group || '';
+                this.editProductForm.qty_per_uom_group = prod.qty_per_uom_group || 1;
+                this.editProductForm.brand = prod.brand || '';
+                this.editProductForm.is_active = prod.is_active ? '1' : '0';
+                this.showEditProductModal = true;
+
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_edit_uom_inventory');
+                    if (tsMasterInstances['select_edit_uom_inventory']) {
+                        tsMasterInstances['select_edit_uom_inventory'].setValue(this.editProductForm.uom_inventory, true);
+                    }
+                    const elActive = document.getElementById('select_edit_is_active');
+                    if (elActive) {
+                        elActive.value = this.editProductForm.is_active;
+                    }
+                });
+            },
+
+            editUomForm: {
+                id: '',
+                name: '',
+                description: ''
+            },
+
+            // Offices
+            showDetailOfficeModal: false,
+            showEditOfficeModal: false,
+            detailOffice: null,
+            editOfficeForm: { id: '', name: '', address: '' },
+            openEditOfficeModal(off) {
+                this.editOfficeForm.id = off.id;
+                this.editOfficeForm.name = off.name;
+                this.editOfficeForm.address = off.address || '';
+                this.showEditOfficeModal = true;
+            },
+
+            // Branches
+            showDetailBranchModal: false,
+            showEditBranchModal: false,
+            detailBranch: null,
+            editBranchForm: { id: '', office_id: '', name: '', city: '' },
+            openEditBranchModal(br) {
+                this.editBranchForm.id = br.id;
+                this.editBranchForm.office_id = br.office_id;
+                this.editBranchForm.name = br.name;
+                this.editBranchForm.city = br.city || '';
+                this.showEditBranchModal = true;
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_edit_branch_office_id');
+                    if (tsMasterInstances['select_edit_branch_office_id']) {
+                        tsMasterInstances['select_edit_branch_office_id'].setValue(this.editBranchForm.office_id, true);
+                    }
+                });
+            },
+
+            // Warehouses
+            showDetailWhModal: false,
+            showEditWhModal: false,
+            detailWh: null,
+            editWhForm: { id: '', branch_id: '', name: '', address: '' },
+            openEditWhModal(wh) {
+                this.editWhForm.id = wh.id;
+                this.editWhForm.branch_id = wh.branch_id;
+                this.editWhForm.name = wh.name;
+                this.editWhForm.address = wh.address || '';
+                this.showEditWhModal = true;
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_edit_wh_branch_id');
+                    if (tsMasterInstances['select_edit_wh_branch_id']) {
+                        tsMasterInstances['select_edit_wh_branch_id'].setValue(this.editWhForm.branch_id, true);
+                    }
+                });
+            },
+
+            // Racks
+            showDetailRackModal: false,
+            showEditRackModal: false,
+            detailRack: null,
+            editRackForm: { id: '', warehouse_id: '', rack_name: '' },
+            openEditRackModal(rk) {
+                this.editRackForm.id = rk.id;
+                this.editRackForm.warehouse_id = rk.warehouse_id;
+                this.editRackForm.rack_name = rk.rack_name;
+                this.showEditRackModal = true;
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_edit_rack_wh_id');
+                    if (tsMasterInstances['select_edit_rack_wh_id']) {
+                        tsMasterInstances['select_edit_rack_wh_id'].setValue(this.editRackForm.warehouse_id, true);
+                    }
+                });
+            },
+
+            // Bins
+            showDetailBinModal: false,
+            showEditBinModal: false,
+            detailBin: null,
+            editBinForm: { id: '', rack_id: '', column_no: 1, level_no: 1, max_pallet: 1 },
+            openEditBinModal(bn) {
+                this.editBinForm.id = bn.id;
+                this.editBinForm.rack_id = bn.rack_id;
+                this.editBinForm.column_no = bn.column_no;
+                this.editBinForm.level_no = bn.level_no;
+                this.editBinForm.max_pallet = bn.max_pallet;
+                this.showEditBinModal = true;
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_edit_bin_rack_id');
+                    if (tsMasterInstances['select_edit_bin_rack_id']) {
+                        tsMasterInstances['select_edit_bin_rack_id'].setValue(this.editBinForm.rack_id, true);
+                    }
+                });
+            },
+
+            openEditUomModal(id, name, desc) {
+                this.editUomForm.id = id;
+                this.editUomForm.name = name;
+                this.editUomForm.description = desc || '';
+                this.showEditUomModal = true;
+            },
+
             forms: {
                 office_id: '',
                 branch_id: '',
                 wh_id: '',
                 rack_id: '',
                 bin_id: '',
+                uom_id: '',
                 product_id: ''
             },
 
@@ -469,6 +1041,12 @@
 
             autoBinCode() {
                 this.forms.bin_id = 'BIN-' + Math.floor(1000 + Math.random() * 9000);
+            },
+
+            autoUomCode() {
+                const prefixes = ['BOX', 'PCS', 'KG', 'CAN', 'BAG', 'BTL', 'CTN', 'PAC', 'ROL', 'SET'];
+                const rand = prefixes[Math.floor(Math.random() * prefixes.length)] + '-' + Math.floor(10 + Math.random() * 90);
+                this.forms.uom_id = rand;
             },
 
             autoProductCode() {

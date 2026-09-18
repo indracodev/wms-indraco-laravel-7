@@ -42,18 +42,59 @@
                             <th class="p-3">Kantor Induk</th>
                             <th class="p-3">Nama Plant</th>
                             <th class="p-3">Kota / Wilayah</th>
+                            <th class="p-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         @forelse($branches as $br)
+                            @php
+                                $brData = [
+                                    'id' => $br->id,
+                                    'office_id' => $br->office_id,
+                                    'office' => $br->office ? ['id' => $br->office->id, 'name' => $br->office->name] : null,
+                                    'name' => $br->name,
+                                    'city' => $br->city,
+                                    'created_at' => $br->created_at ? $br->created_at->format('d M Y H:i') : '-',
+                                    'warehouses' => $br->warehouses ? $br->warehouses->map(function($w) {
+                                        return ['id' => $w->id, 'name' => $w->name];
+                                    })->values() : []
+                                ];
+                            @endphp
                             <tr class="hover:bg-slate-800/50 transition">
                                 <td class="p-3 font-mono font-bold text-indigo-400">{{ $br->id }}</td>
                                 <td class="p-3 text-slate-300">{{ $br->office->name ?? $br->office_id }}</td>
-                                <td class="p-3 font-medium text-white">{{ $br->name }}</td>
+                                <td class="p-3 font-medium text-slate-800 dark:text-white">{{ $br->name }}</td>
                                 <td class="p-3 text-slate-400">{{ $br->city ?? '-' }}</td>
+                                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                    <button type="button" 
+                                            data-branch="{{ json_encode($brData) }}" 
+                                            onclick="window.openDetailBranchModal(this)" 
+                                            class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                            title="Show Detail Plant">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    @canAccessModule('master', 'update')
+                                        <button type="button" 
+                                                data-branch="{{ json_encode($brData) }}" 
+                                                onclick="window.openEditBranchModal(this)" 
+                                                class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                                title="Edit Plant">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    @endcanAccessModule
+                                    @canAccessModule('master', 'delete')
+                                        <form action="{{ route('master.branch.destroy', $br->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Plant">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                    @endcanAccessModule
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="p-6 text-center text-slate-500">Tidak ada data Plant.</td></tr>
+                            <tr><td colspan="5" class="p-6 text-center text-slate-500">Tidak ada data Plant.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -62,14 +103,56 @@
             <!-- Mobile Flat Card List -->
             <div class="space-y-2.5 md:hidden">
                 @forelse($branches as $br)
-                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-mono font-bold text-indigo-400">{{ $br->id }}</div>
-                            <div class="font-bold text-white text-sm mt-0.5">{{ $br->name }}</div>
-                            <div class="text-[11px] text-slate-400 mt-1">Kantor Induk: {{ $br->office->name ?? $br->office_id }}</div>
+                    @php
+                        $brData = [
+                            'id' => $br->id,
+                            'office_id' => $br->office_id,
+                            'office' => $br->office ? ['id' => $br->office->id, 'name' => $br->office->name] : null,
+                            'name' => $br->name,
+                            'city' => $br->city,
+                            'created_at' => $br->created_at ? $br->created_at->format('d M Y H:i') : '-',
+                            'warehouses' => $br->warehouses ? $br->warehouses->map(function($w) {
+                                return ['id' => $w->id, 'name' => $w->name];
+                            })->values() : []
+                        ];
+                    @endphp
+                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-mono font-bold text-indigo-400">{{ $br->id }}</div>
+                                <div class="font-bold text-slate-800 dark:text-white text-sm mt-0.5">{{ $br->name }}</div>
+                                <div class="text-[11px] text-slate-400 mt-1">Kantor Induk: {{ $br->office->name ?? $br->office_id }}</div>
+                            </div>
+                            <div class="text-right font-semibold text-slate-300">
+                                {{ $br->city ?? '-' }}
+                            </div>
                         </div>
-                        <div class="text-right font-semibold text-slate-300">
-                            {{ $br->city ?? '-' }}
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                            <button type="button" 
+                                    data-branch="{{ json_encode($brData) }}" 
+                                    onclick="window.openDetailBranchModal(this)" 
+                                    class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Detail</span>
+                            </button>
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-branch="{{ json_encode($brData) }}" 
+                                        onclick="window.openEditBranchModal(this)" 
+                                        class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                            @endcanAccessModule
+                            @canAccessModule('master', 'delete')
+                                <form action="{{ route('master.branch.destroy', $br->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Plant">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endcanAccessModule
                         </div>
                     </div>
                 @empty

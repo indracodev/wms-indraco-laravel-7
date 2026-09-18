@@ -28,18 +28,57 @@
                             <th class="p-3">Nama Kantor</th>
                             <th class="p-3">Alamat</th>
                             <th class="p-3">Jumlah Plant</th>
+                            <th class="p-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         @forelse($offices as $off)
+                            @php
+                                $offData = [
+                                    'id' => $off->id,
+                                    'name' => $off->name,
+                                    'address' => $off->address,
+                                    'created_at' => $off->created_at ? $off->created_at->format('d M Y H:i') : '-',
+                                    'branches' => $off->branches ? $off->branches->map(function($b) {
+                                        return ['id' => $b->id, 'name' => $b->name, 'city' => $b->city];
+                                    })->values() : []
+                                ];
+                            @endphp
                             <tr class="hover:bg-slate-800/50 transition">
                                 <td class="p-3 font-mono font-bold text-indigo-400">{{ $off->id }}</td>
-                                <td class="p-3 font-medium text-white">{{ $off->name }}</td>
+                                <td class="p-3 font-medium text-slate-800 dark:text-white">{{ $off->name }}</td>
                                 <td class="p-3 text-slate-400">{{ $off->address ?? '-' }}</td>
                                 <td class="p-3 font-bold text-emerald-400">{{ $off->branches_count }} Plant</td>
+                                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                    <button type="button" 
+                                            data-office="{{ json_encode($offData) }}" 
+                                            onclick="window.openDetailOfficeModal(this)" 
+                                            class="p-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer" 
+                                            title="Show Detail Kantor">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    @canAccessModule('master', 'update')
+                                        <button type="button" 
+                                                data-office="{{ json_encode($offData) }}" 
+                                                onclick="window.openEditOfficeModal(this)" 
+                                                class="p-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg transition cursor-pointer" 
+                                                title="Edit Kantor">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    @endcanAccessModule
+                                    @canAccessModule('master', 'delete')
+                                        <form action="{{ route('master.office.destroy', $off->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Kantor">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                    @endcanAccessModule
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="p-6 text-center text-slate-500">Tidak ada data kantor.</td></tr>
+                            <tr><td colspan="5" class="p-6 text-center text-slate-500">Tidak ada data kantor.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -48,16 +87,56 @@
             <!-- Mobile Flat Card List -->
             <div class="space-y-2.5 md:hidden">
                 @forelse($offices as $off)
-                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-mono font-bold text-indigo-400">{{ $off->id }}</div>
-                            <div class="font-bold text-white text-sm mt-0.5">{{ $off->name }}</div>
-                            <div class="text-[11px] text-slate-400 mt-1">{{ $off->address ?? '-' }}</div>
+                    @php
+                        $offData = [
+                            'id' => $off->id,
+                            'name' => $off->name,
+                            'address' => $off->address,
+                            'created_at' => $off->created_at ? $off->created_at->format('d M Y H:i') : '-',
+                            'branches' => $off->branches ? $off->branches->map(function($b) {
+                                return ['id' => $b->id, 'name' => $b->name, 'city' => $b->city];
+                            })->values() : []
+                        ];
+                    @endphp
+                    <div class="bg-slate-800/80 border border-slate-700/70 p-3.5 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-mono font-bold text-indigo-400">{{ $off->id }}</div>
+                                <div class="font-bold text-slate-800 dark:text-white text-sm mt-0.5">{{ $off->name }}</div>
+                                <div class="text-[11px] text-slate-400 mt-1">{{ $off->address ?? '-' }}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-300 font-bold rounded text-[11px]">
+                                    {{ $off->branches_count }} Plant
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-300 font-bold rounded text-[11px]">
-                                {{ $off->branches_count }} Plant
-                            </span>
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-700/60">
+                            <button type="button" 
+                                    data-office="{{ json_encode($offData) }}" 
+                                    onclick="window.openDetailOfficeModal(this)" 
+                                    class="px-2.5 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Detail</span>
+                            </button>
+                            @canAccessModule('master', 'update')
+                                <button type="button" 
+                                        data-office="{{ json_encode($offData) }}" 
+                                        onclick="window.openEditOfficeModal(this)" 
+                                        class="px-2.5 py-1.5 bg-amber-600/80 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                            @endcanAccessModule
+                            @canAccessModule('master', 'delete')
+                                <form action="{{ route('master.office.destroy', $off->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 bg-rose-600/80 hover:bg-rose-500 text-white rounded-lg transition cursor-pointer" title="Hapus Kantor">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endcanAccessModule
                         </div>
                     </div>
                 @empty
