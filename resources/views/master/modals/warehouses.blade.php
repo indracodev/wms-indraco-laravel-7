@@ -1,8 +1,8 @@
 <!-- ========================================================================= -->
 <!-- MODAL POPUP: DETAIL GUDANG (WAREHOUSE)                                    -->
 <!-- ========================================================================= -->
-<div x-show="showDetailWhModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-    <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-sky-500/40 max-h-[90vh] overflow-y-auto" @click.away="showDetailWhModal = false">
+<div x-show="showDetailWhModal" class="fixed inset-0 z-40 pt-16 pb-16 px-4 flex items-center justify-center bg-black/75 backdrop-blur-md" @click.self="showDetailWhModal = false" x-cloak>
+    <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-sky-500/40 max-h-full overflow-y-auto" @click.away="showDetailWhModal = false">
         <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
             <div class="flex items-center space-x-2 text-sky-400">
                 <i class="fa-solid fa-circle-info text-xl"></i>
@@ -85,8 +85,8 @@
 <!-- ========================================================================= -->
 <!-- MODAL POPUP: EDIT GUDANG (WAREHOUSE)                                      -->
 <!-- ========================================================================= -->
-<div x-show="showEditWhModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-    <div class="glass-panel w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5 border border-amber-500/40 max-h-[90vh] overflow-y-auto" @click.away="showEditWhModal = false">
+<div x-show="showEditWhModal" class="fixed inset-0 z-40 pt-16 pb-16 px-4 flex items-center justify-center bg-black/75 backdrop-blur-md" @click.self="showEditWhModal = false" x-cloak>
+    <div class="glass-panel w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5 border border-amber-500/40 max-h-full overflow-y-auto" @click.away="showEditWhModal = false">
         <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
             <div class="flex items-center space-x-2 text-amber-400">
                 <i class="fa-solid fa-pen-to-square text-xl"></i>
@@ -130,6 +130,140 @@
                 <button type="button" @click="showEditWhModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Batal</button>
                 <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center space-x-1.5">
                     <span class="btn-text">Perbarui Gudang</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL POPUP: TAMBAH GUDANG (WAREHOUSE) BARU                               -->
+<!-- ========================================================================= -->
+<div x-show="showAddWhModal" 
+     class="fixed inset-0 z-40 pt-16 pb-16 px-4 flex items-center justify-center bg-black/75 backdrop-blur-md" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @click.self="showAddWhModal = false"
+     x-cloak>
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 max-h-full overflow-y-auto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+         @click.away="showAddWhModal = false">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg border border-indigo-100 dark:border-indigo-800/40 shadow-sm">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white leading-tight">Tambah Gudang Baru</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Daftarkan unit gudang operasional baru</p>
+                </div>
+            </div>
+            <button type="button" @click="showAddWhModal = false" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('master.warehouse.store') }}" method="POST" onsubmit="MasterDataApp.submitCreateForm(event, this)" class="space-y-4 text-xs">
+            @csrf
+            
+            <!-- Plant Induk -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Plant Induk <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-slate-400 font-normal">Lokasi Plant</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
+                        <i class="fa-solid fa-industry text-sm"></i>
+                    </div>
+                    <select name="branch_id" required class="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-semibold text-xs focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 appearance-none shadow-sm cursor-pointer transition">
+                        @foreach($allBranches as $b)
+                            <option value="{{ $b->id }}">{{ $b->name }} ({{ $b->id }})</option>
+                        @endforeach
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kode Gudang (ID) -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Kode Gudang (ID) <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-slate-400 font-normal">Format: WHS-XXX / GSK.01</span>
+                </label>
+                <div class="flex items-center space-x-2">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
+                            <i class="fa-solid fa-barcode text-sm"></i>
+                        </div>
+                        <input type="text" name="id" x-model="forms.wh_id" required 
+                               class="w-full pl-10 pr-3 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono font-bold tracking-wider uppercase focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none shadow-sm transition" 
+                               placeholder="misal: GSK.678.II">
+                    </div>
+                    <button type="button" @click="autoWhCode()" 
+                            class="px-4 py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-mono font-bold text-xs rounded-xl border border-indigo-200 dark:border-indigo-800/50 transition shadow-sm cursor-pointer active:scale-95 flex items-center space-x-1.5 shrink-0"
+                            title="Generate Kode Otomatis">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                        <span>Auto</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nama Gudang -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Nama Gudang <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-slate-400 font-normal">Nama unit gudang</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
+                        <i class="fa-solid fa-warehouse text-sm"></i>
+                    </div>
+                    <input type="text" name="name" required 
+                           class="w-full pl-10 pr-3 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none shadow-sm transition" 
+                           placeholder="Contoh: Gudang Bahan Baku A">
+                </div>
+            </div>
+
+            <!-- Alamat Gudang -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Alamat / Detail Lokasi</span>
+                    <span class="text-[10px] text-slate-400 font-normal">Lokasi fisik gudang</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute top-3 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
+                        <i class="fa-solid fa-location-dot text-sm"></i>
+                    </div>
+                    <textarea name="address" rows="2"
+                              class="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none shadow-sm transition" 
+                              placeholder="Alamat atau lokasi detail gudang..."></textarea>
+                </div>
+            </div>
+
+            <!-- Action Buttons Grid (Ergonomic Full-Width for Mobile) -->
+            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button type="button" @click="showAddWhModal = false" 
+                        class="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition cursor-pointer active:scale-95 text-center">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5 active:scale-95 text-center">
+                    <i class="fa-solid fa-floppy-disk text-sm"></i>
+                    <span class="btn-text">Simpan Gudang</span>
                 </button>
             </div>
         </form>

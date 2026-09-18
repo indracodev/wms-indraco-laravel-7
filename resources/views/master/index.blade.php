@@ -45,6 +45,13 @@
         background-color: #4f46e5 !important;
         color: #ffffff !important;
     }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
 @endsection
 
@@ -55,7 +62,7 @@
 <!-- Toast Container for Floating Alerts -->
 <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2 pointer-events-none"></div>
 
-<div id="master-data-root" class="space-y-6" x-data="masterDataForm('{{ $tab }}')">
+<div id="master-data-root" class="space-y-6 pb-32 md:pb-0" x-data="masterDataForm('{{ $tab }}')">
     <!-- Header Title -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -67,8 +74,8 @@
         </div>
     </div>
 
-    <!-- Optimized Tab Navigation Bar (SPA Zero Page Reload) -->
-    <div class="flex space-x-2 border-b border-slate-700/80 pb-2 overflow-x-auto">
+    <!-- DESKTOP Tab Navigation Bar (Visible on md and up, hidden on mobile) -->
+    <div class="hidden md:flex space-x-2 border-b border-slate-200 dark:border-slate-700/80 pb-2 overflow-x-auto">
         <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'offices' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="offices">
             <i class="fa-solid fa-building text-sm"></i>
             <span>1. Kantor Pusat</span>
@@ -105,6 +112,46 @@
         </a>
     </div>
 
+    <!-- ERGONOMIC MOBILE BOTTOM TAB SLIDER (Positioned directly above bottom navigation for thumb-reach) -->
+    <div class="fixed bottom-[53px] inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)]">
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar scroll-smooth mobile-tab-slider">
+            <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'offices' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="offices">
+                <i class="fa-solid fa-building text-xs"></i>
+                <span>1. Kantor Pusat</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'branches']) }}" onclick="MasterDataApp.loadTab(this.href, 'branches'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'branches' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="branches">
+                <i class="fa-solid fa-industry text-xs"></i>
+                <span>2. Plant</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'warehouses']) }}" onclick="MasterDataApp.loadTab(this.href, 'warehouses'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'warehouses' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="warehouses">
+                <i class="fa-solid fa-warehouse text-xs"></i>
+                <span>3. Gudang</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'racks']) }}" onclick="MasterDataApp.loadTab(this.href, 'racks'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'racks' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="racks">
+                <i class="fa-solid fa-bars-staggered text-xs"></i>
+                <span>4. Rak</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'bins']) }}" onclick="MasterDataApp.loadTab(this.href, 'bins'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'bins' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="bins">
+                <i class="fa-solid fa-qrcode text-xs"></i>
+                <span>5. BIN</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'uoms' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="uoms">
+                <i class="fa-solid fa-scale-balanced text-xs"></i>
+                <span>6. UOM Inventory</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="products">
+                <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                <span>7. Produk SKU</span>
+            </a>
+        </div>
+    </div>
+
     <!-- DYNAMICALLY LOADED ASYNC TAB CONTAINER -->
     <div id="tab-content-container" class="transition-all duration-200 min-h-[400px]">
         @include('master.tabs.' . $tab)
@@ -113,12 +160,18 @@
     <!-- ========================================================================= -->
     <!-- MODAL POPUP: TAMBAH PRODUK SKU BARU                                      -->
     <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
+    <!-- MODAL POPUP: TAMBAH PRODUK SKU BARU                                      -->
+    <!-- ========================================================================= -->
     <div x-show="showAddProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-        <div class="glass-panel w-full max-w-xl p-6 rounded-2xl shadow-2xl space-y-5 border border-indigo-500/40 max-h-[90vh] overflow-y-auto">
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-indigo-500/40 max-h-[90vh] overflow-y-auto" @click.away="showAddProductModal = false">
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                 <div class="flex items-center space-x-2 text-indigo-400">
                     <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                    <h3 class="text-base font-bold text-white">Tambah Produk SKU Baru</h3>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Tambah Produk SKU Baru</h3>
+                        <p class="text-[11px] text-slate-400">Daftarkan SKU baru beserta konfigurasi kemasan & konversi satuan</p>
+                    </div>
                 </div>
                 <button type="button" @click="showAddProductModal = false" class="text-slate-400 hover:text-white text-xl p-1 cursor-pointer">
                     <i class="fa-solid fa-xmark"></i>
@@ -132,23 +185,38 @@
                         <label class="block text-slate-300 font-semibold mb-1">Kode Item SKU <span class="text-rose-400">*</span></label>
                         <div class="flex items-center space-x-2">
                             <input type="text" name="id" x-model="forms.product_id" required placeholder="misal: FGD00999" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono uppercase focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <button type="button" @click="autoProductCode()" class="px-3 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-mono font-bold text-xs rounded-xl border border-slate-600 cursor-pointer">Auto</button>
+                            <button type="button" @click="autoProductCode()" class="px-3 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-mono font-bold text-xs rounded-xl border border-slate-600 cursor-pointer" title="Generate SKU Otomatis">Auto</button>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-slate-300 font-semibold mb-1">Nama Item Produk <span class="text-rose-400">*</span></label>
-                        <input type="text" name="name" required placeholder="Nama Produk" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" name="name" required placeholder="misal: BaliCafé Arabica Gold..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                     </div>
 
                     <div>
                         <label class="block text-slate-300 font-semibold mb-1">Group Item</label>
-                        <input type="text" name="item_group" placeholder="FINISHED GOODS (MANUFAKTUR)" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" name="item_group" list="list_item_groups" placeholder="FINISHED GOODS (MANUFAKTUR)" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <datalist id="list_item_groups">
+                            @foreach($itemGroups as $ig)
+                                <option value="{{ $ig }}">
+                            @endforeach
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Brand</label>
+                        <input type="text" name="brand" list="list_brands" placeholder="BaliCafé / Excelso / Intirasa" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <datalist id="list_brands">
+                            @foreach($brands as $br)
+                                <option value="{{ $br }}">
+                            @endforeach
+                        </datalist>
                     </div>
 
                     <div>
                         <label class="block text-slate-300 font-semibold mb-1">UOM Inventory (Base Unit) <span class="text-rose-400">*</span></label>
-                        <select id="select_uom_inventory" name="uom_inventory" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <select id="select_uom_inventory" name="uom_inventory" required @change="onBaseUomChange($event.target.value)" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             <option value="">-- Pilih Satuan UOM --</option>
                             @foreach($allUoms as $u)
                                 <option value="{{ $u->name }}">{{ $u->name }} ({{ $u->id }})</option>
@@ -157,22 +225,107 @@
                     </div>
 
                     <div>
-                        <label class="block text-slate-300 font-semibold mb-1">Brand</label>
-                        <input type="text" name="brand" placeholder="Intirasa / BaliCafé" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">Status Keaktifan</label>
+                        <label class="block text-slate-300 font-semibold mb-1">Status Keaktifan <span class="text-rose-400">*</span></label>
                         <select id="select_is_active" name="is_active" required class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
                             <option value="1">Aktif (Yes)</option>
                             <option value="0">Non-Aktif (No)</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Grup UOM / Kemasan</label>
+                        <input type="text" name="uom_group" placeholder="misal: BOX24, CAN05, CTN12" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Qty per Grup UOM (Isi Kemasan)</label>
+                        <input type="number" step="any" min="0" name="qty_per_uom_group" value="1" placeholder="1" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Section: Dynamic UOM Conversions Builder -->
+                <div class="space-y-2.5 pt-3 border-t border-slate-700/60">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-slate-200 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-arrows-split-up-and-left text-indigo-400"></i>
+                                <span>Konversi Satuan UOM (Multi-Satuan)</span>
+                            </span>
+                            <p class="text-[11px] text-slate-400">Konfigurasikan satuan kemasan bertingkat (misal: 1 KARTON = 24 BOX).</p>
+                        </div>
+                        <button type="button" 
+                                @click="addNewConversion()" 
+                                class="px-3 py-1.5 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg font-semibold text-xs flex items-center space-x-1 transition cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Tambah Konversi</span>
+                        </button>
+                    </div>
+
+                    <!-- Repeater Table -->
+                    <div class="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/50">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-2.5">Satuan Konversi</th>
+                                    <th class="p-2.5">Qty Konversi</th>
+                                    <th class="p-2.5">Satuan Dasar (Base)</th>
+                                    <th class="p-2.5 w-10 text-center">Hapus</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <template x-for="(conv, idx) in newProductConversions" :key="idx">
+                                    <tr class="hover:bg-slate-800/40">
+                                        <td class="p-2">
+                                            <input type="text" 
+                                                   :name="'conversions[' + idx + '][uom_convert]'" 
+                                                   x-model="conv.uom_convert" 
+                                                   required 
+                                                   placeholder="misal: KARTON / BOX" 
+                                                   class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono uppercase text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                        </td>
+                                        <td class="p-2">
+                                            <input type="number" 
+                                                   step="any" 
+                                                   min="0.01" 
+                                                   :name="'conversions[' + idx + '][qty_convert]'" 
+                                                   x-model="conv.qty_convert" 
+                                                   required 
+                                                   placeholder="24" 
+                                                   class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                        </td>
+                                        <td class="p-2">
+                                            <input type="text" 
+                                                   :name="'conversions[' + idx + '][uom_base]'" 
+                                                   x-model="conv.uom_base" 
+                                                   readonly 
+                                                   class="w-full p-2 bg-slate-800/70 border border-slate-700 rounded-lg text-emerald-400 font-mono text-xs cursor-not-allowed">
+                                        </td>
+                                        <td class="p-2 text-center">
+                                            <button type="button" 
+                                                    @click="removeNewConversion(idx)" 
+                                                    class="w-7 h-7 flex items-center justify-center mx-auto text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                                                    title="Hapus baris konversi">
+                                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="newProductConversions.length === 0">
+                                    <tr>
+                                        <td colspan="4" class="p-3 text-center text-slate-500 italic text-[11px]">
+                                            Opsional. Jika tidak ditambahkan, sistem otomatis membuat 1 konversi dasar (1 : 1 Base Unit).
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-700/60">
                     <button type="button" @click="showAddProductModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-floppy-disk text-xs mr-1"></i>
                         <span class="btn-text">Simpan Produk SKU</span>
                     </button>
                 </div>
@@ -436,7 +589,7 @@
     function initAllMasterTomSelects() {
         const masterSelectIds = [
             'select_office_filter', 'select_office_id', 
-            'select_branch_filter', 'select_branch_id', 
+            'select_branch_filter', 'select_branch_id',
             'select_wh_filter', 'select_warehouse_id', 
             'select_rack_filter', 'select_rack_id', 
             'select_brand_filter', 'select_group_filter', 'select_is_active',
@@ -447,6 +600,99 @@
             initMasterTomSelect(id);
         });
     }
+
+    // Mobile Swipeable Card Action Engine (Swipe Left: Detail & Edit, Swipe Right: Delete)
+    window.swipeableCard = function() {
+        return {
+            startX: 0,
+            startY: 0,
+            offset: 0,
+            isDragging: false,
+            isScrolling: false,
+            maxLeftSwipe: -144, // reveals Right Tray (Detail & Edit)
+            maxRightSwipe: 96,  // reveals Left Tray (Delete)
+
+            touchStart(e) {
+                this.startX = e.touches[0].clientX;
+                this.startY = e.touches[0].clientY;
+                this.isDragging = true;
+                this.isScrolling = false;
+            },
+
+            touchMove(e) {
+                if (!this.isDragging) return;
+                const diffX = e.touches[0].clientX - this.startX;
+                const diffY = e.touches[0].clientY - this.startY;
+
+                // Detect vertical page scrolling
+                if (!this.isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+                    this.isScrolling = true;
+                    this.isDragging = false;
+                    return;
+                }
+
+                if (this.isScrolling) return;
+
+                // Horizontal swipe detected
+                if (Math.abs(diffX) > 10 && e.cancelable) {
+                    e.preventDefault();
+                }
+
+                // Resistance past limits
+                if (diffX > 0) {
+                    this.offset = Math.min(diffX, this.maxRightSwipe + 15);
+                } else {
+                    this.offset = Math.max(diffX, this.maxLeftSwipe - 15);
+                }
+            },
+
+            touchEnd(e) {
+                if (!this.isDragging) return;
+                this.isDragging = false;
+                if (this.offset > 40) {
+                    this.offset = this.maxRightSwipe;
+                } else if (this.offset < -45) {
+                    this.offset = this.maxLeftSwipe;
+                } else {
+                    this.offset = 0;
+                }
+            },
+
+            mouseDown(e) {
+                if (e.target.closest('button') || e.target.closest('a') || e.target.closest('form')) return;
+                this.startX = e.clientX;
+                this.isDragging = true;
+            },
+
+            mouseMove(e) {
+                if (!this.isDragging) return;
+                const diffX = e.clientX - this.startX;
+                if (Math.abs(diffX) > 5) {
+                    if (diffX > 0) {
+                        this.offset = Math.min(diffX, this.maxRightSwipe + 15);
+                    } else {
+                        this.offset = Math.max(diffX, this.maxLeftSwipe - 15);
+                    }
+                }
+            },
+
+            mouseUp(e) {
+                if (!this.isDragging) return;
+                this.isDragging = false;
+                if (this.offset > 40) {
+                    this.offset = this.maxRightSwipe;
+                } else if (this.offset < -45) {
+                    this.offset = this.maxLeftSwipe;
+                } else {
+                    this.offset = 0;
+                }
+            },
+
+            closeTray() {
+                this.offset = 0;
+            }
+        };
+    };
 
     // Centralized Master Data SPA Application Engine
     const MasterDataApp = {
@@ -506,14 +752,23 @@
                 container.style.opacity = '0.5';
             }
 
-            // Update Tab Button UI States
+            // Update Tab Button UI States (Both desktop and mobile sliders)
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.getAttribute('data-tab') === tabName) {
-                    btn.className = 'tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30';
+                const isActive = btn.getAttribute('data-tab') === tabName;
+                if (isActive) {
+                    btn.classList.remove('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200');
+                    btn.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
                 } else {
-                    btn.className = 'tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap bg-slate-800/80 text-slate-400 hover:text-slate-200';
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
+                    btn.classList.add('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200');
                 }
             });
+
+            // Smoothly auto-scroll active tab into center view in mobile bottom slider
+            const activeMobileBtn = document.querySelector('.mobile-tab-slider .tab-btn[data-tab="' + tabName + '"]');
+            if (activeMobileBtn) {
+                activeMobileBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
 
             try {
                 const response = await fetch(url, {
@@ -598,10 +853,13 @@
                         masterAlpine.showEditOfficeModal = false;
                         masterAlpine.showDetailBranchModal = false;
                         masterAlpine.showEditBranchModal = false;
+                        masterAlpine.showAddBranchModal = false;
                         masterAlpine.showDetailWhModal = false;
                         masterAlpine.showEditWhModal = false;
+                        masterAlpine.showAddWhModal = false;
                         masterAlpine.showDetailRackModal = false;
                         masterAlpine.showEditRackModal = false;
+                        masterAlpine.showAddRackModal = false;
                         masterAlpine.showDetailBinModal = false;
                         masterAlpine.showEditBinModal = false;
                     }
@@ -717,6 +975,13 @@
         }
     };
 
+    window.openAddProductModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddProductModal();
+        }
+    };
+
     // Offices
     window.openDetailOfficeModal = function(btn) {
         try {
@@ -770,6 +1035,12 @@
             console.error('Error opening edit branch modal:', e);
         }
     };
+    window.openAddBranchModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddBranchModal();
+        }
+    };
 
     // Warehouses
     window.openDetailWhModal = function(btn) {
@@ -797,6 +1068,12 @@
             console.error('Error opening edit warehouse modal:', e);
         }
     };
+    window.openAddWhModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddWhModal();
+        }
+    };
 
     // Racks
     window.openDetailRackModal = function(btn) {
@@ -822,6 +1099,12 @@
             }
         } catch (e) {
             console.error('Error opening edit rack modal:', e);
+        }
+    };
+    window.openAddRackModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddRackModal();
         }
     };
 
@@ -856,6 +1139,14 @@
         initAllMasterTomSelects();
         MasterDataApp.bindPaginationLinks();
 
+        // Auto-center active mobile tab on page load
+        const initialMobileBtn = document.querySelector('.mobile-tab-slider .tab-btn[data-tab="{{ $tab }}"]');
+        if (initialMobileBtn) {
+            setTimeout(() => {
+                initialMobileBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 150);
+        }
+
         // Handle Browser Back / Forward History navigation
         window.addEventListener('popstate', function() {
             const params = new URLSearchParams(window.location.search);
@@ -867,7 +1158,62 @@
     function masterDataForm(initialTab) {
         return {
             activeTab: initialTab || 'offices',
+
+            // SKU Grouping & Collapsible Accordion Dropdown
+            expandedSkus: [],
+            isSkuExpanded(sku) {
+                return this.expandedSkus.includes(sku);
+            },
+            toggleSku(sku) {
+                if (this.expandedSkus.includes(sku)) {
+                    this.expandedSkus = this.expandedSkus.filter(id => id !== sku);
+                } else {
+                    this.expandedSkus.push(sku);
+                }
+            },
+            expandAllSkus(skus) {
+                if (Array.isArray(skus)) {
+                    this.expandedSkus = Array.from(new Set([...this.expandedSkus, ...skus]));
+                }
+            },
+            collapseAllSkus() {
+                this.expandedSkus = [];
+            },
+
+            // Add Product SKU State & Methods
             showAddProductModal: false,
+            newProductConversions: [],
+            openAddProductModal() {
+                this.forms.product_id = '';
+                this.forms.product_uom_inventory = '';
+                this.newProductConversions = [];
+                this.showAddProductModal = true;
+                this.$nextTick(() => {
+                    initMasterTomSelect('select_uom_inventory');
+                    if (tsMasterInstances['select_uom_inventory']) {
+                        tsMasterInstances['select_uom_inventory'].clear();
+                    }
+                });
+            },
+            addNewConversion() {
+                const baseUom = this.forms.product_uom_inventory || 
+                    (document.getElementById('select_uom_inventory') ? document.getElementById('select_uom_inventory').value : '');
+                this.newProductConversions.push({
+                    uom_convert: '',
+                    qty_convert: 1,
+                    uom_base: baseUom || ''
+                });
+            },
+            removeNewConversion(idx) {
+                this.newProductConversions.splice(idx, 1);
+            },
+            onBaseUomChange(val) {
+                this.forms.product_uom_inventory = val;
+                this.newProductConversions.forEach(c => {
+                    c.uom_base = val;
+                });
+            },
+
             showEditUomModal: false,
             showDetailProductModal: false,
             showEditProductModal: false,
@@ -932,8 +1278,14 @@
             // Branches
             showDetailBranchModal: false,
             showEditBranchModal: false,
+            showAddBranchModal: false,
             detailBranch: null,
             editBranchForm: { id: '', office_id: '', name: '', city: '' },
+            openAddBranchModal() {
+                this.forms.branch_id = '';
+                this.autoBranchCode();
+                this.showAddBranchModal = true;
+            },
             openEditBranchModal(br) {
                 this.editBranchForm.id = br.id;
                 this.editBranchForm.office_id = br.office_id;
@@ -951,8 +1303,14 @@
             // Warehouses
             showDetailWhModal: false,
             showEditWhModal: false,
+            showAddWhModal: false,
             detailWh: null,
             editWhForm: { id: '', branch_id: '', name: '', address: '' },
+            openAddWhModal() {
+                this.forms.wh_id = '';
+                this.autoWhCode();
+                this.showAddWhModal = true;
+            },
             openEditWhModal(wh) {
                 this.editWhForm.id = wh.id;
                 this.editWhForm.branch_id = wh.branch_id;
@@ -970,8 +1328,14 @@
             // Racks
             showDetailRackModal: false,
             showEditRackModal: false,
+            showAddRackModal: false,
             detailRack: null,
             editRackForm: { id: '', warehouse_id: '', rack_name: '' },
+            openAddRackModal() {
+                this.forms.rack_id = '';
+                this.autoRackCode();
+                this.showAddRackModal = true;
+            },
             openEditRackModal(rk) {
                 this.editRackForm.id = rk.id;
                 this.editRackForm.warehouse_id = rk.warehouse_id;

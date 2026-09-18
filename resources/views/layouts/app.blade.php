@@ -82,6 +82,26 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
         }
 
+        html.light .bg-slate-900\/60,
+        html.light .bg-slate-900\/50,
+        html.light .bg-slate-900\/70,
+        html.light .bg-slate-900\/80,
+        html.light .bg-slate-950,
+        html.light .bg-slate-950\/80,
+        html.light .bg-slate-950\/70,
+        html.light .bg-slate-950\/60 {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        html.light .bg-indigo-950\/30,
+        html.light .bg-indigo-950\/40,
+        html.light .bg-indigo-950\/20 {
+            background-color: #eef2ff !important;
+            border-left-color: #4f46e5 !important;
+        }
+
         html.light header {
             background-color: #ffffff !important;
             border-bottom: 1px solid #cbd5e1 !important;
@@ -400,7 +420,7 @@
     </style>
     @yield('styles')
 </head>
-<body x-data="{ mobileSidebarOpen: false }" class="bg-slate-900 text-slate-100 font-sans min-h-screen antialiased transition-colors duration-300">
+<body x-data="{ mobileSidebarOpen: false, quickActionOpen: false }" class="bg-slate-900 text-slate-100 font-sans min-h-screen antialiased transition-colors duration-300">
 
     <!-- Impersonation Banner -->
     @include('layouts.impersonate_banner')

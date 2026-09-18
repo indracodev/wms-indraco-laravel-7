@@ -1,4 +1,4 @@
-<header class="bg-slate-800/80 border-b border-slate-700/60 sticky top-0 z-40 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between">
+<header class="bg-slate-800/80 border-b border-slate-700/60 sticky top-0 z-50 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between">
     <!-- Left Title & Hamburger Button -->
     <div class="flex items-center space-x-3">
         <!-- Hamburger Button to Toggle Mobile Sidebar Drawer -->

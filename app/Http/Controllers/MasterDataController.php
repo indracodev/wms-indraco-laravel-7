@@ -739,36 +739,62 @@ class MasterDataController extends Controller
             'item_group' => 'nullable|string|max:100',
             'uom_inventory' => 'required|string|max:50',
             'uom_group' => 'nullable|string|max:50',
-            'qty_per_uom_group' => 'required|numeric|min:0',
+            'qty_per_uom_group' => 'nullable|numeric|min:0',
             'brand' => 'nullable|string|max:100',
             'is_active' => 'required|boolean',
             'conversions' => 'nullable|array',
-            'conversions.*.uom_convert' => 'required|string|max:50',
-            'conversions.*.qty_convert' => 'required|numeric|min:0.01',
-            'conversions.*.uom_base' => 'required|string|max:50',
+            'conversions.*.uom_convert' => 'nullable|string|max:50',
+            'conversions.*.qty_convert' => 'nullable|numeric|min:0.01',
+            'conversions.*.uom_base' => 'nullable|string|max:50',
         ]);
 
-        DB::transaction(function () use ($data, $request) {
+        DB::transaction(function () use ($data) {
+            $qtyPerGroup = isset($data['qty_per_uom_group']) && is_numeric($data['qty_per_uom_group']) 
+                ? (float)$data['qty_per_uom_group'] 
+                : 1;
+
             $product = Product::create([
-                'id' => $data['id'],
-                'name' => $data['name'],
-                'item_group' => $data['item_group'] ?? null,
-                'uom_inventory' => $data['uom_inventory'],
-                'uom_group' => $data['uom_group'] ?? null,
-                'qty_per_uom_group' => $data['qty_per_uom_group'],
-                'brand' => $data['brand'] ?? null,
+                'id' => strtoupper(trim($data['id'])),
+                'name' => trim($data['name']),
+                'item_group' => !empty($data['item_group']) ? trim($data['item_group']) : null,
+                'uom_inventory' => trim($data['uom_inventory']),
+                'uom_group' => !empty($data['uom_group']) ? trim($data['uom_group']) : null,
+                'qty_per_uom_group' => $qtyPerGroup,
+                'brand' => !empty($data['brand']) ? trim($data['brand']) : null,
                 'is_active' => (bool)$data['is_active'],
             ]);
 
+            $hasBaseConversion = false;
             if (!empty($data['conversions'])) {
                 foreach ($data['conversions'] as $conv) {
-                    ProductUomConversion::create([
-                        'product_id' => $product->id,
-                        'uom_convert' => $conv['uom_convert'],
-                        'qty_convert' => $conv['qty_convert'],
-                        'uom_base' => $conv['uom_base'],
-                    ]);
+                    if (!empty($conv['uom_convert']) && !empty($conv['qty_convert']) && is_numeric($conv['qty_convert'])) {
+                        $uomConvert = trim($conv['uom_convert']);
+                        $qtyConvert = (float)$conv['qty_convert'];
+                        $uomBase = !empty($conv['uom_base']) ? trim($conv['uom_base']) : $product->uom_inventory;
+
+                        if (strtoupper($uomConvert) === strtoupper($product->uom_inventory) && $qtyConvert == 1) {
+                            $hasBaseConversion = true;
+                        }
+
+                        ProductUomConversion::create([
+                            'product_id' => $product->id,
+                            'uom_convert' => $uomConvert,
+                            'qty_convert' => $qtyConvert,
+                            'uom_base' => $uomBase,
+                        ]);
+                    }
                 }
+            }
+
+            // Selalu pastikan konversi dasar 1:1 ada untuk perhitungan stok inventaris
+            if (!$hasBaseConversion) {
+                ProductUomConversion::firstOrCreate([
+                    'product_id' => $product->id,
+                    'uom_convert' => $product->uom_inventory,
+                ], [
+                    'qty_convert' => 1,
+                    'uom_base' => $product->uom_inventory,
+                ]);
             }
         });
 
@@ -796,10 +822,14 @@ class MasterDataController extends Controller
             'item_group' => 'nullable|string|max:100',
             'uom_inventory' => 'required|string|max:50',
             'uom_group' => 'nullable|string|max:50',
-            'qty_per_uom_group' => 'required|numeric|min:0',
+            'qty_per_uom_group' => 'nullable|numeric|min:0',
             'brand' => 'nullable|string|max:100',
             'is_active' => 'required|boolean',
         ]);
+
+        $data['qty_per_uom_group'] = isset($data['qty_per_uom_group']) && is_numeric($data['qty_per_uom_group']) 
+            ? (float)$data['qty_per_uom_group'] 
+            : 1;
 
         $product->update($data);
         AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Produk SKU: {$product->name} ({$product->id})");
