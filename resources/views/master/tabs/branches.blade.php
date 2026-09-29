@@ -3,10 +3,18 @@
 <!-- ========================================================================= -->
 <div class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="flex items-center justify-between">
-        <h3 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <i class="fa-solid fa-industry text-indigo-600 dark:text-indigo-400"></i>
             <span>Daftar Plant Operasional</span>
         </h3>
+        @canAccessModule('master', 'create')
+        <button type="button" 
+                @click="openAddBranchModal()" 
+                class="md:hidden px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-1.5 active:scale-95">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>Tambah</span>
+        </button>
+        @endcanAccessModule
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

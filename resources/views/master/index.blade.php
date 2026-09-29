@@ -554,12 +554,14 @@
         </div>
     </div>
 
-    <!-- Sub-Modals for Office, Branch, Warehouse, Rack, and Bin -->
+    <!-- Sub-Modals for Office, Branch, Warehouse, Rack, Bin, and UOM Products -->
     @include('master.modals.offices')
     @include('master.modals.branches')
     @include('master.modals.warehouses')
     @include('master.modals.racks')
     @include('master.modals.bins')
+    @include('master.modals.uoms')
+    @include('master.modals.uom_products')
 </div>
 
 @section('scripts')
@@ -847,10 +849,13 @@
                     if (masterAlpine) {
                         masterAlpine.showAddProductModal = false;
                         masterAlpine.showEditUomModal = false;
+                        masterAlpine.showAddUomModal = false;
+                        masterAlpine.showUomProductsModal = false;
                         masterAlpine.showEditProductModal = false;
                         masterAlpine.showDetailProductModal = false;
                         masterAlpine.showDetailOfficeModal = false;
                         masterAlpine.showEditOfficeModal = false;
+                        masterAlpine.showAddOfficeModal = false;
                         masterAlpine.showDetailBranchModal = false;
                         masterAlpine.showEditBranchModal = false;
                         masterAlpine.showAddBranchModal = false;
@@ -862,6 +867,7 @@
                         masterAlpine.showAddRackModal = false;
                         masterAlpine.showDetailBinModal = false;
                         masterAlpine.showEditBinModal = false;
+                        masterAlpine.showAddBinModal = false;
                     }
 
                     // Reload active tab data seamlessly
@@ -982,6 +988,17 @@
         }
     };
 
+    window.openUomProductsModal = function(id, name, products) {
+        try {
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openUomProductsModal(id, name, products);
+            }
+        } catch (e) {
+            console.error('Error opening UOM products modal:', e);
+        }
+    };
+
     // Offices
     window.openDetailOfficeModal = function(btn) {
         try {
@@ -1006,6 +1023,12 @@
             }
         } catch (e) {
             console.error('Error opening edit office modal:', e);
+        }
+    };
+    window.openAddOfficeModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddOfficeModal();
         }
     };
 
@@ -1134,6 +1157,18 @@
             console.error('Error opening edit bin modal:', e);
         }
     };
+    window.openAddBinModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddBinModal();
+        }
+    };
+    window.openAddUomModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddUomModal();
+        }
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         initAllMasterTomSelects();
@@ -1215,6 +1250,39 @@
             },
 
             showEditUomModal: false,
+            showUomProductsModal: false,
+            uomProductsTitle: '',
+            uomProductsList: [],
+            uomProductSearchKeyword: '',
+
+            get filteredUomProducts() {
+                if (!this.uomProductSearchKeyword || !this.uomProductSearchKeyword.trim()) {
+                    return this.uomProductsList;
+                }
+                const q = this.uomProductSearchKeyword.toLowerCase().trim();
+                return this.uomProductsList.filter(p => {
+                    return (p.id && p.id.toLowerCase().includes(q)) ||
+                           (p.name && p.name.toLowerCase().includes(q)) ||
+                           (p.brand && p.brand.toLowerCase().includes(q)) ||
+                           (p.item_group && p.item_group.toLowerCase().includes(q)) ||
+                           (p.uom_group && p.uom_group.toLowerCase().includes(q));
+                });
+            },
+
+            openUomProductsModal(id, name, products) {
+                this.uomProductsTitle = name + ' (' + id + ')';
+                this.uomProductsList = Array.isArray(products) ? products : (typeof products === 'string' ? JSON.parse(products) : []);
+                this.uomProductSearchKeyword = '';
+                this.showUomProductsModal = true;
+            },
+
+            filterProductsTabByUom(uomTitle) {
+                this.showUomProductsModal = false;
+                const uomName = uomTitle ? uomTitle.split(' (')[0] : '';
+                const url = '{{ route('master.index') }}?tab=products&search_product=' + encodeURIComponent(uomName);
+                MasterDataApp.loadTab(url, 'products');
+            },
+
             showDetailProductModal: false,
             showEditProductModal: false,
             detailProduct: null,
@@ -1266,8 +1334,14 @@
             // Offices
             showDetailOfficeModal: false,
             showEditOfficeModal: false,
+            showAddOfficeModal: false,
             detailOffice: null,
             editOfficeForm: { id: '', name: '', address: '' },
+            openAddOfficeModal() {
+                this.forms.office_id = '';
+                this.autoOfficeCode();
+                this.showAddOfficeModal = true;
+            },
             openEditOfficeModal(off) {
                 this.editOfficeForm.id = off.id;
                 this.editOfficeForm.name = off.name;
@@ -1352,8 +1426,14 @@
             // Bins
             showDetailBinModal: false,
             showEditBinModal: false,
+            showAddBinModal: false,
             detailBin: null,
             editBinForm: { id: '', rack_id: '', column_no: 1, level_no: 1, max_pallet: 1 },
+            openAddBinModal() {
+                this.forms.bin_id = '';
+                this.autoBinCode();
+                this.showAddBinModal = true;
+            },
             openEditBinModal(bn) {
                 this.editBinForm.id = bn.id;
                 this.editBinForm.rack_id = bn.rack_id;
@@ -1367,6 +1447,13 @@
                         tsMasterInstances['select_edit_bin_rack_id'].setValue(this.editBinForm.rack_id, true);
                     }
                 });
+            },
+
+            showAddUomModal: false,
+            openAddUomModal() {
+                this.forms.uom_id = '';
+                this.autoUomCode();
+                this.showAddUomModal = true;
             },
 
             openEditUomModal(id, name, desc) {

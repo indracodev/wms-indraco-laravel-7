@@ -39,6 +39,8 @@ class MasterDataController extends Controller
         $flatProducts = collect();
         $brands = collect();
         $itemGroups = collect();
+        $groupLevel2s = collect();
+        $groupLevel3s = collect();
 
         // Dropdown Lookup Data (Lazy loaded per active tab)
         $allOffices = collect();
@@ -131,7 +133,9 @@ class MasterDataController extends Controller
                 break;
 
             case 'uoms':
-                $uomQuery = Uom::withCount('products');
+                $uomQuery = Uom::withCount('products')->with(['products' => function($q) {
+                    $q->select('id', 'name', 'brand', 'item_group', 'uom_inventory', 'uom_group', 'karton_to_pcs', 'is_active')->orderBy('id', 'asc');
+                }]);
                 if ($request->filled('search_uom')) {
                     $s = $request->search_uom;
                     $uomQuery->where(function($q) use ($s) {
@@ -148,6 +152,8 @@ class MasterDataController extends Controller
             case 'products':
                 $brands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->sort()->values();
                 $itemGroups = Product::whereNotNull('item_group')->where('item_group', '!=', '')->distinct()->pluck('item_group')->sort()->values();
+                $groupLevel2s = Product::whereNotNull('group_level_2')->where('group_level_2', '!=', '')->distinct()->pluck('group_level_2')->sort()->values();
+                $groupLevel3s = Product::whereNotNull('group_level_3')->where('group_level_3', '!=', '')->distinct()->pluck('group_level_3')->sort()->values();
 
                 $productQuery = Product::with('conversions');
                 if ($request->filled('search_product')) {
@@ -155,7 +161,10 @@ class MasterDataController extends Controller
                     $productQuery->where(function($q) use ($search) {
                         $q->where('id', 'like', "%{$search}%")
                           ->orWhere('name', 'like', "%{$search}%")
-                          ->orWhere('brand', 'like', "%{$search}%");
+                          ->orWhere('brand', 'like', "%{$search}%")
+                          ->orWhere('group_level_2', 'like', "%{$search}%")
+                          ->orWhere('group_level_3', 'like', "%{$search}%")
+                          ->orWhere('uom_group', 'like', "%{$search}%");
                     });
                 }
                 if ($request->filled('brand_filter')) {
@@ -163,6 +172,12 @@ class MasterDataController extends Controller
                 }
                 if ($request->filled('group_filter')) {
                     $productQuery->where('item_group', $request->group_filter);
+                }
+                if ($request->filled('group_level_2_filter')) {
+                    $productQuery->where('group_level_2', $request->group_level_2_filter);
+                }
+                if ($request->filled('group_level_3_filter')) {
+                    $productQuery->where('group_level_3', $request->group_level_3_filter);
                 }
                 if ($request->filled('active_filter')) {
                     $productQuery->where('is_active', $request->active_filter === '1');
@@ -180,6 +195,8 @@ class MasterDataController extends Controller
                                 'id' => $p->id,
                                 'name' => $p->name,
                                 'item_group' => $p->item_group,
+                                'group_level_2' => $p->group_level_2,
+                                'group_level_3' => $p->group_level_3,
                                 'uom_inventory' => $p->uom_inventory,
                                 'uom_group' => $p->uom_group,
                                 'qty_per_uom_group' => $p->qty_per_uom_group,
@@ -196,6 +213,8 @@ class MasterDataController extends Controller
                             'id' => $p->id,
                             'name' => $p->name,
                             'item_group' => $p->item_group,
+                            'group_level_2' => $p->group_level_2,
+                            'group_level_3' => $p->group_level_3,
                             'uom_inventory' => $p->uom_inventory,
                             'uom_group' => $p->uom_group,
                             'qty_per_uom_group' => $p->qty_per_uom_group,
@@ -230,7 +249,7 @@ class MasterDataController extends Controller
         // AJAX / JSON SPA Response
         if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             $html = view('master.tabs.' . $tab, compact(
-                'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
+                'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
                 'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
                 'tab', 'sortBy', 'sortDir'
             ))->render();
@@ -243,7 +262,7 @@ class MasterDataController extends Controller
         }
 
         return view('master.index', compact(
-            'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups',
+            'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
             'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
             'tab', 'sortBy', 'sortDir'
         ));
@@ -737,11 +756,30 @@ class MasterDataController extends Controller
             'id' => 'required|string|max:50|unique:products,id',
             'name' => 'required|string|max:255',
             'item_group' => 'nullable|string|max:100',
+            'group_level_2' => 'nullable|string|max:100',
+            'group_level_3' => 'nullable|string|max:100',
+            'brand' => 'nullable|string|max:100',
             'uom_inventory' => 'required|string|max:50',
             'uom_group' => 'nullable|string|max:50',
+            'uom_1' => 'nullable|string|max:50',
+            'uom_2' => 'nullable|string|max:50',
+            'uom_3' => 'nullable|string|max:50',
+            'karton_to_pcs' => 'nullable|string|max:50',
+            'no_of_units' => 'nullable|integer',
             'qty_per_uom_group' => 'nullable|numeric|min:0',
-            'brand' => 'nullable|string|max:100',
+            'manage_batch_no' => 'nullable|boolean',
+            'purchase_item' => 'nullable|boolean',
+            'sales_item' => 'nullable|boolean',
+            'inventory_item' => 'nullable|boolean',
+            'sales_tax_definition' => 'nullable|string|max:50',
+            'purchase_tax_definition' => 'nullable|string|max:50',
             'is_active' => 'required|boolean',
+            'length_cm' => 'nullable|numeric|min:0',
+            'width_cm' => 'nullable|numeric|min:0',
+            'height_cm' => 'nullable|numeric|min:0',
+            'volume_m3' => 'nullable|numeric|min:0',
+            'weight_gross_kg' => 'nullable|numeric|min:0',
+            'weight_net_g' => 'nullable|numeric|min:0',
             'conversions' => 'nullable|array',
             'conversions.*.uom_convert' => 'nullable|string|max:50',
             'conversions.*.qty_convert' => 'nullable|numeric|min:0.01',
@@ -751,17 +789,41 @@ class MasterDataController extends Controller
         DB::transaction(function () use ($data) {
             $qtyPerGroup = isset($data['qty_per_uom_group']) && is_numeric($data['qty_per_uom_group']) 
                 ? (float)$data['qty_per_uom_group'] 
-                : 1;
+                : (is_numeric($data['karton_to_pcs'] ?? null) ? (float)$data['karton_to_pcs'] : 1);
+
+            $uomGroup = !empty($data['uom_group']) ? trim($data['uom_group']) : null;
+            $kartonToPcs = !empty($data['karton_to_pcs']) ? trim($data['karton_to_pcs']) : null;
+            $isManualUom = ($uomGroup === 'Manual' || strtolower((string)$kartonToPcs) === 'manual');
 
             $product = Product::create([
                 'id' => strtoupper(trim($data['id'])),
                 'name' => trim($data['name']),
-                'item_group' => !empty($data['item_group']) ? trim($data['item_group']) : null,
-                'uom_inventory' => trim($data['uom_inventory']),
-                'uom_group' => !empty($data['uom_group']) ? trim($data['uom_group']) : null,
-                'qty_per_uom_group' => $qtyPerGroup,
+                'item_group' => !empty($data['item_group']) ? trim($data['item_group']) : 'FINISHED GOODS (MANUFAKTUR)',
+                'group_level_2' => !empty($data['group_level_2']) ? trim($data['group_level_2']) : null,
+                'group_level_3' => !empty($data['group_level_3']) ? trim($data['group_level_3']) : null,
                 'brand' => !empty($data['brand']) ? trim($data['brand']) : null,
+                'uom_inventory' => trim($data['uom_inventory']),
+                'uom_group' => $uomGroup,
+                'uom_1' => !empty($data['uom_1']) ? trim($data['uom_1']) : null,
+                'uom_2' => !empty($data['uom_2']) ? trim($data['uom_2']) : null,
+                'uom_3' => !empty($data['uom_3']) ? trim($data['uom_3']) : trim($data['uom_inventory']),
+                'karton_to_pcs' => $kartonToPcs,
+                'no_of_units' => isset($data['no_of_units']) ? (int)$data['no_of_units'] : 1,
+                'qty_per_uom_group' => $qtyPerGroup,
+                'is_manual_uom' => $isManualUom,
+                'manage_batch_no' => $request->has('manage_batch_no') ? (bool)$request->manage_batch_no : true,
+                'purchase_item' => $request->has('purchase_item') ? (bool)$request->purchase_item : false,
+                'sales_item' => $request->has('sales_item') ? (bool)$request->sales_item : true,
+                'inventory_item' => $request->has('inventory_item') ? (bool)$request->inventory_item : true,
+                'sales_tax_definition' => !empty($data['sales_tax_definition']) ? trim($data['sales_tax_definition']) : 'PPN Out 10%',
+                'purchase_tax_definition' => !empty($data['purchase_tax_definition']) ? trim($data['purchase_tax_definition']) : 'PPN In 11%',
                 'is_active' => (bool)$data['is_active'],
+                'length_cm' => isset($data['length_cm']) ? (float)$data['length_cm'] : 0,
+                'width_cm' => isset($data['width_cm']) ? (float)$data['width_cm'] : 0,
+                'height_cm' => isset($data['height_cm']) ? (float)$data['height_cm'] : 0,
+                'volume_m3' => isset($data['volume_m3']) ? (float)$data['volume_m3'] : 0,
+                'weight_gross_kg' => isset($data['weight_gross_kg']) ? (float)$data['weight_gross_kg'] : 0,
+                'weight_net_g' => isset($data['weight_net_g']) ? (float)$data['weight_net_g'] : 0,
             ]);
 
             $hasBaseConversion = false;
@@ -781,6 +843,7 @@ class MasterDataController extends Controller
                             'uom_convert' => $uomConvert,
                             'qty_convert' => $qtyConvert,
                             'uom_base' => $uomBase,
+                            'multiplier_to_base' => $qtyConvert,
                         ]);
                     }
                 }
@@ -794,6 +857,7 @@ class MasterDataController extends Controller
                 ], [
                     'qty_convert' => 1,
                     'uom_base' => $product->uom_inventory,
+                    'multiplier_to_base' => 1,
                 ]);
             }
         });
@@ -820,16 +884,37 @@ class MasterDataController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'item_group' => 'nullable|string|max:100',
+            'group_level_2' => 'nullable|string|max:100',
+            'group_level_3' => 'nullable|string|max:100',
+            'brand' => 'nullable|string|max:100',
             'uom_inventory' => 'required|string|max:50',
             'uom_group' => 'nullable|string|max:50',
+            'uom_1' => 'nullable|string|max:50',
+            'uom_2' => 'nullable|string|max:50',
+            'uom_3' => 'nullable|string|max:50',
+            'karton_to_pcs' => 'nullable|string|max:50',
+            'no_of_units' => 'nullable|integer',
             'qty_per_uom_group' => 'nullable|numeric|min:0',
-            'brand' => 'nullable|string|max:100',
+            'manage_batch_no' => 'nullable|boolean',
+            'purchase_item' => 'nullable|boolean',
+            'sales_item' => 'nullable|boolean',
+            'inventory_item' => 'nullable|boolean',
+            'sales_tax_definition' => 'nullable|string|max:50',
+            'purchase_tax_definition' => 'nullable|string|max:50',
             'is_active' => 'required|boolean',
+            'length_cm' => 'nullable|numeric|min:0',
+            'width_cm' => 'nullable|numeric|min:0',
+            'height_cm' => 'nullable|numeric|min:0',
+            'volume_m3' => 'nullable|numeric|min:0',
+            'weight_gross_kg' => 'nullable|numeric|min:0',
+            'weight_net_g' => 'nullable|numeric|min:0',
         ]);
 
-        $data['qty_per_uom_group'] = isset($data['qty_per_uom_group']) && is_numeric($data['qty_per_uom_group']) 
-            ? (float)$data['qty_per_uom_group'] 
-            : 1;
+        if (isset($data['uom_group']) || isset($data['karton_to_pcs'])) {
+            $uomGroup = $data['uom_group'] ?? $product->uom_group;
+            $kartonToPcs = $data['karton_to_pcs'] ?? $product->karton_to_pcs;
+            $data['is_manual_uom'] = ($uomGroup === 'Manual' || strtolower((string)$kartonToPcs) === 'manual');
+        }
 
         $product->update($data);
         AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Produk SKU: {$product->name} ({$product->id})");

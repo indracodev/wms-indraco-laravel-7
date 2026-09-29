@@ -10,7 +10,9 @@ class ProductUomConversion extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'level' => 'integer',
         'qty_convert' => 'float',
+        'multiplier_to_base' => 'float',
     ];
 
     public function product()

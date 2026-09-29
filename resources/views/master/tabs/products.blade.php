@@ -22,11 +22,11 @@
     </div>
 
     <!-- Filter & Search Toolbar -->
-    <form method="GET" action="{{ route('master.index') }}" onsubmit="MasterDataApp.submitFilter(event, this)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+    <form method="GET" action="{{ route('master.index') }}" onsubmit="MasterDataApp.submitFilter(event, this)" class="grid grid-cols-1 sm:grid-cols-6 gap-3 text-xs">
         <input type="hidden" name="tab" value="products">
-        <div>
+        <div class="sm:col-span-2">
             <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Cari Keyword Produk</label>
-            <input type="text" name="search_product" value="{{ request('search_product') }}" placeholder="🔍 Cari SKU / Nama Produk..." class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+            <input type="text" name="search_product" value="{{ request('search_product') }}" placeholder="🔍 SKU / Nama / Brand / Group..." class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
         </div>
         <div>
             <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Filter Brand</label>
@@ -43,6 +43,15 @@
                 <option value="">-- Semua Group --</option>
                 @foreach($itemGroups as $ig)
                     <option value="{{ $ig }}" {{ request('group_filter') == $ig ? 'selected' : '' }}>{{ $ig }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Grup Level 2</label>
+            <select id="select_group_l2_filter" name="group_level_2_filter" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white shadow-sm">
+                <option value="">-- Level 2 --</option>
+                @foreach($groupLevel2s as $gl2)
+                    <option value="{{ $gl2 }}" {{ request('group_level_2_filter') == $gl2 ? 'selected' : '' }}>{{ $gl2 }}</option>
                 @endforeach
             </select>
         </div>

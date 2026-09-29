@@ -143,3 +143,120 @@
         </form>
     </div>
 </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL POPUP: TAMBAH BIN BARU                                              -->
+<!-- ========================================================================= -->
+<div x-show="showAddBinModal" 
+     class="fixed inset-0 z-40 pt-16 pb-16 px-4 flex items-center justify-center bg-black/75 backdrop-blur-md" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @click.self="showAddBinModal = false"
+     x-cloak>
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 max-h-full overflow-y-auto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+         @click.away="showAddBinModal = false">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg border border-amber-100 dark:border-amber-800/40 shadow-sm">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white leading-tight">Tambah BIN Barcode Baru</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Daftarkan slot lokasi BIN storage baru</p>
+                </div>
+            </div>
+            <button type="button" @click="showAddBinModal = false" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('master.bin.store') }}" method="POST" onsubmit="MasterDataApp.submitCreateForm(event, this)" class="space-y-4 text-xs">
+            @csrf
+            
+            <!-- Rak -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Lokasi Rak Induk <span class="text-rose-500">*</span></span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-500">
+                        <i class="fa-solid fa-bars-staggered text-sm"></i>
+                    </div>
+                    <select name="rack_id" required class="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-semibold text-xs focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-900 appearance-none shadow-sm cursor-pointer transition">
+                        @foreach($allRacks as $r)
+                            <option value="{{ $r->id }}">Rak: {{ $r->id }} (Gudang: {{ $r->warehouse_id }})</option>
+                        @endforeach
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kode Barcode BIN -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                    <span>Kode Barcode BIN (ID) <span class="text-rose-500">*</span></span>
+                </label>
+                <div class="flex items-center space-x-2">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-500">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </div>
+                        <input type="text" name="id" x-model="forms.bin_id" required 
+                               class="w-full pl-10 pr-3 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono font-bold tracking-wider uppercase focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none shadow-sm transition" 
+                               placeholder="BIN-1001">
+                    </div>
+                    <button type="button" @click="autoBinCode()" 
+                            class="px-4 py-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-600 dark:text-amber-300 font-mono font-bold text-xs rounded-xl border border-amber-200 dark:border-amber-800/50 transition shadow-sm cursor-pointer active:scale-95 flex items-center space-x-1.5 shrink-0"
+                            title="Generate Kode Otomatis">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                        <span>Auto</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Posisi Grid (Kolom & Level) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold">Kolom No</label>
+                    <input type="number" min="1" name="column_no" value="1" required class="w-full p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold">Level No</label>
+                    <input type="number" min="1" name="level_no" value="1" required class="w-full p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Max Palet -->
+            <div>
+                <label class="block text-slate-700 dark:text-slate-300 mb-1.5 font-bold">Kapasitas Maksimal Palet</label>
+                <input type="number" min="1" name="max_pallet" value="1" required class="w-full p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button type="button" @click="showAddBinModal = false" 
+                        class="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition cursor-pointer active:scale-95 text-center">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-lg shadow-amber-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5 active:scale-95 text-center">
+                    <i class="fa-solid fa-floppy-disk text-sm"></i>
+                    <span class="btn-text">Simpan BIN</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
