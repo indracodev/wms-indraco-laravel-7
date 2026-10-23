@@ -55,6 +55,13 @@
         .glow-effect {
             box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3);
         }
+        .modal-backdrop-blur,
+        html.light .modal-backdrop-blur,
+        html.dark .modal-backdrop-blur {
+            background-color: rgba(15, 23, 42, 0.45) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
 
         /* -------------------------------------------------------------
          * HIGH-CONTRAST LIGHT MODE DESIGN SYSTEM (html.light)
@@ -68,7 +75,6 @@
         html.light .glass-panel,
         html.light header,
         html.light aside,
-        html.light nav.fixed.bottom-0,
         html.light .bg-slate-900,
         html.light .bg-slate-800,
         html.light .bg-slate-800\/80,
@@ -112,14 +118,22 @@
             border-right: 1px solid #cbd5e1 !important;
         }
 
+        /* Mobile Bottom Navigation Bar (Clean Light Theme) */
+        nav.fixed.bottom-0,
         html.light nav.fixed.bottom-0 {
-            background-color: rgba(255, 255, 255, 0.98) !important;
-            border-top: 1px solid #cbd5e1 !important;
-            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-top: 1px solid #e2e8f0 !important;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+        }
+        html.dark nav.fixed.bottom-0 {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border-top: 1px solid #1e293b !important;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
         }
 
         /* Text Sharp Contrast Overrides */
         html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6,
+        html.light .text-white,
         html.light .text-slate-100,
         html.light .text-slate-200 {
             color: #0f172a !important;
@@ -170,6 +184,18 @@
         html.light .bg-emerald-600 *,
         html.light .bg-rose-600 * {
             color: #ffffff !important;
+        }
+
+        /* Exception: Badges or inner elements with white background inside active buttons must have dark text */
+        html.light .bg-indigo-600 .bg-white,
+        html.light .bg-indigo-600 .bg-white *,
+        html.light .bg-indigo-700 .bg-white,
+        html.light .bg-indigo-700 .bg-white *,
+        html.light .bg-indigo-500 .bg-white,
+        html.light .bg-indigo-500 .bg-white *,
+        html.light .bg-blue-600 .bg-white,
+        html.light .bg-blue-600 .bg-white * {
+            color: #4f46e5 !important;
         }
 
         /* Stat numbers in cards */
@@ -270,17 +296,10 @@
             border: 1px solid #bae6fd !important;
         }
 
-        /* Bottom Nav Links */
-        html.light nav.fixed.bottom-0 a {
-            color: #64748b !important;
-        }
-        html.light nav.fixed.bottom-0 a.text-indigo-400,
-        html.light nav.fixed.bottom-0 a.text-emerald-400,
-        html.light nav.fixed.bottom-0 a.text-amber-400,
-        html.light nav.fixed.bottom-0 a.text-sky-400,
-        html.light nav.fixed.bottom-0 a.text-purple-400 {
-            color: #4338ca !important;
-            background-color: #e0e7ff !important;
+        /* Bottom Nav Links (Clean subtle styling) */
+        nav.fixed.bottom-0 a,
+        nav.fixed.bottom-0 button {
+            transition: all 0.2s ease-in-out;
         }
 
         /* Sidebar active & hover in light mode */

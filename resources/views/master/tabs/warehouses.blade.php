@@ -3,18 +3,9 @@
 <!-- ========================================================================= -->
 <div class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="flex items-center justify-between">
-        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-warehouse text-indigo-600 dark:text-indigo-400"></i>
+        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
             <span>Daftar Gudang</span>
         </h3>
-        @canAccessModule('master', 'create')
-        <button type="button" 
-                @click="openAddWhModal()" 
-                class="md:hidden px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-1.5 active:scale-95">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah</span>
-        </button>
-        @endcanAccessModule
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -187,8 +178,7 @@
                             
                             <!-- Header: Badge ID & Rack Count -->
                             <div class="flex items-center justify-between gap-2">
-                                <span class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800/70 text-indigo-700 dark:text-indigo-400 font-mono font-extrabold rounded-lg text-xs flex items-center gap-1.5 shadow-xs">
-                                    <i class="fa-solid fa-warehouse text-[11px]"></i>
+                                <span class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800/70 text-indigo-700 dark:text-indigo-400 font-mono font-extrabold rounded-lg text-xs flex items-center shadow-xs">
                                     <span>{{ $wh->id }}</span>
                                 </span>
                                 <span class="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-bold rounded-lg text-xs">
@@ -204,13 +194,12 @@
                             <!-- Plant Info Box -->
                             <div class="p-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60 rounded-xl flex items-center justify-between text-xs">
                                 <div class="flex items-center space-x-1.5 truncate">
-                                    <i class="fa-solid fa-industry text-indigo-500 shrink-0"></i>
                                     <span class="text-slate-500 dark:text-slate-400 font-medium">Plant Induk:</span>
                                     <span class="font-bold text-slate-900 dark:text-white truncate">{{ $wh->branch->name ?? $wh->branch_id }}</span>
                                 </div>
                                 @if($wh->address)
                                     <span class="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-[120px]" title="{{ $wh->address }}">
-                                        <i class="fa-solid fa-location-dot mr-1"></i>{{ $wh->address }}
+                                        {{ $wh->address }}
                                     </span>
                                 @endif
                             </div>
@@ -280,11 +269,11 @@
 @canAccessModule('master', 'create')
     <!-- Ergonomic Thumb Floating Action Button (Mobile Only: Tambah Gudang Baru) -->
     <!-- Positioned outside .glass-panel so position: fixed binds directly to viewport -->
-    <div class="fixed bottom-[114px] right-4 z-40 lg:hidden">
+    <div class="fixed bottom-[125px] right-4 z-40 lg:hidden">
         <button type="button" 
                 @click="openAddWhModal()" 
                 onclick="window.openAddWhModal()"
-                class="w-13 h-13 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/50 flex items-center justify-center text-2xl active:scale-90 transition-transform cursor-pointer border-2 border-white dark:border-slate-800"
+                class="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/50 flex items-center justify-center text-xl active:scale-90 transition-transform cursor-pointer border-2 border-white dark:border-slate-800"
                 title="Tambah Gudang Baru">
             <i class="fa-solid fa-plus"></i>
         </button>

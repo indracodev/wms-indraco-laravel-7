@@ -183,8 +183,10 @@ class MasterDataController extends Controller
                     $productQuery->where('is_active', $request->active_filter === '1');
                 }
 
+                $perPage = (int) $request->input('per_page', 10);
+                $page = (int) $request->input('products_page', 1);
                 $products = $productQuery->orderBy($sortBy === 'name' ? 'name' : 'id', $sortDir)
-                                         ->paginate(15, ['*'], 'products_page')
+                                         ->paginate($perPage, ['*'], 'products_page', $page)
                                          ->withQueryString();
 
                 foreach ($products as $p) {
@@ -248,6 +250,20 @@ class MasterDataController extends Controller
 
         // AJAX / JSON SPA Response
         if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            if ($tab === 'products' && $request->filled('lazy')) {
+                $cardsHtml = view('master.tabs.partials.product_cards', compact('products'))->render();
+                return response()->json([
+                    'status' => 'success',
+                    'tab' => 'products',
+                    'html' => $cardsHtml,
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'has_more' => $products->hasMorePages(),
+                    'total' => $products->total(),
+                    'count' => $products->count(),
+                ]);
+            }
+
             $html = view('master.tabs.' . $tab, compact(
                 'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
                 'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',

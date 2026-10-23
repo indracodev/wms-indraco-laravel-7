@@ -144,7 +144,9 @@
                 <select name="status" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                     <option value="">-- Semua Status --</option>
                     <option value="active" {{ $filterStatus == 'active' ? 'selected' : '' }}>Terisi Stok (Aktif)</option>
-                    <option value="empty" {{ $filterStatus == 'empty' ? 'selected' : '' }}>Kosong / Transit</option>
+                    <option value="in_transit" {{ $filterStatus == 'in_transit' ? 'selected' : '' }}>In Transit (Belum di Rak)</option>
+                    <option value="on_rack" {{ $filterStatus == 'on_rack' ? 'selected' : '' }}>On Rack (Sudah di Rak)</option>
+                    <option value="empty" {{ $filterStatus == 'empty' ? 'selected' : '' }}>Kosong (Ready)</option>
                     <option value="inactive" {{ $filterStatus == 'inactive' ? 'selected' : '' }}>Non-Aktif / Maintenance</option>
                 </select>
             </div>

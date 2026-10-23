@@ -1,8 +1,8 @@
 <!-- ========================================================================= -->
 <!-- MODAL POPUP: DETAIL GUDANG (WAREHOUSE)                                    -->
 <!-- ========================================================================= -->
-<div x-show="showDetailWhModal" class="fixed inset-0 z-40 pt-16 pb-16 px-4 flex items-center justify-center bg-black/75 backdrop-blur-md" @click.self="showDetailWhModal = false" x-cloak>
-    <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-sky-500/40 max-h-full overflow-y-auto" @click.away="showDetailWhModal = false">
+<div x-show="showDetailWhModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-28 md:p-6 md:pb-6 bg-slate-950/80 backdrop-blur-sm" @click.self="showDetailWhModal = false" x-cloak>
+    <div class="glass-panel w-full max-w-2xl p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl space-y-5 border border-sky-500/40 max-h-[calc(100vh-140px)] md:max-h-[90vh] overflow-y-auto my-auto" @click.away="showDetailWhModal = false">
         <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
             <div class="flex items-center space-x-2 text-sky-400">
                 <i class="fa-solid fa-circle-info text-xl"></i>

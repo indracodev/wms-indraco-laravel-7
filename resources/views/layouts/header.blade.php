@@ -10,8 +10,7 @@
         </button>
 
         <!-- Brand Logo Title -->
-        <h1 class="text-base sm:text-lg font-extrabold font-display text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <i class="fa-solid fa-boxes-stacked text-indigo-600 dark:text-indigo-400"></i>
+        <h1 class="text-base sm:text-lg font-extrabold font-display text-slate-900 dark:text-white tracking-tight">
             <span>WMS INDRACO</span>
         </h1>
         <span class="hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30">

@@ -52,6 +52,28 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+    /* Mobile Tab Slider - Abu-abu Light Grey Buttons */
+    .mobile-tab-slider .tab-btn {
+        background-color: #e2e8f0 !important; /* Abu-abu light grey */
+        color: #334155 !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    .mobile-tab-slider .tab-btn:hover {
+        background-color: #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+    .mobile-tab-slider .tab-btn.bg-indigo-600 {
+        background-color: #4f46e5 !important;
+        color: #ffffff !important;
+        border-color: #4338ca !important;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35) !important;
+    }
+    html.dark .mobile-tab-slider .tab-btn:not(.bg-indigo-600) {
+        background-color: #334155 !important;
+        color: #e2e8f0 !important;
+        border: 1px solid #475569 !important;
+    }
 </style>
 @endsection
 
@@ -66,9 +88,8 @@
     <!-- Header Title -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold font-display text-white flex items-center gap-2">
-                <i class="fa-solid fa-sitemap text-indigo-400"></i>
-                <span>Manajemen Master Data System</span>
+            <h2 class="text-2xl font-bold font-display text-white">
+                Manajemen Master Data System
             </h2>
             <p class="text-sm text-slate-400">Struktur Hirarki Lokasi (Kantor &rarr; Plant &rarr; Gudang &rarr; Rak &rarr; BIN), Master UOM, dan Katalog Produk SKU</p>
         </div>
@@ -113,40 +134,33 @@
     </div>
 
     <!-- ERGONOMIC MOBILE BOTTOM TAB SLIDER (Positioned directly above bottom navigation for thumb-reach) -->
-    <div class="fixed bottom-[53px] inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)]">
+    <div class="fixed bottom-[52px] inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-3 py-2 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)]">
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar scroll-smooth mobile-tab-slider">
-            <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'offices' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="offices">
-                <i class="fa-solid fa-building text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'offices' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="offices">
                 <span>1. Kantor Pusat</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'branches']) }}" onclick="MasterDataApp.loadTab(this.href, 'branches'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'branches' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="branches">
-                <i class="fa-solid fa-industry text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'branches']) }}" onclick="MasterDataApp.loadTab(this.href, 'branches'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'branches' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="branches">
                 <span>2. Plant</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'warehouses']) }}" onclick="MasterDataApp.loadTab(this.href, 'warehouses'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'warehouses' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="warehouses">
-                <i class="fa-solid fa-warehouse text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'warehouses']) }}" onclick="MasterDataApp.loadTab(this.href, 'warehouses'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'warehouses' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="warehouses">
                 <span>3. Gudang</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'racks']) }}" onclick="MasterDataApp.loadTab(this.href, 'racks'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'racks' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="racks">
-                <i class="fa-solid fa-bars-staggered text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'racks']) }}" onclick="MasterDataApp.loadTab(this.href, 'racks'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'racks' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="racks">
                 <span>4. Rak</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'bins']) }}" onclick="MasterDataApp.loadTab(this.href, 'bins'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'bins' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="bins">
-                <i class="fa-solid fa-qrcode text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'bins']) }}" onclick="MasterDataApp.loadTab(this.href, 'bins'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'bins' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="bins">
                 <span>5. BIN</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'uoms' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="uoms">
-                <i class="fa-solid fa-scale-balanced text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'uoms' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="uoms">
                 <span>6. UOM Inventory</span>
             </a>
 
-            <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="products">
-                <i class="fa-solid fa-boxes-stacked text-xs"></i>
+            <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="products">
                 <span>7. Produk SKU</span>
             </a>
         </div>
@@ -163,8 +177,8 @@
     <!-- ========================================================================= -->
     <!-- MODAL POPUP: TAMBAH PRODUK SKU BARU                                      -->
     <!-- ========================================================================= -->
-    <div x-show="showAddProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-indigo-500/40 max-h-[90vh] overflow-y-auto" @click.away="showAddProductModal = false">
+    <div x-show="showAddProductModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-28 md:p-6 md:pb-6 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+        <div class="glass-panel w-full max-w-2xl p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl space-y-5 border border-indigo-500/40 max-h-[calc(100vh-140px)] md:max-h-[90vh] overflow-y-auto my-auto" @click.away="showAddProductModal = false">
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                 <div class="flex items-center space-x-2 text-indigo-400">
                     <i class="fa-solid fa-boxes-stacked text-xl"></i>
@@ -380,14 +394,17 @@
     <!-- ========================================================================= -->
     <!-- MODAL POPUP: DETAIL PRODUK SKU                                            -->
     <!-- ========================================================================= -->
-    <div x-show="showDetailProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl space-y-5 border border-sky-500/40 max-h-[90vh] overflow-y-auto" @click.away="showDetailProductModal = false">
-            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
-                <div class="flex items-center space-x-2 text-sky-400">
+    <div x-show="showDetailProductModal" 
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-28 md:p-6 md:pb-6 bg-slate-950/80 backdrop-blur-sm" 
+         x-cloak>
+        <div class="glass-panel w-full max-w-2xl p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl space-y-5 border border-sky-500/40 max-h-[calc(100vh-140px)] md:max-h-[90vh] overflow-y-auto my-auto" 
+             @click.away="showDetailProductModal = false">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-3">
+                <div class="flex items-center space-x-2 text-sky-500 dark:text-sky-400">
                     <i class="fa-solid fa-circle-info text-xl"></i>
                     <h3 class="text-base font-bold text-slate-800 dark:text-white">Detail Produk SKU</h3>
                 </div>
-                <button type="button" @click="showDetailProductModal = false" class="text-slate-400 hover:text-white text-xl p-1 cursor-pointer">
+                <button type="button" @click="showDetailProductModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl p-1 cursor-pointer transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -395,70 +412,71 @@
             <template x-if="detailProduct">
                 <div class="space-y-4 text-xs">
                     <!-- Header Info Card -->
-                    <div class="p-4 bg-slate-900/80 border border-slate-800 rounded-xl flex flex-wrap items-center justify-between gap-2">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-inner">
                         <div>
-                            <div class="text-slate-400 text-[11px]">Kode SKU</div>
-                            <div class="text-base font-mono font-bold text-indigo-400" x-text="detailProduct.id"></div>
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] font-medium uppercase tracking-wider">Kode SKU</div>
+                            <div class="text-lg font-mono font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5" x-text="detailProduct.id"></div>
                         </div>
                         <div class="text-right">
-                            <span class="px-2.5 py-1 rounded-full font-bold text-xs" :class="detailProduct.is_active ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'" x-text="detailProduct.is_active ? 'Aktif (Active)' : 'Non-Aktif (Inactive)'"></span>
+                            <span class="px-3 py-1 rounded-full font-bold text-xs" :class="detailProduct.is_active ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30' : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30'" x-text="detailProduct.is_active ? 'Aktif (Active)' : 'Non-Aktif (Inactive)'"></span>
                         </div>
                     </div>
 
                     <!-- Main Grid Info -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">Nama Produk</div>
-                            <div class="font-bold text-slate-800 dark:text-white text-sm" x-text="detailProduct.name"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">Nama Produk</div>
+                            <div class="font-bold text-slate-900 dark:text-white text-sm" x-text="detailProduct.name"></div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">Item Group</div>
-                            <div class="font-medium text-slate-700 dark:text-slate-200" x-text="detailProduct.item_group || '-'"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">Item Group</div>
+                            <div class="font-semibold text-slate-800 dark:text-slate-200" x-text="detailProduct.item_group || '-'"></div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">Brand</div>
-                            <div class="font-medium text-slate-700 dark:text-slate-200" x-text="detailProduct.brand || '-'"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">Brand</div>
+                            <div class="font-semibold text-slate-800 dark:text-slate-200" x-text="detailProduct.brand || '-'"></div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">UOM Inventory (Base Unit)</div>
-                            <div class="font-bold font-mono text-emerald-400 text-sm" x-text="detailProduct.uom_inventory"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">UOM Inventory (Base Unit)</div>
+                            <div class="font-bold font-mono text-emerald-700 dark:text-emerald-400 text-sm" x-text="detailProduct.uom_inventory"></div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">UOM Group / Kemasan</div>
-                            <div class="font-medium font-mono text-slate-700 dark:text-slate-200" x-text="detailProduct.uom_group || '-'"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">UOM Group / Kemasan</div>
+                            <div class="font-bold font-mono text-slate-800 dark:text-slate-200" x-text="detailProduct.uom_group || '-'"></div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                            <div class="text-slate-400 text-[11px] mb-1">Qty per UOM Group</div>
-                            <div class="font-bold text-amber-400" x-text="detailProduct.qty_per_uom_group || '-'"></div>
+                        <div class="p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
+                            <div class="text-slate-500 dark:text-slate-400 text-[11px] mb-1 font-medium">Qty per UOM Group</div>
+                            <div class="font-bold text-amber-600 dark:text-amber-400 text-sm" x-text="detailProduct.qty_per_uom_group || '-'"></div>
                         </div>
                     </div>
 
                     <!-- UOM Conversions Table -->
                     <div class="space-y-2">
-                        <div class="font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
-                            <i class="fa-solid fa-arrows-split-up-and-left text-sky-400"></i>
+                        <div class="font-bold text-slate-900 dark:text-white text-xs">
                             <span>Daftar Konversi Satuan UOM</span>
                         </div>
-                        <div class="border border-slate-800 rounded-xl overflow-hidden">
+                        <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-950/70 shadow-xs">
                             <table class="w-full text-left">
-                                <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                                <thead class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-300 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200 dark:border-slate-800">
                                     <tr>
-                                        <th class="p-2.5">Satuan Konversi</th>
-                                        <th class="p-2.5">Qty Konversi</th>
-                                        <th class="p-2.5">Satuan Dasar (Base)</th>
+                                        <th class="p-2.5 sm:p-3">Satuan Konversi</th>
+                                        <th class="p-2.5 sm:p-3">Qty Konversi</th>
+                                        <th class="p-2.5 sm:p-3">Satuan Dasar (Base)</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-800 bg-slate-900/40">
+                                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/40">
                                     <template x-for="(c, idx) in detailProduct.conversions" :key="idx">
-                                        <tr class="hover:bg-slate-800/40">
-                                            <td class="p-2.5 font-bold font-mono text-sky-400" x-text="c.uom_convert"></td>
-                                            <td class="p-2.5 font-bold font-mono text-indigo-300" x-text="c.qty_convert"></td>
-                                            <td class="p-2.5 font-mono text-slate-400" x-text="c.uom_base"></td>
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                                            <td class="p-2.5 sm:p-3">
+                                                <span class="px-2 py-0.5 rounded font-mono font-extrabold text-xs bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-300 dark:border-sky-700/60 shadow-xs" x-text="c.uom_convert"></span>
+                                            </td>
+                                            <td class="p-2.5 sm:p-3 font-mono font-extrabold text-xs text-amber-600 dark:text-amber-400" x-text="c.qty_convert"></td>
+                                            <td class="p-2.5 sm:p-3 font-mono font-bold text-xs text-slate-900 dark:text-slate-100" x-text="c.uom_base"></td>
                                         </tr>
                                     </template>
                                     <template x-if="!detailProduct.conversions || detailProduct.conversions.length === 0">
                                         <tr>
-                                            <td colspan="3" class="p-3 text-center text-slate-500 italic">Hanya satuan dasar (1 : 1 base unit).</td>
+                                            <td colspan="3" class="p-4 text-center text-slate-500 dark:text-slate-400 italic">Hanya satuan dasar (1 : 1 base unit).</td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -466,9 +484,9 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-700/60 text-slate-400 text-[11px]">
-                        <span>Dibuat: <strong class="text-slate-300" x-text="detailProduct.created_at"></strong></span>
-                        <button type="button" @click="showDetailProductModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition cursor-pointer">Tutup</button>
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 text-[11px]">
+                        <span>Dibuat: <strong class="text-slate-700 dark:text-slate-200" x-text="detailProduct.created_at"></strong></span>
+                        <button type="button" @click="showDetailProductModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-700 transition cursor-pointer active:scale-95 shadow-sm">Tutup</button>
                     </div>
                 </div>
             </template>
@@ -478,8 +496,8 @@
     <!-- ========================================================================= -->
     <!-- MODAL POPUP: EDIT PRODUK SKU                                              -->
     <!-- ========================================================================= -->
-    <div x-show="showEditProductModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
-        <div class="glass-panel w-full max-w-xl p-6 rounded-2xl shadow-2xl space-y-5 border border-amber-500/40 max-h-[90vh] overflow-y-auto" @click.away="showEditProductModal = false">
+    <div x-show="showEditProductModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-28 md:p-6 md:pb-6 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+        <div class="glass-panel w-full max-w-xl p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl space-y-5 border border-amber-500/40 max-h-[calc(100vh-140px)] md:max-h-[90vh] overflow-y-auto my-auto" @click.away="showEditProductModal = false">
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                 <div class="flex items-center space-x-2 text-amber-400">
                     <i class="fa-solid fa-pen-to-square text-xl"></i>
@@ -758,11 +776,11 @@
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 const isActive = btn.getAttribute('data-tab') === tabName;
                 if (isActive) {
-                    btn.classList.remove('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200');
+                    btn.classList.remove('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200', 'bg-slate-200', 'text-slate-700');
                     btn.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
                 } else {
                     btn.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
-                    btn.classList.add('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200');
+                    btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:text-slate-200');
                 }
             });
 
@@ -785,6 +803,13 @@
                     if (container) {
                         container.innerHTML = data.html;
                         container.style.opacity = '1';
+                        // Re-execute scripts embedded in dynamic tab content
+                        container.querySelectorAll('script').forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                            oldScript.parentNode.replaceChild(newScript, oldScript);
+                        });
                         if (window.Alpine) {
                             Alpine.initTree(container);
                         }
@@ -792,6 +817,9 @@
                     window.history.pushState({}, '', url);
                     initAllMasterTomSelects();
                     this.bindPaginationLinks();
+                    if (tabName === 'products' && typeof window.initProductInfiniteScroll === 'function') {
+                        setTimeout(() => window.initProductInfiniteScroll(), 50);
+                    }
                 }
             } catch (err) {
                 console.error('Error loading tab:', err);
@@ -1170,6 +1198,20 @@
         }
     };
 
+    window.openDetailUomModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-uom');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailUom = data;
+                alpine.showDetailUomModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail UOM modal:', e);
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         initAllMasterTomSelects();
         MasterDataApp.bindPaginationLinks();
@@ -1250,6 +1292,12 @@
             },
 
             showEditUomModal: false,
+            showDetailUomModal: false,
+            detailUom: null,
+            openDetailUomModal(uom) {
+                this.detailUom = uom;
+                this.showDetailUomModal = true;
+            },
             showUomProductsModal: false,
             uomProductsTitle: '',
             uomProductsList: [],

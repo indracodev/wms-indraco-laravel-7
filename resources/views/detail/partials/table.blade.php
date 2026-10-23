@@ -68,12 +68,8 @@
 <div class="space-y-3 md:hidden">
     @forelse($boxes as $box)
         <div class="bg-slate-800/80 border border-slate-700/70 p-4 rounded-xl space-y-2 text-xs">
-            <!-- Header: Box ID + BIN Badge -->
+            <!-- Header: BIN Badge shifted to Left (Box ID removed) -->
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
-                <div class="font-mono font-bold text-indigo-400 text-sm flex items-center">
-                    <i class="fa-solid fa-box text-xs mr-1.5 text-slate-400"></i>
-                    {{ $box->id }}
-                </div>
                 <span class="px-2.5 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs">
                     BIN: {{ $box->pallet->bin_id ?? 'TRANSIT' }}
                 </span>

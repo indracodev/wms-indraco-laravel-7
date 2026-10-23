@@ -51,6 +51,12 @@ class PalletController extends Controller
             $query->where('is_active', true)->whereHas('boxes', function ($q) {
                 $q->where('status', 'active');
             });
+        } elseif ($filterStatus === 'in_transit') {
+            $query->where(function($q) {
+                $q->where('status', 'in_transit')->orWhereNull('bin_id');
+            })->where('is_active', true);
+        } elseif ($filterStatus === 'on_rack') {
+            $query->where('status', 'on_rack')->whereNotNull('bin_id')->where('is_active', true);
         } elseif ($filterStatus === 'empty') {
             $query->where('is_active', true)->whereDoesntHave('boxes', function ($q) {
                 $q->where('status', 'active');
@@ -67,6 +73,9 @@ class PalletController extends Controller
             'active_with_stock' => Pallet::where('is_active', true)->whereHas('boxes', function ($q) {
                 $q->where('status', 'active');
             })->count(),
+            'in_transit' => Pallet::where(function($q) {
+                $q->where('status', 'in_transit')->orWhereNull('bin_id');
+            })->where('is_active', true)->count(),
             'empty_transit' => Pallet::where('is_active', true)->whereDoesntHave('boxes', function ($q) {
                 $q->where('status', 'active');
             })->count(),

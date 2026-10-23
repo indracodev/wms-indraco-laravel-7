@@ -2,9 +2,9 @@
 <!-- MODAL POPUP: DAFTAR PRODUK DALAM SATUAN UOM                                -->
 <!-- ========================================================================= -->
 <div x-show="showUomProductsModal" 
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" 
+     class="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-28 md:p-6 md:pb-6 bg-slate-950/80 backdrop-blur-sm" 
      x-cloak>
-    <div class="glass-panel w-full max-w-3xl p-6 rounded-2xl shadow-2xl space-y-5 border border-emerald-500/40 max-h-[90vh] flex flex-col" 
+    <div class="glass-panel w-full max-w-3xl p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl space-y-5 border border-emerald-500/40 max-h-[calc(100vh-140px)] md:max-h-[90vh] flex flex-col my-auto" 
          @click.away="showUomProductsModal = false">
         
         <!-- Header -->

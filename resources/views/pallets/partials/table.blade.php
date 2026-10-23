@@ -1,9 +1,9 @@
 <!-- Overview Statistics Cards -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
     <!-- Total Palet -->
     <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
-            <div class="text-slate-400 text-xs font-medium">Total Palet Terdaftar</div>
+            <div class="text-slate-400 text-xs font-medium">Total Palet</div>
             <div class="text-2xl font-extrabold text-white mt-1">{{ number_format($stats['total']) }}</div>
         </div>
         <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
@@ -11,21 +11,32 @@
         </div>
     </div>
 
-    <!-- Palet Terisi Stock -->
+    <!-- Palet On Rack -->
     <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
-            <div class="text-slate-400 text-xs font-medium">Palet Terisi Stok</div>
-            <div class="text-2xl font-extrabold text-emerald-400 mt-1">{{ number_format($stats['active_with_stock']) }}</div>
+            <div class="text-slate-400 text-xs font-medium">Di Rak (On Rack)</div>
+            <div class="text-2xl font-extrabold text-emerald-400 mt-1">{{ number_format($stats['active_with_stock'] - ($stats['in_transit'] ?? 0)) }}</div>
         </div>
         <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
             <i class="fa-solid fa-boxes-stacked"></i>
         </div>
     </div>
 
-    <!-- Palet Kosong / Transit -->
+    <!-- Palet In Transit -->
     <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
-            <div class="text-slate-400 text-xs font-medium">Palet Kosong / Transit</div>
+            <div class="text-slate-400 text-xs font-medium">In Transit (Dock)</div>
+            <div class="text-2xl font-extrabold text-sky-400 mt-1">{{ number_format($stats['in_transit'] ?? 0) }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-dolly"></i>
+        </div>
+    </div>
+
+    <!-- Palet Kosong -->
+    <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+        <div>
+            <div class="text-slate-400 text-xs font-medium">Palet Kosong</div>
             <div class="text-2xl font-extrabold text-amber-400 mt-1">{{ number_format($stats['empty_transit']) }}</div>
         </div>
         <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
@@ -33,10 +44,10 @@
         </div>
     </div>
 
-    <!-- Palet Non-Aktif / Maint -->
+    <!-- Palet Non-Aktif -->
     <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
-            <div class="text-slate-400 text-xs font-medium">Non-Aktif / Maintenance</div>
+            <div class="text-slate-400 text-xs font-medium">Non-Aktif</div>
             <div class="text-2xl font-extrabold text-slate-400 mt-1">{{ number_format($stats['inactive']) }}</div>
         </div>
         <div class="w-10 h-10 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center text-lg">
@@ -52,7 +63,7 @@
             <thead class="bg-slate-800/90 text-slate-300 uppercase tracking-wider font-semibold">
                 <tr>
                     <th class="p-3.5">Palet Barcode</th>
-                    <th class="p-3.5">Jenis Palet</th>
+                    <th class="p-3.5">Jenis & Kapasitas</th>
                     <th class="p-3.5">Lokasi BIN & Gudang</th>
                     <th class="p-3.5">Status Palet</th>
                     <th class="p-3.5">Isi Box & Stok Terkecil</th>
@@ -72,10 +83,12 @@
                             {{ $plt->id }}
                         </td>
 
-                        <!-- Jenis Palet -->
+                        <!-- Jenis Palet & Kapasitas -->
                         <td class="p-3.5">
                             <div class="font-semibold text-white">{{ $plt->type->name ?? $plt->pallet_type_id }}</div>
-                            <div class="text-[10px] text-slate-400">ID: {{ $plt->pallet_type_id }}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">
+                                Kap: <span class="font-bold text-indigo-300">{{ $plt->max_capacity ?? 72 }}</span> Unit
+                            </div>
                         </td>
 
                         <!-- Lokasi BIN & Gudang -->
@@ -88,8 +101,8 @@
                                     {{ $plt->bin->rack->warehouse->name ?? 'Gudang Utama' }}
                                 </div>
                             @else
-                                <span class="px-2.5 py-1 rounded font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700 text-xs">
-                                    TRANSIT / UNASSIGNED
+                                <span class="px-2.5 py-1 rounded font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs">
+                                    IN TRANSIT (DOCK)
                                 </span>
                             @endif
                         </td>
@@ -98,11 +111,15 @@
                         <td class="p-3.5 font-semibold">
                             @if(!$plt->is_active)
                                 <span class="px-2.5 py-1 rounded font-bold text-[10px] bg-slate-800 text-rose-400 border border-rose-500/30">
-                                    NON-AKTIF / MAINTENANCE
+                                    NON-AKTIF
+                                </span>
+                            @elseif($plt->status === 'in_transit' || !$plt->bin_id)
+                                <span class="px-2.5 py-1 rounded font-bold text-[10px] bg-sky-950 text-sky-300 border border-sky-500/40">
+                                    IN TRANSIT
                                 </span>
                             @elseif($hasBoxes)
                                 <span class="px-2.5 py-1 rounded font-bold text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-500/40">
-                                    TERISI STOK (AKTIF)
+                                    ON RACK (AKTIF)
                                 </span>
                             @else
                                 <span class="px-2.5 py-1 rounded font-bold text-[10px] bg-amber-950 text-amber-300 border border-amber-500/40">
@@ -230,21 +247,25 @@
             <!-- Info Jenis & Status -->
             <div class="flex items-start justify-between text-xs">
                 <div>
-                    <div class="text-slate-400">Jenis Palet:</div>
-                    <div class="font-bold text-white">{{ $plt->type->name ?? $plt->pallet_type_id }}</div>
+                    <div class="text-slate-400">Jenis & Kapasitas:</div>
+                    <div class="font-bold text-white">{{ $plt->type->name ?? $plt->pallet_type_id }} ({{ $plt->max_capacity ?? 72 }} Unit)</div>
                 </div>
                 <div>
                     @if(!$plt->is_active)
                         <span class="px-2 py-0.5 rounded font-bold text-[10px] bg-slate-800 text-rose-400 border border-rose-500/30">
-                            MAINTENANCE
+                            NON-AKTIF
+                        </span>
+                    @elseif($plt->status === 'in_transit' || !$plt->bin_id)
+                        <span class="px-2 py-0.5 rounded font-bold text-[10px] bg-sky-950 text-sky-300 border border-sky-500/40">
+                            IN TRANSIT
                         </span>
                     @elseif($hasBoxes)
                         <span class="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-500/40">
-                            TERISI STOK
+                            ON RACK (AKTIF)
                         </span>
                     @else
                         <span class="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-950 text-amber-300 border border-amber-500/40">
-                            KOSONG
+                            KOSONG (READY)
                         </span>
                     @endif
                 </div>

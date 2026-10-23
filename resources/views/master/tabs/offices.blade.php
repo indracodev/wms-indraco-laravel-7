@@ -3,18 +3,9 @@
 <!-- ========================================================================= -->
 <div class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="flex items-center justify-between">
-        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-building text-indigo-600 dark:text-indigo-400"></i>
+        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
             <span>Daftar Kantor Pusat & Perwakilan</span>
         </h3>
-        @canAccessModule('master', 'create')
-        <button type="button" 
-                @click="openAddOfficeModal()" 
-                class="md:hidden px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-1.5 active:scale-95">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah</span>
-        </button>
-        @endcanAccessModule
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -167,27 +158,20 @@
                         <div :style="'transform: translateX(' + offset + 'px)'" 
                              class="relative z-10 bg-white dark:bg-slate-800 p-4 transition-transform duration-150 ease-out flex items-center justify-between gap-3">
                             
-                            <!-- Left: Icon Avatar + Main Info -->
-                            <div class="flex items-start space-x-3 min-w-0 flex-1">
-                                <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-base border border-indigo-100 dark:border-indigo-800/40 shrink-0 shadow-sm">
-                                    <i class="fa-solid fa-building"></i>
+                            <!-- Left: Main Info -->
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-mono font-extrabold text-indigo-600 dark:text-indigo-400 text-xs">{{ $off->id }}</span>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-mono font-extrabold text-indigo-600 dark:text-indigo-400 text-xs">{{ $off->id }}</span>
-                                    </div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white text-sm mt-0.5 leading-snug truncate">{{ $off->name }}</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 flex items-center gap-1">
-                                        <i class="fa-solid fa-location-dot text-[10px] text-slate-400"></i>
-                                        <span>{{ $off->address ?? 'Belum ada alamat' }}</span>
-                                    </p>
-                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm mt-0.5 leading-snug truncate">{{ $off->name }}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+                                    {{ $off->address ?? 'Belum ada alamat' }}
+                                </p>
                             </div>
 
                             <!-- Right: Plant Badge -->
                             <div class="shrink-0 text-right">
-                                <span class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-extrabold rounded-xl text-[11px] border border-emerald-200 dark:border-emerald-500/30 shadow-sm inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-industry text-[10px]"></i>
+                                <span class="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold rounded-xl text-xs border border-emerald-200 dark:border-emerald-500/30 shadow-xs inline-flex items-center">
                                     <span>{{ $off->branches_count }} Plant</span>
                                 </span>
                             </div>
@@ -234,16 +218,16 @@
         </div>
         @endcanAccessModule
     </div>
-
-    <!-- FLOATING ACTION BUTTON (FAB) FOR MOBILE -->
-    @canAccessModule('master', 'create')
-    <div class="fixed bottom-20 right-4 z-40 md:hidden">
-        <button type="button" 
-                @click="openAddOfficeModal()" 
-                class="w-13 h-13 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold shadow-xl shadow-indigo-600/40 border border-indigo-400/40 flex items-center justify-center transition transform active:scale-95 cursor-pointer"
-                title="Tambah Kantor Baru">
-            <i class="fa-solid fa-plus text-xl"></i>
-        </button>
-    </div>
-    @endcanAccessModule
 </div>
+
+<!-- FLOATING ACTION BUTTON (FAB) FOR MOBILE -->
+@canAccessModule('master', 'create')
+<div class="fixed bottom-[125px] right-4 z-40 md:hidden">
+    <button type="button" 
+            @click="openAddOfficeModal()" 
+            class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold shadow-xl shadow-indigo-600/40 border-2 border-white dark:border-slate-800 flex items-center justify-center transition transform active:scale-95 cursor-pointer"
+            title="Tambah Kantor Baru">
+        <i class="fa-solid fa-plus text-lg"></i>
+    </button>
+</div>
+@endcanAccessModule

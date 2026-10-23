@@ -3,18 +3,9 @@
 <!-- ========================================================================= -->
 <div class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="flex items-center justify-between">
-        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-qrcode text-indigo-600 dark:text-indigo-400"></i>
+        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
             <span>Daftar BIN Storage Slot</span>
         </h3>
-        @canAccessModule('master', 'create')
-        <button type="button" 
-                @click="openAddBinModal()" 
-                class="md:hidden px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-1.5 active:scale-95">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah</span>
-        </button>
-        @endcanAccessModule
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -211,26 +202,20 @@
                         <div :style="'transform: translateX(' + offset + 'px)'" 
                              class="relative z-10 bg-white dark:bg-slate-800 p-4 transition-transform duration-150 ease-out flex items-center justify-between gap-3">
                             
-                            <!-- Left: Icon Avatar + Main Info -->
-                            <div class="flex items-start space-x-3 min-w-0 flex-1">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-base border border-amber-100 dark:border-amber-800/40 shrink-0 shadow-sm">
-                                    <i class="fa-solid fa-qrcode"></i>
+                            <!-- Left: Main Info -->
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-mono font-extrabold text-amber-600 dark:text-amber-400 text-xs">{{ $bn->id }}</span>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-mono font-extrabold text-amber-600 dark:text-amber-400 text-xs">{{ $bn->id }}</span>
-                                    </div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white text-xs mt-0.5 leading-snug truncate">Rak {{ $bn->rack_id }}</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-                                        Kolom {{ $bn->column_no }} • Level {{ $bn->level_no }}
-                                    </p>
-                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-xs mt-0.5 leading-snug truncate">Rak {{ $bn->rack_id }}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+                                    Kolom {{ $bn->column_no }} • Level {{ $bn->level_no }}
+                                </p>
                             </div>
 
                             <!-- Right: Pallet Capacity Badge -->
                             <div class="shrink-0 text-right">
-                                <span class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border shadow-sm inline-flex items-center gap-1 {{ $activePalletsCount >= $bn->max_pallet ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-500/30' : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30' }}">
-                                    <i class="fa-solid fa-cubes text-[10px]"></i>
+                                <span class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border shadow-sm inline-flex items-center {{ $activePalletsCount >= $bn->max_pallet ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-500/30' : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30' }}">
                                     <span>{{ $activePalletsCount }}/{{ $bn->max_pallet }} Palet</span>
                                 </span>
                             </div>
@@ -292,15 +277,16 @@
         @endcanAccessModule
     </div>
 
-    <!-- FLOATING ACTION BUTTON (FAB) FOR MOBILE -->
-    @canAccessModule('master', 'create')
-    <div class="fixed bottom-20 right-4 z-40 md:hidden">
-        <button type="button" 
-                @click="openAddBinModal()" 
-                class="w-13 h-13 rounded-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold shadow-xl shadow-amber-600/40 border border-amber-400/40 flex items-center justify-center transition transform active:scale-95 cursor-pointer"
-                title="Tambah BIN Baru">
-            <i class="fa-solid fa-plus text-xl"></i>
-        </button>
-    </div>
-    @endcanAccessModule
 </div>
+
+<!-- FLOATING ACTION BUTTON (FAB) FOR MOBILE -->
+@canAccessModule('master', 'create')
+<div class="fixed bottom-[125px] right-4 z-40 md:hidden">
+    <button type="button" 
+            @click="openAddBinModal()" 
+            class="w-12 h-12 rounded-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold shadow-xl shadow-amber-600/40 border-2 border-white dark:border-slate-800 flex items-center justify-center transition transform active:scale-95 cursor-pointer"
+            title="Tambah BIN Baru">
+        <i class="fa-solid fa-plus text-lg"></i>
+    </button>
+</div>
+@endcanAccessModule

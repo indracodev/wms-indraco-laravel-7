@@ -13,17 +13,17 @@
      x-transition:leave="transition-opacity ease-in duration-150" 
      x-transition:leave-start="opacity-100" 
      x-transition:leave-end="opacity-0" 
-     class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 md:hidden"></div>
+     class="fixed inset-0 bg-slate-950/20 backdrop-blur-[2px] z-40 md:hidden"></div>
 
 <div x-show="quickActionOpen" 
      x-cloak 
      x-transition:enter="transition ease-out duration-250 transform" 
-     x-transition:enter-start="opacity-0 translate-y-10 scale-95" 
+     x-transition:enter-start="opacity-0 translate-y-6 scale-95" 
      x-transition:enter-end="opacity-100 translate-y-0 scale-100" 
      x-transition:leave="transition ease-in duration-150 transform" 
      x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
-     x-transition:leave-end="opacity-0 translate-y-10 scale-95" 
-     class="fixed bottom-[114px] inset-x-3 sm:inset-x-6 z-50 md:hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-2xl space-y-3.5">
+     x-transition:leave-end="opacity-0 translate-y-6 scale-95" 
+     class="fixed bottom-[68px] inset-x-3 sm:inset-x-6 z-50 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3.5 shadow-xl space-y-3">
     
     <!-- Sheet Header -->
     <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
@@ -98,78 +98,68 @@
     </a>
 </div>
 
-<!-- Bottom Navigation Bar (Main Thumb Dock) -->
-<nav class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 z-50 md:hidden px-2 pt-1 pb-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_25px_rgba(0,0,0,0.4)]">
-    <div class="grid grid-cols-5 items-end justify-items-center relative max-w-lg mx-auto">
+<!-- Bottom Navigation Bar (Main Thumb Dock - Clean Modern Theme) -->
+<nav class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50 md:hidden px-2 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+    <div class="grid grid-cols-5 items-center justify-items-center relative max-w-lg mx-auto gap-1">
         
-        <!-- Position 1: Dashboard (Left Thumb Primary) -->
+        <!-- Position 1: Dashboard (Home) -->
         <a href="{{ route('dashboard') }}" 
-           class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 {{ request()->routeIs('dashboard') ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' }}">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 {{ request()->routeIs('dashboard') ? 'bg-indigo-100 dark:bg-indigo-500/20 shadow-sm' : '' }}">
-                <i class="fa-solid fa-chart-pie text-base"></i>
-            </div>
+           class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs"
+           :class="(!quickActionOpen && {{ request()->routeIs('dashboard') ? 'true' : 'false' }}) ? 'bottom-nav-active bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'">
+            <i class="fa-solid fa-house text-sm mb-0.5"></i>
             <span class="text-[10px] tracking-tight">Home</span>
         </a>
 
-        <!-- Position 2: Master Data (Left Thumb Secondary) -->
+        <!-- Position 2: Master Data (Master) -->
         @canAccessModule('master', 'read')
         <a href="{{ route('master.index') }}" 
-           class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 {{ request()->routeIs('master.*') ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' }}">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 {{ request()->routeIs('master.*') ? 'bg-indigo-100 dark:bg-indigo-500/20 shadow-sm' : '' }}">
-                <i class="fa-solid fa-boxes-stacked text-base"></i>
-            </div>
+           class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs"
+           :class="(!quickActionOpen && {{ request()->routeIs('master.*') ? 'true' : 'false' }}) ? 'bottom-nav-active bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'">
+            <i class="fa-solid fa-database text-sm mb-0.5"></i>
             <span class="text-[10px] tracking-tight">Master</span>
         </a>
         @else
         <a href="{{ route('pallets.index') }}" 
-           class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 {{ request()->routeIs('pallets.*') ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' }}">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 {{ request()->routeIs('pallets.*') ? 'bg-indigo-100 dark:bg-indigo-500/20 shadow-sm' : '' }}">
-                <i class="fa-solid fa-pallet text-base"></i>
-            </div>
+           class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs"
+           :class="(!quickActionOpen && {{ request()->routeIs('pallets.*') ? 'true' : 'false' }}) ? 'bottom-nav-active bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'">
+            <i class="fa-solid fa-pallet text-sm mb-0.5"></i>
             <span class="text-[10px] tracking-tight">Palet</span>
         </a>
         @endcanAccessModule
 
-        <!-- Position 3: CENTER THUMB SWEET SPOT (Quick Action Hub) -->
+        <!-- Position 3: CENTER THUMB SWEET SPOT (Quick Action Hub / In & Out) -->
         <button type="button" 
                 @click="quickActionOpen = !quickActionOpen" 
-                class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 text-purple-600 dark:text-purple-400 cursor-pointer"
-                :title="quickActionOpen ? 'Tutup Aksi Cepat' : 'Buka Aksi Cepat Jempol'">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 shadow-sm transition-colors duration-200"
-                 :class="quickActionOpen ? 'bg-purple-600 text-white shadow-purple-500/40' : 'bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400'">
-                <i class="fa-solid text-base transition-transform duration-200" 
-                   :class="quickActionOpen ? 'fa-xmark rotate-90 text-white' : 'fa-bolt text-purple-600 dark:text-purple-400'"></i>
-            </div>
-            <span class="text-[10px] font-bold tracking-tight text-purple-700 dark:text-purple-300">Aksi Cepat</span>
+                class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs cursor-pointer"
+                :class="quickActionOpen ? 'bottom-nav-active bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/25' : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium'"
+                :title="quickActionOpen ? 'Tutup Menu In & Out' : 'Buka Menu In & Out'">
+            <i class="fa-solid text-sm mb-0.5 transition-transform duration-200" :class="quickActionOpen ? 'fa-xmark rotate-90 text-white' : 'fa-right-left text-indigo-500 dark:text-indigo-400'"></i>
+            <span class="text-[10px] tracking-tight truncate">In & Out</span>
         </button>
 
-        <!-- Position 4: Stock Locator (Right Thumb Secondary) -->
+        <!-- Position 4: Stock Locator (Locator) -->
         @canAccessModule('detail', 'read')
         <a href="{{ route('detail.index') }}" 
-           class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 {{ request()->routeIs('detail.*') ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' }}">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 {{ request()->routeIs('detail.*') ? 'bg-indigo-100 dark:bg-indigo-500/20 shadow-sm' : '' }}">
-                <i class="fa-solid fa-magnifying-glass-location text-base"></i>
-            </div>
+           class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs"
+           :class="(!quickActionOpen && {{ request()->routeIs('detail.*') ? 'true' : 'false' }}) ? 'bottom-nav-active bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'">
+            <i class="fa-solid fa-location-dot text-sm mb-0.5"></i>
             <span class="text-[10px] tracking-tight">Locator</span>
         </a>
         @else
         <a href="{{ route('scanner.index') }}" 
-           class="w-full flex flex-col items-center py-1 rounded-2xl transition active:scale-95 {{ request()->routeIs('scanner.*') ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' }}">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5 {{ request()->routeIs('scanner.*') ? 'bg-indigo-100 dark:bg-indigo-500/20 shadow-sm' : '' }}">
-                <i class="fa-solid fa-barcode text-base"></i>
-            </div>
+           class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl transition text-center active:scale-95 text-xs"
+           :class="(!quickActionOpen && {{ request()->routeIs('scanner.*') ? 'true' : 'false' }}) ? 'bottom-nav-active bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'">
+            <i class="fa-solid fa-barcode text-sm mb-0.5"></i>
             <span class="text-[10px] tracking-tight">Scan</span>
         </a>
         @endcanAccessModule
 
-        <!-- Position 5: Menu Drawer (Right Thumb Primary) -->
+        <!-- Position 5: Menu Drawer (Menu) -->
         <button type="button" 
                 @click="mobileSidebarOpen = true; quickActionOpen = false" 
-                class="w-full flex flex-col items-center py-1 rounded-2xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition active:scale-95 cursor-pointer">
-            <div class="w-9 h-7 flex items-center justify-center rounded-xl mb-0.5">
-                <i class="fa-solid fa-bars text-base"></i>
-            </div>
-            <span class="text-[10px] tracking-tight font-medium">Menu</span>
+                class="w-full flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition text-center active:scale-95 cursor-pointer text-xs font-medium">
+            <i class="fa-solid fa-bars text-sm mb-0.5"></i>
+            <span class="text-[10px] tracking-tight">Menu</span>
         </button>
 
     </div>

@@ -92,9 +92,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['permission:transfer,read'])->get('/transaction/transfer', [TransactionController::class, 'transferForm'])->name('transaction.transfer.form');
     Route::middleware(['permission:transfer,create'])->post('/transaction/transfer', [TransactionController::class, 'transfer'])->name('transaction.transfer');
+    Route::middleware(['permission:transfer,create'])->post('/transaction/transfer/pallet-to-pallet', [TransactionController::class, 'transferPalletToPallet'])->name('transaction.transfer.pallet_to_pallet');
 
     // API Helper Routes
     Route::get('/api/product/{id}/conversions', [TransactionController::class, 'getProductConversions'])->name('api.product.conversions');
+    Route::get('/api/pallet/{id}/info', [TransactionController::class, 'getPalletInfo'])->name('api.pallet.info');
+    Route::get('/api/rack/{id}/inventory', [TransactionController::class, 'getRackInventory'])->name('api.rack.inventory');
 
     // User Management
     Route::middleware(['permission:users,read'])->group(function () {

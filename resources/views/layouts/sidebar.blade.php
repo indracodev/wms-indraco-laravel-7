@@ -51,21 +51,21 @@
         @canAccessModule('inbound', 'read')
             <a href="{{ route('transaction.inbound.form') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('transaction.inbound*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-truck-ramp-box text-base w-5 text-center text-emerald-400"></i>
-                <span>Inbound (Putaway)</span>
+                <span>Inbound (Barang Masuk)</span>
             </a>
         @endcanAccessModule
 
         @canAccessModule('outbound', 'read')
             <a href="{{ route('transaction.outbound.form') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('transaction.outbound*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-dolly text-base w-5 text-center text-amber-400"></i>
-                <span>Outbound (Picking)</span>
+                <span>Outbound (Barang Keluar)</span>
             </a>
         @endcanAccessModule
 
         @canAccessModule('transfer', 'read')
             <a href="{{ route('transaction.transfer.form') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('transaction.transfer*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-arrows-up-down-left-right text-base w-5 text-center text-sky-400"></i>
-                <span>Transfer BIN</span>
+                <span>Transfer & Relokasi</span>
             </a>
         @endcanAccessModule
 

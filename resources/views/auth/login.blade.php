@@ -83,9 +83,7 @@
 
     <!-- Theme Toggle Button -->
     <div class="fixed top-4 right-4 z-50">
-        <button id="theme-toggle" type="button" class="px-3 py-2 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 text-white border border-white/20 backdrop-blur-md transition-all shadow-lg cursor-pointer flex items-center space-x-2 text-xs font-semibold">
-            <i id="theme-toggle-dark-icon" class="fa-solid fa-moon text-amber-300"></i>
-            <i id="theme-toggle-light-icon" class="fa-solid fa-sun text-amber-400 hidden"></i>
+        <button id="theme-toggle" type="button" class="px-3 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 text-white border border-white/20 backdrop-blur-md transition-all shadow-lg cursor-pointer text-xs font-semibold">
             <span id="theme-toggle-text">Dark Mode</span>
         </button>
     </div>
@@ -94,9 +92,6 @@
     <div class="w-full max-w-md relative z-10">
         <!-- Logo & Header -->
         <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-tr from-emerald-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-500/20">
-                <i class="fa-solid fa-cubes text-3xl text-white"></i>
-            </div>
             <h1 class="font-display font-extrabold text-3xl tracking-tight text-head-title">WMS INDRACO</h1>
             <p class="text-head-sub text-sm mt-1">Warehouse Management System • Production Ready</p>
         </div>
@@ -106,9 +101,8 @@
             <h2 class="text-xl font-bold mb-6 text-center card-header-title">Masuk ke Akun Anda</h2>
 
             @if ($errors->any())
-                <div class="mb-4 p-3 bg-rose-950/80 border border-rose-500/40 rounded-xl text-rose-200 text-xs flex items-center">
-                    <i class="fa-solid fa-circle-exclamation text-rose-400 text-lg mr-2"></i>
-                    <span>{{ $errors->first() }}</span>
+                <div class="mb-4 p-3 bg-rose-950/80 border border-rose-500/40 rounded-xl text-rose-200 text-xs font-medium">
+                    {{ $errors->first() }}
                 </div>
             @endif
 
@@ -145,9 +139,8 @@
                     </label>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 flex items-center justify-center">
                     <span>Masuk ke Dashboard</span>
-                    <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
 
@@ -183,20 +176,12 @@
     <script>
         // 1. Theme Switcher Logic
         const themeToggleBtn = document.getElementById('theme-toggle');
-        const themeDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        const themeLightIcon = document.getElementById('theme-toggle-light-icon');
         const themeToggleText = document.getElementById('theme-toggle-text');
 
         function syncThemeUI() {
             const isDark = document.documentElement.classList.contains('dark');
-            if (isDark) {
-                themeDarkIcon.classList.remove('hidden');
-                themeLightIcon.classList.add('hidden');
-                themeToggleText.textContent = 'Dark Mode';
-            } else {
-                themeLightIcon.classList.remove('hidden');
-                themeDarkIcon.classList.add('hidden');
-                themeToggleText.textContent = 'Light Mode';
+            if (themeToggleText) {
+                themeToggleText.textContent = isDark ? 'Dark Mode' : 'Light Mode';
             }
         }
 

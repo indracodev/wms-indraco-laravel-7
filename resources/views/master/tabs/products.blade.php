@@ -4,8 +4,7 @@
 <div class="glass-panel p-6 rounded-2xl space-y-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-boxes-stacked text-indigo-600 dark:text-indigo-400"></i>
+            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">
                 <span>Master Katalog Produk SKU</span>
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tampilan data dikelompokkan berdasarkan Kode SKU dengan rincian konversi & kemasan barang.</p>
@@ -14,7 +13,7 @@
             <button type="button" 
                     @click="openAddProductModal()" 
                     onclick="window.openAddProductModal()"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-auto">
+                    class="hidden sm:flex px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition items-center space-x-1.5 cursor-pointer self-start sm:self-auto">
                 <i class="fa-solid fa-plus"></i>
                 <span>Tambah Produk SKU Baru</span>
             </button>
@@ -67,10 +66,10 @@
     @endphp
     <div class="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-100 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-300 dark:border-slate-800 shadow-sm">
         <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-300 font-medium">
-            <i class="fa-solid fa-layer-group text-indigo-600 dark:text-indigo-400"></i>
             <span>Total: <strong class="text-slate-900 dark:text-white font-bold">{{ $products->total() }}</strong> SKU Produk Terdaftar</span>
             <span class="text-slate-400 dark:text-slate-500">|</span>
-            <span class="text-slate-500 dark:text-slate-400">Halaman {{ $products->currentPage() }} dari {{ $products->lastPage() }}</span>
+            <span class="hidden md:inline text-slate-500 dark:text-slate-400">Halaman {{ $products->currentPage() }} dari {{ $products->lastPage() }}</span>
+            <span class="md:hidden text-slate-500 dark:text-slate-400">(Tampil <strong id="mobile-products-loaded-count" class="text-slate-900 dark:text-white font-bold">{{ $products->count() }}</strong>)</span>
         </div>
         <div class="flex items-center space-x-2">
             <button type="button" 
@@ -299,125 +298,39 @@
         </table>
     </div>
 
-    <!-- Mobile Grouped Card List with Accordion -->
+    <!-- Mobile Swipeable Interactive Card List with Lazy Loading Infinite Scroll -->
     <div class="space-y-3 md:hidden">
-        @forelse($products as $p)
-            @php
-                $mobileProdData = [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'item_group' => $p->item_group,
-                    'uom_inventory' => $p->uom_inventory,
-                    'uom_group' => $p->uom_group,
-                    'qty_per_uom_group' => $p->qty_per_uom_group,
-                    'brand' => $p->brand,
-                    'is_active' => (bool)$p->is_active,
-                    'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-',
-                    'conversions' => $p->conversions ? $p->conversions->map(function($c) {
-                        return [
-                            'uom_convert' => $c->uom_convert,
-                            'qty_convert' => $c->qty_convert,
-                            'uom_base' => $c->uom_base,
-                        ];
-                    })->values() : []
-                ];
-            @endphp
-            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 p-4 rounded-xl space-y-3 text-xs shadow-sm">
-                <!-- Card Header -->
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-2">
-                    <div class="flex items-center space-x-2">
-                        <span class="font-mono font-bold text-indigo-700 dark:text-indigo-400 text-sm">{{ $p->id }}</span>
-                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded-full font-bold text-[10px]">
-                            {{ $p->conversions->count() }} Konversi
-                        </span>
-                    </div>
-                    <span class="px-2 py-0.5 rounded font-bold text-[10px] {{ $p->is_active ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30' }}">
-                        {{ $p->is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                </div>
+        <!-- Container for Product Cards -->
+        <div id="mobile-products-card-list" class="space-y-3">
+            @include('master.tabs.partials.product_cards', ['products' => $products])
+        </div>
 
-                <!-- Card Body -->
-                <div>
-                    <div class="font-bold text-slate-900 dark:text-white text-sm">{{ $p->name }}</div>
-                    <div class="grid grid-cols-2 gap-2 mt-2 text-slate-600 dark:text-slate-400">
-                        <div>Brand: <strong class="text-slate-900 dark:text-white">{{ $p->brand ?? '-' }}</strong></div>
-                        <div>Base UOM: <strong class="text-emerald-700 dark:text-emerald-400 font-mono">{{ $p->uom_inventory }}</strong></div>
-                        <div>Kemasan: <strong class="text-slate-800 dark:text-slate-300 font-mono">{{ $p->uom_group ?? '-' }}</strong></div>
-                        <div>Isi: <strong class="text-amber-700 dark:text-amber-300 font-bold">{{ $p->qty_per_uom_group ?? 1 }}</strong></div>
-                    </div>
-                </div>
-
-                <!-- Dropdown / Accordion Trigger for Mobile -->
-                <div>
-                    <button type="button" 
-                            @click="toggleSku('{{ $p->id }}')" 
-                            class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/80 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-300 dark:border-slate-700 flex items-center justify-between transition cursor-pointer">
-                        <span class="flex items-center space-x-1.5 font-bold text-[11px]">
-                            <i class="fa-solid fa-arrows-split-up-and-left text-indigo-600 dark:text-sky-400"></i>
-                            <span>Rincian Konversi Satuan</span>
-                        </span>
-                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
-                           :class="isSkuExpanded('{{ $p->id }}') ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''"></i>
-                    </button>
-
-                    <!-- Collapsible Section -->
-                    <div x-show="isSkuExpanded('{{ $p->id }}')" 
-                         x-cloak 
-                         class="mt-2.5 p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl space-y-2">
-                        <div class="text-[11px] text-slate-700 dark:text-slate-400 font-bold mb-1">Daftar Konversi Satuan:</div>
-                        @forelse($p->conversions as $conv)
-                            <div class="flex items-center justify-between p-2 bg-white dark:bg-slate-900/60 rounded-lg text-[11px] border border-slate-200 dark:border-slate-800/80 shadow-sm">
-                                <div>
-                                    <span class="font-bold font-mono text-sky-800 dark:text-sky-300 bg-sky-50 dark:bg-transparent px-1.5 py-0.5 rounded border border-sky-200 dark:border-transparent">{{ $conv->uom_convert }}</span>
-                                    <span class="text-slate-400 mx-1">&rarr;</span>
-                                    <span class="text-emerald-800 dark:text-slate-400 font-mono font-semibold">{{ $conv->uom_base }}</span>
-                                </div>
-                                <div class="font-mono font-extrabold text-amber-700 dark:text-amber-300">
-                                    1 : {{ number_format($conv->qty_convert) }}
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-slate-500 italic text-center py-1">Satuan tunggal (1:1 base unit).</div>
-                        @endforelse
-                    </div>
-                </div>
-
-                <!-- Card Footer Actions -->
-                <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200 dark:border-slate-700/60">
-                    <button type="button" 
-                            data-product="{{ json_encode($mobileProdData) }}" 
-                            onclick="window.openDetailProductModal(this)" 
-                            class="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-eye text-xs"></i>
-                        <span>Detail</span>
-                    </button>
-                    @canAccessModule('master', 'update')
-                        <button type="button" 
-                                data-product="{{ json_encode($mobileProdData) }}" 
-                                onclick="window.openEditProductModal(this)" 
-                                chip-tooltip="Edit Produk SKU"
-                                class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-semibold flex items-center space-x-1 transition shadow-sm cursor-pointer">
-                            <i class="fa-solid fa-pen-to-square text-xs"></i>
-                            <span>Edit</span>
-                        </button>
-                    @endcanAccessModule
-                    @canAccessModule('master', 'delete')
-                        <form action="{{ route('master.product.destroy', $p->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition shadow-sm cursor-pointer" title="Hapus Produk SKU">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </form>
-                    @endcanAccessModule
-                </div>
+        <!-- Infinite Scroll Sentinel & Status Indicator (Mobile Only) -->
+        <div id="product-lazy-sentinel" 
+             x-init="$nextTick(() => { if (typeof window.initProductInfiniteScroll === 'function') window.initProductInfiniteScroll(); })"
+             data-current-page="{{ $products->currentPage() }}" 
+             data-last-page="{{ $products->lastPage() }}"
+             data-has-more="{{ $products->hasMorePages() ? '1' : '0' }}"
+             class="py-4 text-center transition-all">
+            
+            <div id="product-lazy-loading" class="hidden flex items-center justify-center space-x-2.5 py-3 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-base"></i>
+                <span>Memuat data produk berikutnya...</span>
             </div>
-        @empty
-            <div class="p-6 text-center text-slate-500 text-xs bg-slate-100 dark:bg-slate-800/40 rounded-xl">Tidak ada data produk SKU.</div>
-        @endforelse
+
+            <div id="product-lazy-end" class="{{ $products->hasMorePages() ? 'hidden' : '' }} py-2 text-center text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                @if($products->total() > 0)
+                    <div class="inline-flex items-center space-x-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800/60 rounded-full border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-check text-[10px] text-emerald-500"></i>
+                        <span>Semua {{ $products->total() }} produk telah ditampilkan</span>
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 
-    <div class="mt-4">
+    <!-- Desktop Pagination Controls (Hidden on Mobile) -->
+    <div class="hidden md:block mt-4">
         {{ $products->links() }}
     </div>
 </div>
@@ -425,13 +338,214 @@
 @canAccessModule('master', 'create')
     <!-- Ergonomic Thumb Floating Action Button (Mobile Only) -->
     <!-- Positioned outside .glass-panel so position: fixed binds directly to viewport -->
-    <div class="fixed bottom-[114px] right-4 z-40 md:hidden">
+    <div class="fixed bottom-[125px] right-4 z-40 md:hidden">
         <button type="button" 
                 @click="openAddProductModal()" 
                 onclick="window.openAddProductModal()"
-                class="w-13 h-13 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xl shadow-emerald-600/50 flex items-center justify-center text-2xl active:scale-90 transition-transform cursor-pointer border-2 border-white dark:border-slate-800"
+                class="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xl shadow-emerald-600/50 flex items-center justify-center text-xl active:scale-90 transition-transform cursor-pointer border-2 border-white dark:border-slate-800"
                 title="Tambah Produk SKU">
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
 @endcanAccessModule
+
+<script>
+    if (typeof window.swipeableCard !== 'function') {
+        window.swipeableCard = function() {
+            return {
+                startX: 0,
+                startY: 0,
+                offset: 0,
+                isDragging: false,
+                isScrolling: false,
+                maxLeftSwipe: -144,
+                maxRightSwipe: 96,
+                touchStart(e) {
+                    this.startX = e.touches[0].clientX;
+                    this.startY = e.touches[0].clientY;
+                    this.isDragging = true;
+                    this.isScrolling = false;
+                },
+                touchMove(e) {
+                    if (!this.isDragging) return;
+                    const diffX = e.touches[0].clientX - this.startX;
+                    const diffY = e.touches[0].clientY - this.startY;
+                    if (!this.isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+                        this.isScrolling = true;
+                        this.isDragging = false;
+                        return;
+                    }
+                    if (this.isScrolling) return;
+                    if (Math.abs(diffX) > 10 && e.cancelable) {
+                        e.preventDefault();
+                    }
+                    if (diffX > 0) {
+                        this.offset = Math.min(diffX, this.maxRightSwipe + 15);
+                    } else {
+                        this.offset = Math.max(diffX, this.maxLeftSwipe - 15);
+                    }
+                },
+                touchEnd(e) {
+                    if (!this.isDragging) return;
+                    this.isDragging = false;
+                    if (this.offset > 40) {
+                        this.offset = this.maxRightSwipe;
+                    } else if (this.offset < -45) {
+                        this.offset = this.maxLeftSwipe;
+                    } else {
+                        this.offset = 0;
+                    }
+                },
+                mouseDown(e) {
+                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('form')) return;
+                    this.startX = e.clientX;
+                    this.isDragging = true;
+                },
+                mouseMove(e) {
+                    if (!this.isDragging) return;
+                    const diffX = e.clientX - this.startX;
+                    if (Math.abs(diffX) > 5) {
+                        if (diffX > 0) {
+                            this.offset = Math.min(diffX, this.maxRightSwipe + 15);
+                        } else {
+                            this.offset = Math.max(diffX, this.maxLeftSwipe - 15);
+                        }
+                    }
+                },
+                mouseUp(e) {
+                    if (!this.isDragging) return;
+                    this.isDragging = false;
+                    if (this.offset > 40) {
+                        this.offset = this.maxRightSwipe;
+                    } else if (this.offset < -45) {
+                        this.offset = this.maxLeftSwipe;
+                    } else {
+                        this.offset = 0;
+                    }
+                },
+                closeTray() {
+                    this.offset = 0;
+                }
+            };
+        };
+    }
+
+    if (typeof window.initProductInfiniteScroll !== 'function') {
+        window.initProductInfiniteScroll = function() {
+            const sentinel = document.getElementById('product-lazy-sentinel');
+            const cardList = document.getElementById('mobile-products-card-list');
+            const loadingEl = document.getElementById('product-lazy-loading');
+            const endEl = document.getElementById('product-lazy-end');
+            const countEl = document.getElementById('mobile-products-loaded-count');
+
+            if (!sentinel || !cardList) return;
+
+            if (window.productScrollObserver) {
+                window.productScrollObserver.disconnect();
+                window.productScrollObserver = null;
+            }
+
+            let currentPage = parseInt(sentinel.getAttribute('data-current-page') || '1');
+            let lastPage = parseInt(sentinel.getAttribute('data-last-page') || '1');
+            let hasMore = sentinel.getAttribute('data-has-more') === '1' && currentPage < lastPage;
+            let isLoading = false;
+
+            if (!hasMore) {
+                if (endEl) endEl.classList.remove('hidden');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                return;
+            }
+
+            const loadNextChunk = async () => {
+                if (isLoading || !hasMore) return;
+                isLoading = true;
+
+                if (loadingEl) loadingEl.classList.remove('hidden');
+                if (endEl) endEl.classList.add('hidden');
+
+                const nextPage = currentPage + 1;
+                const fetchUrl = new URL(window.location.href);
+                fetchUrl.searchParams.set('tab', 'products');
+                fetchUrl.searchParams.set('lazy', '1');
+                fetchUrl.searchParams.set('products_page', nextPage);
+
+                try {
+                    const res = await fetch(fetchUrl.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success' && data.html) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = data.html;
+                        const newCards = Array.from(tempDiv.children);
+
+                        newCards.forEach(card => {
+                            cardList.appendChild(card);
+                            if (window.Alpine) {
+                                window.Alpine.initTree(card);
+                            }
+                        });
+
+                        currentPage = data.current_page;
+                        hasMore = Boolean(data.has_more);
+                        sentinel.setAttribute('data-current-page', currentPage);
+                        sentinel.setAttribute('data-has-more', hasMore ? '1' : '0');
+
+                        if (countEl) {
+                            const currentTotalShown = cardList.querySelectorAll('.product-card-item').length;
+                            countEl.textContent = currentTotalShown;
+                        }
+
+                        if (!hasMore) {
+                            if (window.productScrollObserver) {
+                                window.productScrollObserver.disconnect();
+                            }
+                            if (loadingEl) loadingEl.classList.add('hidden');
+                            if (endEl) endEl.classList.remove('hidden');
+                        }
+                    } else {
+                        hasMore = false;
+                        if (endEl) endEl.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    console.error('Error in lazy loading products:', err);
+                } finally {
+                    isLoading = false;
+                    if (loadingEl) loadingEl.classList.add('hidden');
+                }
+            };
+
+            window.productScrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && hasMore && !isLoading) {
+                        loadNextChunk();
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '250px 0px',
+                threshold: 0.01
+            });
+
+            window.productScrollObserver.observe(sentinel);
+        };
+    }
+
+    // Auto-initialize on initial DOM load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.initProductInfiniteScroll === 'function') {
+                window.initProductInfiniteScroll();
+            }
+        });
+    } else {
+        setTimeout(() => {
+            if (typeof window.initProductInfiniteScroll === 'function') {
+                window.initProductInfiniteScroll();
+            }
+        }, 100);
+    }
+</script>
