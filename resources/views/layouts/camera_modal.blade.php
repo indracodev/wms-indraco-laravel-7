@@ -1,9 +1,9 @@
 <!-- GLOBAL CAMERA BARCODE SCANNER MODAL -->
 <div id="cameraModal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden" style="display: none;">
-    <div class="glass-panel w-full max-w-md p-5 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 border border-indigo-500/40 text-slate-100">
+    <div class="glass-panel w-full max-w-md p-5 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 border border-[#004b87]/40 text-slate-100">
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-slate-700/80 pb-2.5">
-            <div class="text-indigo-400">
+            <div class="text-[#004b87] dark:text-sky-400">
                 <h3 class="font-bold text-white text-base">Scan Barcode via Kamera</h3>
             </div>
             <button type="button" onclick="closeCameraScanner()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer">
@@ -14,7 +14,7 @@
         <!-- Camera Switcher Dropdown (Tampil jika kamera lebih dari satu) -->
         <div id="camera-select-container" class="space-y-1" style="display: none;">
             <label for="camera-select" class="block text-[11px] font-semibold text-slate-300">Pilih Kamera:</label>
-            <select id="camera-select" onchange="switchCamera(this.value)" class="w-full py-2 px-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
+            <select id="camera-select" onchange="switchCamera(this.value)" class="w-full py-2 px-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-[#004b87]">
                 <!-- Diisi secara dinamis oleh JavaScript -->
             </select>
         </div>
@@ -22,19 +22,23 @@
         <!-- Camera Viewfinder -->
         <div class="space-y-2">
             <p class="text-xs text-slate-300 text-center">Arahkan kamera ke kode barcode (BIN, Palet, Box, atau SKU Produk)</p>
-            <div id="camera-reader-container" class="relative overflow-hidden rounded-2xl border-2 border-indigo-500/50 bg-slate-900 min-h-[220px] flex items-center justify-center">
+            <div id="camera-reader-container" class="relative overflow-hidden rounded-2xl border-2 border-[#004b87]/50 bg-slate-900 min-h-[220px] flex items-center justify-center">
                 <div id="camera-reader" class="w-full"></div>
             </div>
-            <div id="camera-status" class="text-[11px] text-center text-indigo-300 font-mono">Menyiapkan kamera...</div>
+            <div id="camera-status" class="text-[11px] text-center text-sky-400 dark:text-sky-300 font-mono">Menyiapkan kamera...</div>
         </div>
 
         <!-- Actions -->
         <div class="pt-1 grid grid-cols-2 gap-2">
-            <button type="button" onclick="promptManualInputFromCameraModal()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow flex items-center justify-center cursor-pointer">
-                <span>Input Code Manual</span>
+            <button type="button" onclick="promptManualInputFromCameraModal()" 
+                    style="background-color: #004b87 !important; color: #ffffff !important; border: 1.5px solid #003661 !important;"
+                    class="py-2.5 hover:bg-[#003661] text-white font-extrabold text-xs rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95">
+                <span style="color: #ffffff !important; font-weight: 800;">Input Code Manual</span>
             </button>
-            <button type="button" onclick="closeCameraScanner()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl border border-slate-700 cursor-pointer">
-                Batal / Tutup
+            <button type="button" onclick="closeCameraScanner()" 
+                    style="background-color: #004b87 !important; color: #ffffff !important; border: 1.5px solid #003661 !important;"
+                    class="py-2.5 hover:bg-[#003661] text-white font-extrabold text-xs rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95">
+                <span style="color: #ffffff !important; font-weight: 800;">Batal / Tutup</span>
             </button>
         </div>
     </div>

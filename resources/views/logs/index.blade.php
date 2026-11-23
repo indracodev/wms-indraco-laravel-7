@@ -40,8 +40,16 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
-                    <label class="block text-slate-400 mb-1">Cari Keyword</label>
-                    <input type="text" name="tx_search" value="{{ request('tx_search') }}" placeholder="🔍 Produk, User, BIN, Palet..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold text-[13px]">Cari Keyword</label>
+                    <div class="search-input-group">
+                        <a href="{{ route('logs.index', ['tab' => 'transaction']) }}" class="btn btn-sm btn-warning search-btn-reset" title="Reset Pencarian">
+                            «
+                        </a>
+                        <input type="text" name="tx_search" value="{{ request('tx_search') }}" placeholder="Produk, User, BIN, Palet..." class="form-control search-input-field">
+                        <button type="submit" class="btn btn-sm btn-primary search-btn-submit" title="Cari">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div>
@@ -207,8 +215,16 @@
             <input type="hidden" name="tab" value="audit">
             
             <div>
-                <label class="block text-slate-400 mb-1">Cari Keyword Aktivitas</label>
-                <input type="text" name="audit_search" value="{{ request('audit_search') }}" placeholder="🔍 Modul, Deskripsi, User..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold text-[13px]">Cari Keyword Aktivitas</label>
+                <div class="search-input-group">
+                    <a href="{{ route('logs.index', ['tab' => 'audit']) }}" class="btn btn-sm btn-warning search-btn-reset" title="Reset Pencarian">
+                        «
+                    </a>
+                    <input type="text" name="audit_search" value="{{ request('audit_search') }}" placeholder="Modul, Deskripsi, User..." class="form-control search-input-field">
+                    <button type="submit" class="btn btn-sm btn-primary search-btn-submit" title="Cari">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
             </div>
 
             <div>
@@ -309,8 +325,16 @@
             <input type="hidden" name="tab" value="impersonation">
             
             <div>
-                <label class="block text-slate-400 mb-1">Cari Nama Admin / Target User</label>
-                <input type="text" name="imp_search" value="{{ request('imp_search') }}" placeholder="🔍 Nama Admin / Target..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold text-[13px]">Cari Nama Admin / Target User</label>
+                <div class="search-input-group">
+                    <a href="{{ route('logs.index', ['tab' => 'impersonation']) }}" class="btn btn-sm btn-warning search-btn-reset" title="Reset Pencarian">
+                        «
+                    </a>
+                    <input type="text" name="imp_search" value="{{ request('imp_search') }}" placeholder="Nama Admin / Target..." class="form-control search-input-field">
+                    <button type="submit" class="btn btn-sm btn-primary search-btn-submit" title="Cari">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
             </div>
 
             <div>

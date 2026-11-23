@@ -13,50 +13,54 @@
             <button type="button" 
                     @click="openAddProductModal()" 
                     onclick="window.openAddProductModal()"
-                    class="hidden sm:flex px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition items-center space-x-1.5 cursor-pointer self-start sm:self-auto">
+                    class="hidden sm:flex px-4 py-2.5 bg-[#59c594] hover:bg-[#48b282] text-white font-bold text-[13px] rounded-xl shadow-md transition items-center space-x-1.5 cursor-pointer self-start sm:self-auto">
                 <i class="fa-solid fa-plus"></i>
                 <span>Tambah Produk SKU Baru</span>
             </button>
         @endcanAccessModule
     </div>
 
-    <!-- Filter & Search Toolbar -->
-    <form method="GET" action="{{ route('master.index') }}" onsubmit="MasterDataApp.submitFilter(event, this)" class="grid grid-cols-1 sm:grid-cols-6 gap-3 text-xs">
+    <!-- Filter & Search Toolbar (Identical to Detail Data & Pallets) -->
+    <form method="GET" action="{{ route('master.index') }}" onsubmit="MasterDataApp.submitFilter(event, this)" class="space-y-2.5 text-[13px]">
         <input type="hidden" name="tab" value="products">
-        <div class="sm:col-span-2">
-            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Cari Keyword Produk</label>
-            <input type="text" name="search_product" value="{{ request('search_product') }}" placeholder="🔍 SKU / Nama / Brand / Group..." class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+        
+        <!-- Row 1: Search Bar (Identical to Detail Data & Pallets) -->
+        <div class="search-input-group w-full">
+            <button type="button" onclick="MasterDataApp.loadTab('{{ route('master.index', ['tab' => 'products']) }}', 'products')" class="btn btn-sm btn-warning search-btn-reset" title="Reset Pencarian">
+                «
+            </button>
+            <input type="text" name="search_product" value="{{ request('search_product') }}" placeholder="Cari SKU Produk, Nama Produk, Brand, Group..." class="form-control search-input-field">
+            <button type="submit" class="btn btn-sm btn-primary search-btn-submit" title="Cari Produk">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
         </div>
-        <div>
-            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Filter Brand</label>
-            <select id="select_brand_filter" name="brand_filter" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white shadow-sm">
-                <option value="">-- Semua Brand --</option>
-                @foreach($brands as $br)
-                    <option value="{{ $br }}" {{ request('brand_filter') == $br ? 'selected' : '' }}>{{ $br }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Filter Group</label>
-            <select id="select_group_filter" name="group_filter" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white shadow-sm">
-                <option value="">-- Semua Group --</option>
-                @foreach($itemGroups as $ig)
-                    <option value="{{ $ig }}" {{ request('group_filter') == $ig ? 'selected' : '' }}>{{ $ig }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Grup Level 2</label>
-            <select id="select_group_l2_filter" name="group_level_2_filter" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white shadow-sm">
-                <option value="">-- Level 2 --</option>
-                @foreach($groupLevel2s as $gl2)
-                    <option value="{{ $gl2 }}" {{ request('group_level_2_filter') == $gl2 ? 'selected' : '' }}>{{ $gl2 }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex items-end space-x-2">
-            <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md transition cursor-pointer">Filter</button>
-            <button type="button" onclick="MasterDataApp.loadTab('{{ route('master.index', ['tab' => 'products']) }}', 'products')" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl border border-slate-300 dark:border-slate-700 transition cursor-pointer">Reset</button>
+
+        <!-- Row 2: Filter Dropdowns (Height 36px) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+                <select id="select_brand_filter" name="brand_filter" onchange="this.form.dispatchEvent(new Event('submit'))" class="w-full h-[36px] px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white shadow-xs text-[13px]">
+                    <option value="">-- Semua Brand --</option>
+                    @foreach($brands as $br)
+                        <option value="{{ $br }}" {{ request('brand_filter') == $br ? 'selected' : '' }}>{{ $br }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <select id="select_group_filter" name="group_filter" onchange="this.form.dispatchEvent(new Event('submit'))" class="w-full h-[36px] px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white shadow-xs text-[13px]">
+                    <option value="">-- Semua Group --</option>
+                    @foreach($itemGroups as $ig)
+                        <option value="{{ $ig }}" {{ request('group_filter') == $ig ? 'selected' : '' }}>{{ $ig }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <select id="select_group_l2_filter" name="group_level_2_filter" onchange="this.form.dispatchEvent(new Event('submit'))" class="w-full h-[36px] px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white shadow-xs text-[13px]">
+                    <option value="">-- Semua Grup Level 2 --</option>
+                    @foreach($groupLevel2s as $gl2)
+                        <option value="{{ $gl2 }}" {{ request('group_level_2_filter') == $gl2 ? 'selected' : '' }}>{{ $gl2 }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </form>
 
@@ -89,22 +93,22 @@
 
     <!-- Grouped Master SKU Table with Accordion Dropdown -->
     <div class="hidden md:block overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-transparent shadow-sm">
-        <table class="w-full text-left text-xs">
-            <thead class="bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-300 dark:border-slate-700">
+        <table class="w-full text-left text-[13px]">
+            <thead class="bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-300 dark:border-slate-700 text-[13px]">
                 <tr>
-                    <th class="p-3 w-12 text-center">#</th>
-                    <th class="p-3">Kode Item SKU</th>
+                    <th class="p-3 w-12 text-center whitespace-nowrap">#</th>
+                    <th class="p-3 whitespace-nowrap">Kode Item SKU</th>
                     <th class="p-3">Nama Item Produk</th>
                     <th class="p-3">Group Item</th>
-                    <th class="p-3">UOM Inventory</th>
-                    <th class="p-3">Grup UOM</th>
-                    <th class="p-3">Isi/Grup</th>
-                    <th class="p-3">Brand</th>
-                    <th class="p-3">Status</th>
-                    <th class="p-3 text-center">Aksi</th>
+                    <th class="p-3 whitespace-nowrap text-center">UOM Inventory</th>
+                    <th class="p-3 whitespace-nowrap">Grup UOM</th>
+                    <th class="p-3 whitespace-nowrap text-center">Isi/Grup</th>
+                    <th class="p-3 whitespace-nowrap">Brand</th>
+                    <th class="p-3 whitespace-nowrap text-center">Status</th>
+                    <th class="p-3 text-center whitespace-nowrap">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[13px]">
                 @forelse($products as $p)
                     @php
                         $prodData = [
@@ -132,7 +136,7 @@
                     <tr class="transition cursor-pointer select-none border-b border-slate-200 dark:border-slate-800"
                         :class="isSkuExpanded('{{ $p->id }}') ? 'bg-indigo-50/90 dark:bg-indigo-950/40 border-l-4 border-l-indigo-600 dark:border-l-indigo-500' : 'bg-white dark:bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40'"
                         @click="toggleSku('{{ $p->id }}')">
-                        <td class="p-3 text-center">
+                        <td class="p-3 text-center whitespace-nowrap">
                             <button type="button" 
                                     @click.stop="toggleSku('{{ $p->id }}')" 
                                     class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shadow-sm transition cursor-pointer"
@@ -141,50 +145,50 @@
                                    :class="isSkuExpanded('{{ $p->id }}') ? 'rotate-90 text-indigo-600 dark:text-indigo-400' : ''"></i>
                             </button>
                         </td>
-                        <td class="p-3">
+                        <td class="p-3 whitespace-nowrap">
                             <div class="flex items-center space-x-2">
                                 <span class="font-mono font-bold text-indigo-700 dark:text-indigo-400 text-sm tracking-wide">{{ $p->id }}</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold transition"
+                                <span class="px-2 py-0.5 rounded-full text-[13px] font-bold transition whitespace-nowrap"
                                       :class="isSkuExpanded('{{ $p->id }}') ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700'">
                                     {{ $conversionsCount }} Unit
                                 </span>
                             </div>
                         </td>
                         <td class="p-3">
-                            <div class="font-bold text-slate-900 dark:text-white">{{ $p->name }}</div>
+                            <div class="font-bold text-slate-900 dark:text-white break-words">{{ $p->name }}</div>
                         </td>
-                        <td class="p-3 text-slate-600 dark:text-slate-400 text-[11px] font-medium">{{ $p->item_group ?? '-' }}</td>
-                        <td class="p-3">
-                            <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 text-xs shadow-sm">
+                        <td class="p-3 text-slate-600 dark:text-slate-400 text-[13px] font-medium break-words">{{ $p->item_group ?? '-' }}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 text-[13px] shadow-sm">
                                 {{ $p->uom_inventory }}
                             </span>
                         </td>
-                        <td class="p-3 font-mono font-semibold text-slate-700 dark:text-slate-300">{{ $p->uom_group ?? '-' }}</td>
-                        <td class="p-3 font-bold text-amber-700 dark:text-amber-400 text-xs">{{ $p->qty_per_uom_group ?? '-' }}</td>
-                        <td class="p-3 text-slate-700 dark:text-slate-300 font-medium">{{ $p->brand ?? '-' }}</td>
-                        <td class="p-3">
+                        <td class="p-3 font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{{ $p->uom_group ?? '-' }}</td>
+                        <td class="p-3 text-center font-bold text-amber-700 dark:text-amber-400 text-[13px] whitespace-nowrap">{{ $p->qty_per_uom_group ?? '-' }}</td>
+                        <td class="p-3 text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">{{ $p->brand ?? '-' }}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
                             @if($p->is_active)
-                                <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 rounded font-bold text-[10px]">Active</span>
+                                <span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 rounded-lg font-bold text-[13px]">Active</span>
                             @else
-                                <span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 rounded font-bold text-[10px]">Inactive</span>
+                                <span class="px-2.5 py-1 bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 rounded-lg font-bold text-[13px]">Inactive</span>
                             @endif
                         </td>
-                        <td class="p-3 text-center space-x-1 whitespace-nowrap" @click.stop>
+                        <td class="p-3 text-center space-x-1.5 whitespace-nowrap" @click.stop>
                             <button type="button" 
                                     data-product="{{ json_encode($prodData) }}" 
                                     onclick="window.openDetailProductModal(this)" 
-                                    class="p-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg transition shadow-sm cursor-pointer" 
+                                    class="p-2 bg-[#00c0ef] hover:bg-[#00a7d0] text-white rounded-lg transition shadow-sm cursor-pointer inline-flex items-center justify-center text-[13px]" 
                                     title="Show Detail Produk SKU">
-                                <i class="fa-solid fa-eye text-xs"></i>
+                                <i class="fa-solid fa-eye text-[13px]"></i>
                             </button>
 
                             @canAccessModule('master', 'update')
                                 <button type="button" 
                                         data-product="{{ json_encode($prodData) }}" 
                                         onclick="window.openEditProductModal(this)" 
-                                        class="p-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition shadow-sm cursor-pointer" 
+                                        class="p-2 bg-[#f39c12] hover:bg-[#e08e0b] text-white rounded-lg transition shadow-sm cursor-pointer inline-flex items-center justify-center text-[13px]" 
                                         title="Edit Produk SKU">
-                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <i class="fa-solid fa-pen-to-square text-[13px]"></i>
                                 </button>
                             @endcanAccessModule
 
@@ -192,8 +196,8 @@
                                 <form action="{{ route('master.product.destroy', $p->id) }}" method="POST" onsubmit="MasterDataApp.deleteItem(event, this)" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition shadow-sm cursor-pointer" title="Hapus Produk SKU">
-                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    <button type="submit" class="p-2 bg-[#dd4b39] hover:bg-[#c23321] text-white rounded-lg transition shadow-sm cursor-pointer inline-flex items-center justify-center text-[13px]" title="Hapus Produk SKU">
+                                        <i class="fa-solid fa-trash text-[13px]"></i>
                                     </button>
                                 </form>
                             @endcanAccessModule
@@ -212,20 +216,20 @@
                                 <!-- Dropdown Sub-Header -->
                                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-300 dark:border-slate-800 pb-3">
                                     <div class="flex items-center space-x-2.5">
-                                        <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-xs shadow-sm font-bold border border-indigo-200 dark:border-transparent">
+                                        <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-xs shadow-sm font-bold border border-indigo-200 dark:border-transparent">
                                             <i class="fa-solid fa-arrows-split-up-and-left"></i>
                                         </div>
                                         <div>
-                                            <h4 class="font-extrabold text-slate-900 dark:text-white text-xs">
+                                            <h4 class="font-extrabold text-slate-900 dark:text-white text-[13px]">
                                                 Daftar Konversi Satuan & Kemasan untuk SKU: 
                                                 <span class="font-mono text-indigo-700 dark:text-indigo-300 font-extrabold">{{ $p->id }}</span>
                                             </h4>
-                                            <div class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                                            <div class="text-[13px] text-slate-600 dark:text-slate-400 font-medium">
                                                 {{ $p->name }} &bull; Brand: <strong class="text-slate-900 dark:text-white">{{ $p->brand ?? '-' }}</strong> &bull; Group: <strong class="text-slate-900 dark:text-white">{{ $p->item_group ?? '-' }}</strong>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                                    <div class="flex flex-wrap items-center gap-2 text-[13px]">
                                         <span class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 rounded-lg font-medium">Satuan Dasar (Base): <strong class="font-mono font-bold">{{ $p->uom_inventory }}</strong></span>
                                         <span class="px-2.5 py-1 bg-sky-50 dark:bg-sky-950/50 border border-sky-300 dark:border-sky-700 text-sky-800 dark:text-sky-300 rounded-lg font-medium">Grup Kemasan: <strong class="font-mono font-bold">{{ $p->uom_group ?? '-' }}</strong></span>
                                         <span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-300 rounded-lg font-medium">Isi per Kemasan: <strong class="font-bold">{{ $p->qty_per_uom_group ?? 1 }}</strong></span>
@@ -234,41 +238,41 @@
 
                                 <!-- Conversions Nested Table -->
                                 <div class="border border-slate-300 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-950/60 shadow-sm">
-                                    <table class="w-full text-left text-xs">
-                                        <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-300 dark:border-slate-800">
+                                    <table class="w-full text-left text-[13px]">
+                                        <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-400 uppercase text-[13px] tracking-wider font-bold border-b border-slate-300 dark:border-slate-800">
                                             <tr>
-                                                <th class="p-2.5 w-12 text-center">No</th>
-                                                <th class="p-2.5">Satuan Konversi (UOM Convert)</th>
-                                                <th class="p-2.5">Qty Konversi</th>
-                                                <th class="p-2.5">Satuan Dasar (UOM Base)</th>
-                                                <th class="p-2.5">Formula Ekivalensi Satuan</th>
-                                                <th class="p-2.5 text-center">Status</th>
+                                                <th class="p-3 w-12 text-center whitespace-nowrap">No</th>
+                                                <th class="p-3 whitespace-nowrap">Satuan Konversi (UOM Convert)</th>
+                                                <th class="p-3 whitespace-nowrap">Qty Konversi</th>
+                                                <th class="p-3 whitespace-nowrap">Satuan Dasar (UOM Base)</th>
+                                                <th class="p-3">Formula Ekivalensi Satuan</th>
+                                                <th class="p-3 text-center whitespace-nowrap">Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800/80">
+                                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800/80 text-[13px]">
                                             @forelse($p->conversions as $idx => $conv)
                                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/60 transition">
-                                                    <td class="p-2.5 text-center text-slate-500 font-bold font-mono">{{ $idx + 1 }}</td>
-                                                    <td class="p-2.5 font-mono font-bold">
-                                                        <span class="px-2.5 py-1 bg-sky-100 dark:bg-sky-500/10 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/20 rounded-md font-mono font-bold text-xs shadow-sm">
+                                                    <td class="p-3 text-center text-slate-500 font-bold font-mono">{{ $idx + 1 }}</td>
+                                                    <td class="p-3 font-mono font-bold whitespace-nowrap">
+                                                        <span class="px-2.5 py-1 bg-sky-100 dark:bg-sky-500/10 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/20 rounded-md font-mono font-bold text-[13px] shadow-sm">
                                                             {{ $conv->uom_convert }}
                                                         </span>
                                                     </td>
-                                                    <td class="p-2.5 font-mono font-extrabold text-indigo-700 dark:text-indigo-300 text-sm">
+                                                    <td class="p-3 font-mono font-extrabold text-indigo-700 dark:text-indigo-300 text-sm whitespace-nowrap">
                                                         {{ number_format($conv->qty_convert) }}
                                                     </td>
-                                                    <td class="p-2.5 font-mono font-bold">
-                                                        <span class="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 rounded font-mono text-xs">
+                                                    <td class="p-3 font-mono font-bold whitespace-nowrap">
+                                                        <span class="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 rounded font-mono text-[13px]">
                                                             {{ $conv->uom_base }}
                                                         </span>
                                                     </td>
-                                                    <td class="p-2.5 font-mono text-[11px]">
+                                                    <td class="p-3 font-mono text-[13px]">
                                                         <span class="text-slate-900 dark:text-white font-bold">1 {{ $conv->uom_convert }}</span>
                                                         <span class="text-slate-400 mx-1">=</span>
                                                         <span class="text-amber-700 dark:text-amber-300 font-extrabold">{{ number_format($conv->qty_convert) }} {{ $conv->uom_base }}</span>
                                                     </td>
-                                                    <td class="p-2.5 text-center">
-                                                        <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 shadow-sm">
+                                                    <td class="p-3 text-center whitespace-nowrap">
+                                                        <span class="px-2.5 py-1 rounded text-[13px] font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 shadow-sm">
                                                             Valid Ekivalen
                                                         </span>
                                                     </td>

@@ -7,7 +7,7 @@
                     <i class="fa-solid fa-chevron-left mr-1.5 text-[10px]"></i> Sebelumnya
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500 rounded-xl transition shadow-sm">
+                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-[#004b87] rounded-xl transition shadow-sm">
                     <i class="fa-solid fa-chevron-left mr-1.5 text-[10px]"></i> Sebelumnya
                 </a>
             @endif
@@ -17,7 +17,7 @@
             </span>
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500 rounded-xl transition shadow-sm">
+                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-[#004b87] rounded-xl transition shadow-sm">
                     Berikutnya <i class="fa-solid fa-chevron-right ml-1.5 text-[10px]"></i>
                 </a>
             @else
@@ -36,7 +36,7 @@
                     sampai
                     <span class="font-bold text-white font-mono">{{ $paginator->lastItem() ?? 0 }}</span>
                     dari
-                    <span class="font-bold text-indigo-400 font-mono">{{ $paginator->total() }}</span>
+                    <span class="font-bold text-[#004b87] dark:text-sky-400 font-mono">{{ $paginator->total() }}</span>
                     data
                 </p>
             </div>
@@ -67,7 +67,7 @@
                         @if (is_array($element))
                             @foreach ($element as $page => $url)
                                 @if ($page == $paginator->currentPage())
-                                    <span aria-current="page" class="relative inline-flex items-center px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 border border-indigo-500 rounded-lg shadow-md shadow-indigo-600/30">
+                                    <span aria-current="page" class="relative inline-flex items-center px-3 py-1.5 text-xs font-bold text-white bg-[#004b87] border border-[#003661] rounded-lg shadow-md shadow-[#004b87]/30">
                                         {{ $page }}
                                     </span>
                                 @else

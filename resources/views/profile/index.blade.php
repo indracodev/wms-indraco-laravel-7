@@ -14,12 +14,12 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- User Info Card -->
         <div class="glass-panel p-6 rounded-2xl text-center space-y-4">
-            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-2xl text-white mx-auto shadow-xl ring-4 ring-indigo-500/20">
+            <div class="w-20 h-20 rounded-full bg-[#E31B23] flex items-center justify-center font-bold text-2xl text-white mx-auto shadow-xl ring-4 ring-white/80">
                 {{ strtoupper(substr($user->name, 0, 2)) }}
             </div>
             <div>
                 <h3 class="text-lg font-bold text-white">{{ $user->name }}</h3>
-                <div class="text-xs text-indigo-400 font-mono">@ {{ $user->username }}</div>
+                <div class="text-xs text-[#004b87] dark:text-sky-300 font-mono">@ {{ $user->username }}</div>
             </div>
             <div class="pt-2 border-t border-slate-700/60 space-y-2 text-xs text-slate-300">
                 <div class="flex justify-between">
@@ -55,7 +55,7 @@
                     <input type="password" name="new_password_confirmation" required class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
                 </div>
                 <div class="pt-2 flex justify-end">
-                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow transition">
+                    <button type="submit" class="btn-royal px-5 py-2.5 bg-[#3850c9] hover:bg-[#2c3fa8] text-white font-semibold text-xs rounded-xl shadow transition">
                         Perbarui Password
                     </button>
                 </div>

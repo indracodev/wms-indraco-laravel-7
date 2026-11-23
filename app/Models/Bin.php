@@ -10,6 +10,13 @@ class Bin extends Model
     protected $keyType = 'string';
     protected $guarded = [];
 
+    protected $casts = [
+        'column_no' => 'integer',
+        'level_no' => 'integer',
+        'max_pallet' => 'integer',
+        'beam_length' => 'integer',
+    ];
+
     public function rack()
     {
         return $this->belongsTo(Rack::class, 'rack_id');

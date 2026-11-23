@@ -6,45 +6,285 @@
 <!-- TomSelect Searchable Dropdown CSS -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
+    /* -------------------------------------------------------------
+     * MASTER DATA DESIGN SYSTEM: Identik gifanya-adhiyaksa-jaya
+     * ------------------------------------------------------------- */
+    
+    /* TomSelect Dropdown Customization */
     .ts-control {
-        background-color: #0f172a !important;
-        border-color: #334155 !important;
+        background-color: #001e38 !important;
+        border: 1.5px solid #003661 !important;
         color: #ffffff !important;
-        border-radius: 0.75rem !important;
-        padding: 0.6rem 0.8rem !important;
-        font-size: 0.75rem !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 0.85rem !important;
+        font-size: 0.82rem !important;
     }
     .ts-dropdown {
-        background-color: #0f172a !important;
-        border-color: #334155 !important;
+        background-color: #00274d !important;
+        border: 1px solid #003661 !important;
         color: #ffffff !important;
-        border-radius: 0.75rem !important;
-        font-size: 0.75rem !important;
+        border-radius: 10px !important;
+        font-size: 0.82rem !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
     }
     .ts-dropdown .option {
         color: #e2e8f0 !important;
+        padding: 8px 12px !important;
     }
     .ts-dropdown .option.active, .ts-dropdown .option:hover {
-        background-color: #4f46e5 !important;
+        background-color: #004b87 !important;
         color: #ffffff !important;
     }
     html.light .ts-control {
-        background-color: #ffffff !important;
-        border-color: #cbd5e1 !important;
+        background-color: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
         color: #0f172a !important;
+    }
+    html.light .ts-control:focus, html.light .ts-control.focus {
+        border-color: #004b87 !important;
+        box-shadow: 0 0 0 3px rgba(0, 75, 135, 0.15) !important;
     }
     html.light .ts-dropdown {
         background-color: #ffffff !important;
-        border-color: #cbd5e1 !important;
+        border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
+        box-shadow: 0 10px 25px rgba(0, 43, 91, 0.1) !important;
     }
     html.light .ts-dropdown .option {
-        color: #0f172a !important;
+        color: #1e293b !important;
     }
     html.light .ts-dropdown .option.active, html.light .ts-dropdown .option:hover {
-        background-color: #4f46e5 !important;
+        background-color: #f0f7ff !important;
+        color: #004b87 !important;
+        font-weight: 600 !important;
+    }
+
+    /* Container Glass Panel -> Solid Clean White Card (gifanya-adhiyaksa-jaya style) */
+    html.light #master-data-root .glass-panel {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 1px 3px rgba(0, 43, 91, 0.05) !important;
+        padding: 20px !important;
+    }
+    html.dark #master-data-root .glass-panel {
+        background-color: #00274d !important;
+        border: 1px solid #003661 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 20px rgba(0, 15, 35, 0.4) !important;
+        padding: 20px !important;
+    }
+
+    /* Table Head Styling */
+    html.light #master-data-root table thead,
+    html.light #master-data-root .bg-slate-100 {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    html.light #master-data-root table thead th {
+        color: #475569 !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        font-weight: 700 !important;
+        padding: 12px 14px !important;
+    }
+    html.dark #master-data-root table thead {
+        background-color: #001e38 !important;
+        border-bottom: 2px solid #003661 !important;
+    }
+    html.dark #master-data-root table thead th {
+        color: #93c5fd !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        font-weight: 700 !important;
+        padding: 12px 14px !important;
+    }
+
+    /* Table Body Rows */
+    html.light #master-data-root table tbody tr {
+        border-bottom: 1px solid #f1f5f9 !important;
+        transition: background-color 0.15s ease !important;
+    }
+    html.light #master-data-root table tbody tr:hover {
+        background-color: #f8fafc !important;
+    }
+    html.light #master-data-root table tbody td {
+        padding: 13px 14px !important;
+        vertical-align: middle !important;
+        font-size: 0.84rem !important;
+    }
+    html.dark #master-data-root table tbody tr {
+        border-bottom: 1px solid #00274d !important;
+    }
+    html.dark #master-data-root table tbody tr:hover {
+        background-color: rgba(0, 75, 135, 0.2) !important;
+    }
+    html.dark #master-data-root table tbody td {
+        padding: 13px 14px !important;
+        vertical-align: middle !important;
+        font-size: 0.84rem !important;
+    }
+
+    /* Table Outer Container Box */
+    html.light #master-data-root .overflow-x-auto.border {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    }
+    html.dark #master-data-root .overflow-x-auto.border {
+        border: 1px solid #003661 !important;
+        border-radius: 14px !important;
+        background: #00274d !important;
+    }
+
+    /* Tab Button Navigation */
+    .tab-btn {
+        transition: all 0.2s ease !important;
+    }
+    html.light .tab-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Form Controls in Light Mode */
+    html.light #master-data-root input[type="text"]:not(.search-input-field),
+    html.light #master-data-root input[type="number"],
+    html.light #master-data-root select,
+    html.light #master-data-root textarea {
+        background-color: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
+        font-size: 0.82rem !important;
+    }
+    html.light #master-data-root input:not(.search-input-field):focus,
+    html.light #master-data-root select:focus,
+    html.light #master-data-root textarea:focus {
+        background-color: #ffffff !important;
+        border-color: #004b87 !important;
+        box-shadow: 0 0 0 3px rgba(0, 75, 135, 0.15) !important;
+    }
+
+    /* Global Search Component for Master Data (Identical to Detail Data & Pallets) */
+    #master-data-root .search-input-group {
+        display: flex !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        height: 36px !important;
+        max-height: 36px !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
+    #master-data-root .search-btn-reset {
+        background-color: #f39c12 !important;
+        color: #ffffff !important;
+        border: 1px solid #f39c12 !important;
+        border-radius: 4px 0 0 4px !important;
+        padding: 8px 12px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+        min-width: 37.16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease !important;
+        font-size: 13px !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        z-index: 1;
+    }
+    #master-data-root .search-btn-reset:hover {
+        background-color: #e08e0b !important;
+        border-color: #e08e0b !important;
         color: #ffffff !important;
     }
+    #master-data-root .search-input-field,
+    html.light #master-data-root .search-input-field,
+    html.light #master-data-root input.search-input-field {
+        flex: 1 1 auto !important;
+        background-color: #ffffff !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0 !important;
+        margin: 0 0 0 -1px !important;
+        padding: 6px 12px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+        font-size: 13px !important;
+        font-family: 'Poppins', sans-serif !important;
+        line-height: normal !important;
+        color: #1e293b !important;
+        outline: none !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+        z-index: 2;
+    }
+    html.dark #master-data-root .search-input-field,
+    html.dark #master-data-root input.search-input-field {
+        background-color: #001e38 !important;
+        border-color: #003661 !important;
+        color: #ffffff !important;
+    }
+    #master-data-root .search-input-field:focus,
+    html.light #master-data-root .search-input-field:focus,
+    html.light #master-data-root input.search-input-field:focus {
+        outline: none !important;
+        border-color: #3850c9 !important;
+        box-shadow: 0 0 0 1px #3850c9 !important;
+        z-index: 3;
+    }
+    #master-data-root .search-btn-submit {
+        background-color: #3850c9 !important;
+        color: #ffffff !important;
+        border: 1px solid #3850c9 !important;
+        border-radius: 0 4px 4px 0 !important;
+        margin: 0 0 0 -1px !important;
+        padding: 8px 12px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+        width: auto !important;
+        min-width: 37.16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease !important;
+        font-size: 13px !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+        z-index: 1;
+    }
+    #master-data-root .search-btn-submit:hover {
+        background-color: #2b3ea6 !important;
+        border-color: #2b3ea6 !important;
+        color: #ffffff !important;
+    }
+
+    /* Card Form Input on the right side */
+    html.light #master-data-root .lg\:block.bg-slate-100 {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        padding: 20px !important;
+    }
+    html.dark #master-data-root .lg\:block.bg-slate-100 {
+        background-color: #00274d !important;
+        border: 1px solid #003661 !important;
+        border-radius: 14px !important;
+        padding: 20px !important;
+    }
+
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -52,27 +292,298 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    /* Mobile Tab Slider - Abu-abu Light Grey Buttons */
+    /* Enforce Minimal 13px Font Across Master Data without breaking icon fonts */
+    #master-data-root input,
+    #master-data-root select,
+    #master-data-root textarea,
+    #master-data-root button:not([class*="fa"]),
+    #master-data-root .tab-btn:not([class*="fa"]),
+    #master-data-root .desktop-tab-btn:not([class*="fa"]),
+    #master-data-root table th,
+    #master-data-root table td,
+    #master-data-root label,
+    #master-data-root p,
+    #master-data-root span:not([class*="fa"]):not([class*="icon"]),
+    #master-data-root div:not([class*="fa"]):not([class*="icon"]) {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* CRITICAL: Force Font Awesome Icons inside Master Data to preserve glyphs with exact weights */
+    #master-data-root .fa-solid,
+    #master-data-root .fas,
+    #master-data-root i.fa-solid,
+    #master-data-root i.fas,
+    #master-data-root [class*="fa-solid"],
+    #master-data-root [class*="fas"],
+    #master-data-root button i.fa-solid,
+    #master-data-root a i.fa-solid,
+    #master-data-root h2 i.fa-solid,
+    #master-data-root h3 i.fa-solid {
+        font-family: "Font Awesome 6 Free" !important;
+        font-weight: 900 !important;
+        font-style: normal !important;
+        font-variant: normal !important;
+        text-rendering: auto !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+    }
+    #master-data-root .fa-regular,
+    #master-data-root .far,
+    #master-data-root i.fa-regular,
+    #master-data-root i.far {
+        font-family: "Font Awesome 6 Free" !important;
+        font-weight: 400 !important;
+        font-style: normal !important;
+        font-variant: normal !important;
+        text-rendering: auto !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+    }
+    #master-data-root i.fa-brands,
+    #master-data-root i.fab,
+    #master-data-root .fa-brands,
+    #master-data-root .fab {
+        font-family: "Font Awesome 6 Brands" !important;
+        font-weight: 400 !important;
+        font-style: normal !important;
+        font-variant: normal !important;
+        text-rendering: auto !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+    }
+    #master-data-root [class*="fa-"]::before {
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        font-style: inherit !important;
+    }
+
+    #master-data-root,
+    #master-data-root input,
+    #master-data-root select,
+    #master-data-root textarea,
+    #master-data-root button,
+    #master-data-root .tab-btn,
+    #master-data-root .desktop-tab-btn,
+    #master-data-root table th,
+    #master-data-root table td,
+    #master-data-root label,
+    #master-data-root p,
+    #master-data-root span,
+    #master-data-root td,
+    #master-data-root th {
+        font-size: 13px;
+    }
+    #master-data-root table th {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    #master-data-root table td {
+        font-size: 13px !important;
+        overflow-wrap: break-word !important;
+    }
+    #master-data-root input,
+    #master-data-root select,
+    #master-data-root textarea {
+        font-size: 13px !important;
+    }
+    #master-data-root button,
+    #master-data-root .btn {
+        font-size: 13px !important;
+    }
+    #master-data-root .text-xs,
+    #master-data-root .text-\[10px\],
+    #master-data-root .text-\[11px\],
+    #master-data-root .text-\[12px\],
+    .fixed .glass-panel .text-xs,
+    .fixed .glass-panel .text-\[10px\],
+    .fixed .glass-panel .text-\[11px\],
+    .fixed .glass-panel .text-\[12px\] {
+        font-size: 13px !important;
+    }
+
+    /* Desktop Tabs Styling (EduMaster Navigation) */
+    .desktop-tab-btn {
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 9px 16px !important;
+        transition: all 0.2s ease !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #ffffff !important;
+        color: #334155 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        white-space: nowrap !important;
+        cursor: pointer !important;
+    }
+    .desktop-tab-btn:not(.tab-active) i {
+        color: #004b87 !important;
+        font-size: 14px !important;
+        transition: color 0.2s ease !important;
+    }
+    .desktop-tab-btn:hover {
+        background-color: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+    }
+    .desktop-tab-btn.tab-active,
+    html.light .desktop-tab-btn.tab-active,
+    html.dark .desktop-tab-btn.tab-active {
+        background-color: #004b87 !important;
+        border-color: #004b87 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 75, 135, 0.25) !important;
+    }
+    .desktop-tab-btn.tab-active *,
+    .desktop-tab-btn.tab-active i,
+    .desktop-tab-btn.tab-active span,
+    html.light .desktop-tab-btn.tab-active *,
+    html.light .desktop-tab-btn.tab-active i,
+    html.light .desktop-tab-btn.tab-active span,
+    html.dark .desktop-tab-btn.tab-active *,
+    html.dark .desktop-tab-btn.tab-active i,
+    html.dark .desktop-tab-btn.tab-active span {
+        color: #ffffff !important;
+    }
+    html.dark .desktop-tab-btn:not(.tab-active) {
+        background-color: #00274d !important;
+        border-color: #003661 !important;
+        color: #e2e8f0 !important;
+    }
+    html.dark .desktop-tab-btn:not(.tab-active) i {
+        color: #38bdf8 !important;
+    }
+
+    /* Action Buttons: Exact Palette from User Images */
+    /* Cyan: #00c0ef */
+    #master-data-root .bg-sky-600,
+    #master-data-root .btn-cyan,
+    #master-data-root button[title*="Detail"],
+    #master-data-root button[title*="Show"] {
+        background-color: #00c0ef !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+    #master-data-root .bg-sky-600:hover,
+    #master-data-root .btn-cyan:hover,
+    #master-data-root button[title*="Detail"]:hover,
+    #master-data-root button[title*="Show"]:hover {
+        background-color: #00a7d0 !important;
+    }
+
+    /* Amber / Orange: #f39c12 */
+    #master-data-root .bg-amber-600,
+    #master-data-root .btn-amber,
+    #master-data-root button[title*="Edit"] {
+        background-color: #f39c12 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+    #master-data-root .bg-amber-600:hover,
+    #master-data-root .btn-amber:hover,
+    #master-data-root button[title*="Edit"]:hover {
+        background-color: #e08e0b !important;
+    }
+
+    /* Danger Red: #dd4b39 */
+    #master-data-root .bg-rose-600,
+    #master-data-root .btn-danger,
+    #master-data-root button[title*="Hapus"] {
+        background-color: #dd4b39 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+    #master-data-root .bg-rose-600:hover,
+    #master-data-root .btn-danger:hover,
+    #master-data-root button[title*="Hapus"]:hover {
+        background-color: #c23321 !important;
+    }
+
+    /* Green: #59c594 */
+    #master-data-root .bg-emerald-600,
+    #master-data-root .btn-green {
+        background-color: #59c594 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+    #master-data-root .bg-emerald-600:hover,
+    #master-data-root .btn-green:hover {
+        background-color: #48b282 !important;
+    }
+
+    /* Royal Blue: #3850c9 */
+    #master-data-root .bg-blue-600,
+    #master-data-root .btn-blue,
+    #master-data-root .btn-primary-blue {
+        background-color: #3850c9 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+    #master-data-root .bg-blue-600:hover,
+    #master-data-root .btn-blue:hover,
+    #master-data-root .btn-primary-blue:hover {
+        background-color: #2b3ea6 !important;
+    }
+
+    /* Modal Styling Aligned with gifanya-adhiyaksa-jaya */
+    html.light .fixed .glass-panel {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 43, 91, 0.25) !important;
+        color: #0f172a !important;
+    }
+    html.light .fixed .glass-panel h3,
+    html.light .fixed .glass-panel label {
+        color: #0f172a !important;
+    }
+    html.light .fixed .glass-panel input,
+    html.light .fixed .glass-panel select,
+    html.light .fixed .glass-panel textarea {
+        background-color: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+    html.light .fixed .glass-panel input:focus,
+    html.light .fixed .glass-panel select:focus,
+    html.light .fixed .glass-panel textarea:focus {
+        background-color: #ffffff !important;
+        border-color: #004b87 !important;
+        box-shadow: 0 0 0 3px rgba(0, 75, 135, 0.15) !important;
+    }
+
+    /* Mobile Tab Slider */
     .mobile-tab-slider .tab-btn {
-        background-color: #e2e8f0 !important; /* Abu-abu light grey */
+        background-color: #f1f5f9 !important;
         color: #334155 !important;
         border: 1px solid #cbd5e1 !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
     }
     .mobile-tab-slider .tab-btn:hover {
-        background-color: #cbd5e1 !important;
+        background-color: #e2e8f0 !important;
         color: #0f172a !important;
     }
     .mobile-tab-slider .tab-btn.bg-indigo-600 {
-        background-color: #4f46e5 !important;
+        background-color: #004b87 !important;
         color: #ffffff !important;
-        border-color: #4338ca !important;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35) !important;
+        border-color: #003661 !important;
+        box-shadow: 0 4px 12px rgba(0, 75, 135, 0.35) !important;
     }
     html.dark .mobile-tab-slider .tab-btn:not(.bg-indigo-600) {
-        background-color: #334155 !important;
+        background-color: #00274d !important;
         color: #e2e8f0 !important;
-        border: 1px solid #475569 !important;
+        border: 1px solid #003661 !important;
     }
 </style>
 @endsection
@@ -85,51 +596,48 @@
 <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2 pointer-events-none"></div>
 
 <div id="master-data-root" class="space-y-6 pb-32 md:pb-0" x-data="masterDataForm('{{ $tab }}')">
-    <!-- Header Title -->
+    <!-- Header Title (Matching gifanya-adhiyaksa-jaya style) -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold font-display text-white">
-                Manajemen Master Data System
+            <h2 class="text-2xl font-bold font-display text-slate-900 dark:text-white flex items-center gap-2.5">
+                <span>Manajemen Master Data</span>
             </h2>
-            <p class="text-sm text-slate-400">Struktur Hirarki Lokasi (Kantor &rarr; Plant &rarr; Gudang &rarr; Rak &rarr; BIN), Master UOM, dan Katalog Produk SKU</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Struktur hirarki lokasi (Kantor &rarr; Plant &rarr; Gudang &rarr; Rak &rarr; BIN &rarr; Palet), Master UOM, dan Katalog Produk SKU</p>
         </div>
     </div>
 
-    <!-- DESKTOP Tab Navigation Bar (Visible on md and up, hidden on mobile) -->
-    <div class="hidden md:flex space-x-2 border-b border-slate-200 dark:border-slate-700/80 pb-2 overflow-x-auto">
-        <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'offices' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="offices">
-            <i class="fa-solid fa-building text-sm"></i>
+    <!-- DESKTOP Tab Navigation Bar (EduMaster Academic Tabs) -->
+    <div class="hidden md:flex space-x-2 border-b border-slate-200 dark:border-slate-700/80 pb-3 overflow-x-auto">
+        <a href="{{ route('master.index', ['tab' => 'offices']) }}" onclick="MasterDataApp.loadTab(this.href, 'offices'); return false;" class="desktop-tab-btn {{ $tab === 'offices' ? 'tab-active' : '' }}" data-tab="offices">
             <span>1. Kantor Pusat</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'branches']) }}" onclick="MasterDataApp.loadTab(this.href, 'branches'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'branches' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="branches">
-            <i class="fa-solid fa-industry text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'branches']) }}" onclick="MasterDataApp.loadTab(this.href, 'branches'); return false;" class="desktop-tab-btn {{ $tab === 'branches' ? 'tab-active' : '' }}" data-tab="branches">
             <span>2. Plant</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'warehouses']) }}" onclick="MasterDataApp.loadTab(this.href, 'warehouses'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'warehouses' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="warehouses">
-            <i class="fa-solid fa-warehouse text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'warehouses']) }}" onclick="MasterDataApp.loadTab(this.href, 'warehouses'); return false;" class="desktop-tab-btn {{ $tab === 'warehouses' ? 'tab-active' : '' }}" data-tab="warehouses">
             <span>3. Gudang</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'racks']) }}" onclick="MasterDataApp.loadTab(this.href, 'racks'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'racks' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="racks">
-            <i class="fa-solid fa-bars-staggered text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'racks']) }}" onclick="MasterDataApp.loadTab(this.href, 'racks'); return false;" class="desktop-tab-btn {{ $tab === 'racks' ? 'tab-active' : '' }}" data-tab="racks">
             <span>4. Rak</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'bins']) }}" onclick="MasterDataApp.loadTab(this.href, 'bins'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'bins' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="bins">
-            <i class="fa-solid fa-qrcode text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'bins']) }}" onclick="MasterDataApp.loadTab(this.href, 'bins'); return false;" class="desktop-tab-btn {{ $tab === 'bins' ? 'tab-active' : '' }}" data-tab="bins">
             <span>5. BIN</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'uoms' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="uoms">
-            <i class="fa-solid fa-scale-balanced text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'uoms']) }}" onclick="MasterDataApp.loadTab(this.href, 'uoms'); return false;" class="desktop-tab-btn {{ $tab === 'uoms' ? 'tab-active' : '' }}" data-tab="uoms">
             <span>6. UOM Inventory</span>
         </a>
 
-        <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn px-4 py-2.5 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 cursor-pointer whitespace-nowrap {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200' }}" data-tab="products">
-            <i class="fa-solid fa-boxes-stacked text-sm"></i>
+        <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="desktop-tab-btn {{ $tab === 'products' ? 'tab-active' : '' }}" data-tab="products">
             <span>7. Produk SKU</span>
+        </a>
+
+        <a href="{{ route('master.index', ['tab' => 'pallets']) }}" onclick="MasterDataApp.loadTab(this.href, 'pallets'); return false;" class="desktop-tab-btn {{ $tab === 'pallets' ? 'tab-active' : '' }}" data-tab="pallets">
+            <span>8. Palet</span>
         </a>
     </div>
 
@@ -162,6 +670,10 @@
 
             <a href="{{ route('master.index', ['tab' => 'products']) }}" onclick="MasterDataApp.loadTab(this.href, 'products'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'products' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="products">
                 <span>7. Produk SKU</span>
+            </a>
+
+            <a href="{{ route('master.index', ['tab' => 'pallets']) }}" onclick="MasterDataApp.loadTab(this.href, 'pallets'); return false;" class="tab-btn shrink-0 px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer whitespace-nowrap active:scale-95 {{ $tab === 'pallets' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700/80 dark:text-slate-200' }}" data-tab="pallets">
+                <span>8. Palet</span>
             </a>
         </div>
     </div>
@@ -580,6 +1092,7 @@
     @include('master.modals.bins')
     @include('master.modals.uoms')
     @include('master.modals.uom_products')
+    @include('master.modals.pallets')
 </div>
 
 @section('scripts')
@@ -772,15 +1285,25 @@
                 container.style.opacity = '0.5';
             }
 
-            // Update Tab Button UI States (Both desktop and mobile sliders)
-            document.querySelectorAll('.tab-btn').forEach(btn => {
+            // Update Desktop Tabs UI (EduMaster Academic Tabs)
+            document.querySelectorAll('.desktop-tab-btn').forEach(btn => {
                 const isActive = btn.getAttribute('data-tab') === tabName;
                 if (isActive) {
-                    btn.classList.remove('bg-slate-800/80', 'text-slate-400', 'hover:text-slate-200', 'bg-slate-200', 'text-slate-700');
+                    btn.classList.add('tab-active');
+                } else {
+                    btn.classList.remove('tab-active');
+                }
+            });
+
+            // Update Mobile Bottom Slider Tabs UI
+            document.querySelectorAll('.mobile-tab-slider .tab-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-tab') === tabName;
+                if (isActive) {
+                    btn.classList.remove('bg-slate-200', 'text-slate-700');
                     btn.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
                 } else {
                     btn.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-indigo-600/30');
-                    btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:text-slate-200');
+                    btn.classList.add('bg-slate-200', 'text-slate-700');
                 }
             });
 
@@ -896,6 +1419,9 @@
                         masterAlpine.showDetailBinModal = false;
                         masterAlpine.showEditBinModal = false;
                         masterAlpine.showAddBinModal = false;
+                        masterAlpine.showDetailPalletModal = false;
+                        masterAlpine.showEditPalletModal = false;
+                        masterAlpine.showAddPalletModal = false;
                     }
 
                     // Reload active tab data seamlessly
@@ -1212,6 +1738,40 @@
         }
     };
 
+    window.openDetailPalletModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-pallet');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.detailPallet = data;
+                alpine.showDetailPalletModal = true;
+            }
+        } catch (e) {
+            console.error('Error opening detail pallet modal:', e);
+        }
+    };
+
+    window.openEditPalletModal = function(btn) {
+        try {
+            const raw = typeof btn === 'string' ? btn : btn.getAttribute('data-pallet');
+            const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            const alpine = getMasterAlpine();
+            if (alpine) {
+                alpine.openEditPalletModal(data);
+            }
+        } catch (e) {
+            console.error('Error opening edit pallet modal:', e);
+        }
+    };
+
+    window.openAddPalletModal = function() {
+        const alpine = getMasterAlpine();
+        if (alpine) {
+            alpine.openAddPalletModal();
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         initAllMasterTomSelects();
         MasterDataApp.bindPaginationLinks();
@@ -1511,6 +2071,25 @@
                 this.showEditUomModal = true;
             },
 
+            showDetailPalletModal: false,
+            showEditPalletModal: false,
+            showAddPalletModal: false,
+            detailPallet: null,
+            editPalletForm: { id: '', pallet_type_id: '', bin_id: '', max_capacity: 72, is_active: 1 },
+            openAddPalletModal() {
+                this.forms.pallet_id = '';
+                this.autoPalletCode();
+                this.showAddPalletModal = true;
+            },
+            openEditPalletModal(plt) {
+                this.editPalletForm.id = plt.id;
+                this.editPalletForm.pallet_type_id = plt.pallet_type_id;
+                this.editPalletForm.bin_id = plt.bin_id || '';
+                this.editPalletForm.max_capacity = plt.max_capacity || 72;
+                this.editPalletForm.is_active = plt.is_active ? 1 : 0;
+                this.showEditPalletModal = true;
+            },
+
             forms: {
                 office_id: '',
                 branch_id: '',
@@ -1518,7 +2097,8 @@
                 rack_id: '',
                 bin_id: '',
                 uom_id: '',
-                product_id: ''
+                product_id: '',
+                pallet_id: ''
             },
 
             autoOfficeCode() {
@@ -1550,6 +2130,10 @@
 
             autoProductCode() {
                 this.forms.product_id = 'FGD' + Math.floor(10000 + Math.random() * 90000);
+            },
+
+            autoPalletCode() {
+                this.forms.pallet_id = 'PLT-' + Math.floor(1000 + Math.random() * 9000);
             }
         }
     }

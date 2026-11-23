@@ -9,6 +9,7 @@ use App\Models\Warehouse;
 use App\Models\Rack;
 use App\Models\Bin;
 use App\Models\PalletType;
+use App\Models\Pallet;
 use App\Models\Uom;
 use App\Models\Product;
 use App\Models\ProductUomConversion;
@@ -32,6 +33,7 @@ class MasterDataController extends Controller
         $warehouses = $emptyPaginator;
         $racks = $emptyPaginator;
         $bins = $emptyPaginator;
+        $pallets = $emptyPaginator;
         $uoms = $emptyPaginator;
         $palletTypes = $emptyPaginator;
         $products = $emptyPaginator;
@@ -47,6 +49,7 @@ class MasterDataController extends Controller
         $allBranches = collect();
         $allWarehouses = collect();
         $allRacks = collect();
+        $allBins = collect();
         $allPalletTypes = collect();
         $allUoms = Uom::select('id', 'name', 'description')->orderBy('name', 'asc')->get();
 
@@ -230,6 +233,50 @@ class MasterDataController extends Controller
                 }
                 break;
 
+            case 'pallets':
+                $allBins = Bin::select('id', 'rack_id')->orderBy('id', 'asc')->get();
+                $allPalletTypes = PalletType::select('id', 'name')->orderBy('name', 'asc')->get();
+
+                $palletQuery = Pallet::with([
+                    'bin.rack.warehouse',
+                    'type',
+                    'boxes' => function($q) { $q->where('status', 'active'); }
+                ])->withCount(['boxes as active_boxes_count' => function($q) {
+                    $q->where('status', 'active');
+                }]);
+
+                if ($request->filled('type_filter')) {
+                    $palletQuery->where('pallet_type_id', $request->type_filter);
+                }
+                if ($request->filled('bin_filter')) {
+                    $palletQuery->where('bin_id', $request->bin_filter);
+                }
+                if ($request->filled('status_filter')) {
+                    if ($request->status_filter === 'on_rack') {
+                        $palletQuery->where('status', 'on_rack')->whereNotNull('bin_id');
+                    } elseif ($request->status_filter === 'in_transit') {
+                        $palletQuery->where(function($q) {
+                            $q->where('status', 'in_transit')->orWhereNull('bin_id');
+                        });
+                    } elseif ($request->status_filter === 'active') {
+                        $palletQuery->where('is_active', true);
+                    } elseif ($request->status_filter === 'inactive') {
+                        $palletQuery->where('is_active', false);
+                    }
+                }
+                if ($request->filled('search_pallet')) {
+                    $s = $request->search_pallet;
+                    $palletQuery->where(function($q) use ($s) {
+                        $q->where('id', 'like', "%{$s}%")
+                          ->orWhere('bin_id', 'like', "%{$s}%")
+                          ->orWhere('pallet_type_id', 'like', "%{$s}%");
+                    });
+                }
+                $pallets = $palletQuery->orderBy('id', $sortDir)
+                                       ->paginate(15, ['*'], 'pallets_page')
+                                       ->withQueryString();
+                break;
+
             case 'offices':
             default:
                 $tab = 'offices';
@@ -265,8 +312,8 @@ class MasterDataController extends Controller
             }
 
             $html = view('master.tabs.' . $tab, compact(
-                'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
-                'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
+                'offices', 'branches', 'warehouses', 'racks', 'bins', 'pallets', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
+                'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allBins', 'allPalletTypes', 'allUoms',
                 'tab', 'sortBy', 'sortDir'
             ))->render();
 
@@ -278,8 +325,8 @@ class MasterDataController extends Controller
         }
 
         return view('master.index', compact(
-            'offices', 'branches', 'warehouses', 'racks', 'bins', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
-            'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allPalletTypes', 'allUoms',
+            'offices', 'branches', 'warehouses', 'racks', 'bins', 'pallets', 'uoms', 'palletTypes', 'products', 'flatProducts', 'brands', 'itemGroups', 'groupLevel2s', 'groupLevel3s',
+            'allOffices', 'allBranches', 'allWarehouses', 'allRacks', 'allBins', 'allPalletTypes', 'allUoms',
             'tab', 'sortBy', 'sortDir'
         ));
     }
@@ -977,6 +1024,138 @@ class MasterDataController extends Controller
                 'status' => 'success',
                 'message' => $msg,
                 'tab' => 'products'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function storePallet(Request $request)
+    {
+        $data = $request->validate([
+            'id' => 'required|string|max:50|unique:pallets,id',
+            'pallet_type_id' => 'required|exists:pallet_types,id',
+            'bin_id' => 'nullable|exists:bins,id',
+            'max_capacity' => 'nullable|integer|min:1',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $palletId = strtoupper(trim($data['id']));
+
+        if (!empty($data['bin_id'])) {
+            $bin = Bin::findOrFail($data['bin_id']);
+            $currentPalletCount = Pallet::where('bin_id', $bin->id)->where('is_active', true)->count();
+            if ($currentPalletCount >= $bin->max_pallet) {
+                $errMsg = "Gagal: BIN {$bin->id} sudah penuh ({$currentPalletCount} Palet terdaftar). Maksimal {$bin->max_pallet} Palet per BIN.";
+                if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                    return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+                }
+                return back()->with('error', $errMsg);
+            }
+        }
+
+        $pallet = Pallet::create([
+            'id' => $palletId,
+            'pallet_type_id' => $data['pallet_type_id'],
+            'bin_id' => $data['bin_id'] ?: null,
+            'status' => !empty($data['bin_id']) ? 'on_rack' : 'in_transit',
+            'max_capacity' => !empty($data['max_capacity']) ? (int)$data['max_capacity'] : 72,
+            'is_active' => $request->has('is_active') ? (bool)$data['is_active'] : true,
+        ]);
+
+        AuditLogger::log(auth()->id(), 'master', 'CREATE', "Menambah Palet: {$pallet->id} (Tipe: {$pallet->pallet_type_id}, Lokasi: " . ($pallet->bin_id ?: 'TRANSIT') . ")");
+
+        $msg = "Palet {$pallet->id} berhasil ditambahkan.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'pallets'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function updatePallet(Request $request, $id)
+    {
+        $pallet = Pallet::findOrFail($id);
+
+        $data = $request->validate([
+            'pallet_type_id' => 'required|exists:pallet_types,id',
+            'bin_id' => 'nullable|exists:bins,id',
+            'max_capacity' => 'nullable|integer|min:1',
+            'is_active' => 'required|boolean',
+        ]);
+
+        if (!empty($data['bin_id']) && $data['bin_id'] !== $pallet->bin_id) {
+            $targetBin = Bin::findOrFail($data['bin_id']);
+            $currentPalletCount = Pallet::where('bin_id', $targetBin->id)
+                                        ->where('is_active', true)
+                                        ->where('id', '!=', $pallet->id)
+                                        ->count();
+            if ($currentPalletCount >= $targetBin->max_pallet) {
+                $errMsg = "Gagal: BIN Tujuan {$targetBin->id} sudah penuh ({$currentPalletCount} Palet terdaftar). Maksimal {$targetBin->max_pallet} Palet per BIN.";
+                if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                    return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+                }
+                return back()->with('error', $errMsg);
+            }
+        }
+
+        $oldBin = $pallet->bin_id;
+        $newBin = $data['bin_id'] ?: null;
+        $status = !empty($newBin) ? 'on_rack' : 'in_transit';
+
+        $pallet->update([
+            'pallet_type_id' => $data['pallet_type_id'],
+            'bin_id' => $newBin,
+            'status' => $status,
+            'max_capacity' => !empty($data['max_capacity']) ? (int)$data['max_capacity'] : $pallet->max_capacity,
+            'is_active' => (bool)$data['is_active'],
+        ]);
+
+        AuditLogger::log(auth()->id(), 'master', 'UPDATE', "Mengubah Palet: {$pallet->id} (Tipe: {$pallet->pallet_type_id}, Lokasi: " . ($newBin ?: 'TRANSIT') . ", Lama: " . ($oldBin ?: 'TRANSIT') . ")");
+
+        $msg = "Palet {$pallet->id} berhasil diperbarui.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'pallets'
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function destroyPallet(Request $request, $id)
+    {
+        $pallet = Pallet::findOrFail($id);
+
+        $activeBoxesCount = $pallet->boxes()->where('status', 'active')->count();
+        if ($activeBoxesCount > 0) {
+            $errMsg = "Gagal menghapus: Palet {$pallet->id} masih terisi {$activeBoxesCount} box barang aktif di gudang!";
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json(['status' => 'error', 'message' => $errMsg], 422);
+            }
+            return back()->with('error', $errMsg);
+        }
+
+        $palletId = $pallet->id;
+        $pallet->delete();
+
+        AuditLogger::log(auth()->id(), 'master', 'DELETE', "Menghapus Palet: {$palletId}");
+
+        $msg = "Palet {$palletId} berhasil dihapus.";
+
+        if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $msg,
+                'tab' => 'pallets'
             ]);
         }
 

@@ -80,17 +80,17 @@
     <!-- Header Title -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold font-display text-white flex items-center gap-2">
-                <i class="fa-solid fa-pallet text-indigo-400"></i>
+            <h2 class="text-2xl font-bold font-display text-slate-900 dark:text-white flex items-center gap-2.5">
+                <i class="fa-solid fa-pallet text-[#004b87] dark:text-sky-400"></i>
                 <span>Manajemen & Tracking Palet Gudang</span>
             </h2>
-            <p class="text-sm text-slate-400">Pendaftaran palet baru, penambahan produk/box ke palet, check isi stok, lokasi BIN, & barcode tracking</p>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400">Pendaftaran palet baru, penambahan produk/box ke palet, check isi stok, lokasi BIN, & barcode tracking</p>
         </div>
         <div>
             @canAccessModule('pallet', 'create')
                 <button type="button" 
                         @click="openRegisterModal()" 
-                        class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2 cursor-pointer">
+                        class="btn-green px-5 py-2.5 bg-[#59c594] hover:bg-[#48b282] text-white font-semibold text-[13px] rounded-xl shadow-md transition flex items-center space-x-2 cursor-pointer">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>Daftarkan Palet Baru</span>
                 </button>
@@ -99,65 +99,82 @@
     </div>
 
     <!-- Filter & Search Bar (SPA Zero Page Reload) -->
-    <div class="glass-panel p-5 rounded-2xl">
-        <form method="GET" action="{{ route('pallets.index') }}" onsubmit="PalletApp.submitFilter(event, this)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 text-xs">
-            <div>
-                <label class="block text-slate-400 font-semibold mb-1">Cari Barcode / Lokasi BIN</label>
-                <div class="flex items-center space-x-1.5">
+    <div class="glass-panel p-5 rounded-2xl space-y-4">
+        <form method="GET" action="{{ route('pallets.index') }}" onsubmit="PalletApp.submitFilter(event, this)" class="space-y-4">
+            <!-- Row 1: Search Toolbar (Matching Gambar Style) + Scan Camera (Cyan #00c0ef) -->
+            <div class="flex flex-col sm:flex-row items-center gap-2.5">
+                <div class="search-input-group flex-1">
+                    <button type="button" 
+                            onclick="document.getElementById('pallet_search_input').value = ''; PalletApp.loadData('{{ route('pallets.index') }}')" 
+                            class="btn btn-sm btn-warning search-btn-reset" 
+                            title="Reset Pencarian">
+                        «
+                    </button>
                     <input type="text" 
                            name="search" 
                            id="pallet_search_input" 
                            value="{{ $search }}" 
-                           class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none uppercase font-mono" 
-                           placeholder="e.g. PLT-0001, B.10.2">
-                    <button type="button" 
-                            onclick="openCameraScanner(val => { document.getElementById('pallet_search_input').value = val; })" 
-                            class="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow flex items-center justify-center cursor-pointer transition" 
-                            title="Scan Barcode Kamera">
-                        <i class="fa-solid fa-camera text-sm"></i>
+                           placeholder="Cari Barcode Palet, Lokasi BIN, e.g. PLT-0001, B.10.2..." 
+                           class="form-control search-input-field uppercase font-mono">
+                    <button type="submit" 
+                            class="btn btn-sm btn-primary search-btn-submit" 
+                            title="Cari Palet">
+                        <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-slate-400 font-semibold mb-1">Filter Lokasi BIN</label>
-                <select name="bin_id" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    <option value="">-- Semua BIN --</option>
-                    @foreach($bins as $b)
-                        <option value="{{ $b->id }}" {{ $filterBin == $b->id ? 'selected' : '' }}>BIN: {{ $b->id }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-slate-400 font-semibold mb-1">Filter Jenis Palet</label>
-                <select name="pallet_type_id" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    <option value="">-- Semua Jenis Palet --</option>
-                    @foreach($palletTypes as $pt)
-                        <option value="{{ $pt->id }}" {{ $filterType == $pt->id ? 'selected' : '' }}>{{ $pt->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-slate-400 font-semibold mb-1">Filter Status Stock</label>
-                <select name="status" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    <option value="">-- Semua Status --</option>
-                    <option value="active" {{ $filterStatus == 'active' ? 'selected' : '' }}>Terisi Stok (Aktif)</option>
-                    <option value="in_transit" {{ $filterStatus == 'in_transit' ? 'selected' : '' }}>In Transit (Belum di Rak)</option>
-                    <option value="on_rack" {{ $filterStatus == 'on_rack' ? 'selected' : '' }}>On Rack (Sudah di Rak)</option>
-                    <option value="empty" {{ $filterStatus == 'empty' ? 'selected' : '' }}>Kosong (Ready)</option>
-                    <option value="inactive" {{ $filterStatus == 'inactive' ? 'selected' : '' }}>Non-Aktif / Maintenance</option>
-                </select>
-            </div>
-
-            <div class="flex items-end space-x-2">
-                <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 font-semibold text-white rounded-xl shadow transition cursor-pointer flex items-center justify-center space-x-1">
-                    <i class="fa-solid fa-filter mr-1"></i> <span class="btn-text">Filter</span>
+                <!-- Camera Scan Button (Cyan #00c0ef) -->
+                <button type="button" 
+                        onclick="openCameraScanner(val => { document.getElementById('pallet_search_input').value = val; PalletApp.submitFilter(new Event('submit'), document.querySelector('form')); })" 
+                        class="btn-cyan py-2.5 px-3.5 bg-[#00c0ef] hover:bg-[#00acd6] text-white rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95 text-[13px] font-semibold gap-1.5 self-stretch sm:self-auto" 
+                        title="Scan Barcode Kamera">
+                    <i class="fa-solid fa-camera text-sm"></i>
+                    <span>Scan</span>
                 </button>
-                <button type="button" onclick="PalletApp.loadData('{{ route('pallets.index') }}')" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-700 transition cursor-pointer">
-                    Reset
-                </button>
+            </div>
+
+            <!-- Row 2: Filter Dropdowns -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-[13px]">
+                <div>
+                    <label class="block text-slate-600 dark:text-slate-400 font-semibold mb-1">Filter Lokasi BIN</label>
+                    <select name="bin_id" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white text-[13px] focus:ring-2 focus:ring-[#004b87] focus:outline-none">
+                        <option value="">-- Semua BIN --</option>
+                        @foreach($bins as $b)
+                            <option value="{{ $b->id }}" {{ $filterBin == $b->id ? 'selected' : '' }}>BIN: {{ $b->id }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 dark:text-slate-400 font-semibold mb-1">Filter Jenis Palet</label>
+                    <select name="pallet_type_id" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white text-[13px] focus:ring-2 focus:ring-[#004b87] focus:outline-none">
+                        <option value="">-- Semua Jenis Palet --</option>
+                        @foreach($palletTypes as $pt)
+                            <option value="{{ $pt->id }}" {{ $filterType == $pt->id ? 'selected' : '' }}>{{ $pt->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 dark:text-slate-400 font-semibold mb-1">Filter Status Stock</label>
+                    <select name="status" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white text-[13px] focus:ring-2 focus:ring-[#004b87] focus:outline-none">
+                        <option value="">-- Semua Status --</option>
+                        <option value="active" {{ $filterStatus == 'active' ? 'selected' : '' }}>Terisi Stok (Aktif)</option>
+                        <option value="in_transit" {{ $filterStatus == 'in_transit' ? 'selected' : '' }}>In Transit (Belum di Rak)</option>
+                        <option value="on_rack" {{ $filterStatus == 'on_rack' ? 'selected' : '' }}>On Rack (Sudah di Rak)</option>
+                        <option value="empty" {{ $filterStatus == 'empty' ? 'selected' : '' }}>Kosong (Ready)</option>
+                        <option value="inactive" {{ $filterStatus == 'inactive' ? 'selected' : '' }}>Non-Aktif / Maintenance</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="btn-blue flex-1 py-2.5 bg-[#3850c9] hover:bg-[#2b3ea6] font-semibold text-white rounded-xl shadow transition cursor-pointer flex items-center justify-center space-x-1 text-[13px]">
+                        <i class="fa-solid fa-filter mr-1"></i> <span class="btn-text">Filter</span>
+                    </button>
+                    <button type="button" onclick="PalletApp.loadData('{{ route('pallets.index') }}')" class="btn-amber py-2.5 px-4 bg-[#f39c12] hover:bg-[#e08e0b] text-white font-semibold rounded-xl shadow transition cursor-pointer text-[13px]">
+                        Reset
+                    </button>
+                </div>
             </div>
         </form>
     </div>

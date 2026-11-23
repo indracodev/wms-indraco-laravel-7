@@ -33,7 +33,7 @@ Aktivitas Inbound terbagi menjadi 2 alur utama pada halaman **[`http://127.0.0.1
 1. Buka menu **Inbound Putaway** (`/transaction/inbound`) dan pilih tab **"1. Penempatan Palet ke BIN"**.
 2. **Step 1 - Scan / Input BIN Target**: Scan barcode BIN atau pilih dari dropdown Select Search (misal: `B.10.2`). Sistem akan menampilkan kapasitas sisa palet pada BIN tersebut (maksimal 2 palet per BIN).
 3. **Step 2 - Scan / Input Palet Barcode**: Scan barcode fisik palet atau masukkan ID Palet (`PLT-xxxx`).
-4. **Pilih Jenis Palet**: Pilih material palet (*Palet Loscam Wood*, *Palet Kayu Standar*, *Palet Plastik Heavy Duty*).
+4. **Pilih Jenis Palet**: Pilih material palet (*Palet Loscam*, *Palet Kayu Standar*, *Palet Plastik*).
 5. Klik **"Lanjutkan & Konfirmasikan"** -> Periksa detail pada modal konfirmasi -> Klik **"Ya, Simpan Putaway"**.
 
 ---

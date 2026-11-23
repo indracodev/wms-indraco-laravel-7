@@ -10,7 +10,7 @@
             <p class="text-sm text-slate-400">Pengelolaan hak akses pengguna, penetapan shift, dan fitur Impersonasi (Login As)</p>
         </div>
         @canAccessModule('users', 'create')
-            <button @click="showCreateModal = true" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+            <button @click="showCreateModal = true" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm rounded-xl shadow-lg transition flex items-center space-x-2">
                 <i class="fa-solid fa-user-plus"></i>
                 <span>Tambah User Baru</span>
             </button>

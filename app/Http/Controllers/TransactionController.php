@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Bin;
 use App\Models\Rack;
 use App\Models\Pallet;
@@ -63,7 +64,20 @@ class TransactionController extends Controller
     // --- API HELPER: PALLET INFO & EXISTING PRODUCT / MULTI-ED CHECK ---
     public function getPalletInfo($id)
     {
-        $pallet = Pallet::with(['activeBoxes.product.conversions', 'bin.rack'])->find($id);
+        // Eager Loading dengan seleksi kolom spesifik
+        $pallet = Pallet::select('id', 'pallet_type_id', 'bin_id', 'status', 'max_capacity', 'is_active')
+            ->with([
+                'activeBoxes' => function ($qb) {
+                    $qb->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base', 'expired_date', 'machine_code', 'notes')
+                       ->with([
+                           'product:id,name,brand,uom_inventory',
+                           'product.conversions:id,product_id,uom_convert,qty_convert,uom_base'
+                       ]);
+                },
+                'bin:id,rack_id',
+                'bin.rack:id,warehouse_id'
+            ])
+            ->find($id);
 
         if (!$pallet) {
             return response()->json([
@@ -78,6 +92,9 @@ class TransactionController extends Controller
                 'boxes' => [],
             ]);
         }
+
+        // Lazy Eager Loading jika relasi belum termuat
+        $pallet->loadMissing(['type:id,name']);
 
         $activeBoxes = $pallet->activeBoxes;
         $activeProducts = $activeBoxes->pluck('product_id')->unique()->values();
@@ -109,61 +126,210 @@ class TransactionController extends Controller
         ]);
     }
 
-    // --- API HELPER: RACK / BIN INVENTORY FOR OUTBOUND PICKING ---
+    // --- API HELPER: RACK / BIN INVENTORY FOR OUTBOUND PICKING (WITH CACHE + EAGER + LAZY) ---
     public function getRackInventory($id)
     {
-        // $id can be a BIN ID (e.g. B.10.1) or Rack ID (e.g. RK-B)
-        $bins = Bin::where('id', $id)->orWhere('rack_id', $id)->pluck('id');
+        // Cache inventory rack/bin selama 60 detik untuk scan & request cepat (<10ms)
+        $cacheKey = 'rack_inventory_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $id);
+        
+        $result = Cache::remember($cacheKey, 60, function () use ($id) {
+            // $id can be a BIN ID (e.g. B.10.1) or Rack ID (e.g. RK-B)
+            $bins = Bin::where('id', $id)->orWhere('rack_id', $id)->pluck('id');
 
-        $pallets = Pallet::with(['activeBoxes' => function ($q) {
-            $q->orderBy('expired_date', 'asc')->with('product.conversions');
-        }, 'bin.rack'])
-        ->whereIn('bin_id', $bins)
-        ->where('is_active', true)
-        ->get();
+            // Eager Loading terarah + Lazy Collection untuk hemat alokasi memori
+            $pallets = Pallet::select('id', 'bin_id', 'max_capacity', 'status', 'is_active')
+                ->with([
+                    'bin:id,rack_id',
+                    'bin.rack:id,warehouse_id',
+                    'activeBoxes' => function ($q) {
+                        $q->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base', 'expired_date', 'machine_code', 'notes')
+                          ->orderBy('expired_date', 'asc')
+                          ->with([
+                              'product:id,name,brand,uom_inventory',
+                              'product.conversions:id,product_id,uom_convert,qty_convert,uom_base'
+                          ]);
+                    }
+                ])
+                ->whereIn('bin_id', $bins)
+                ->where('is_active', true)
+                ->cursor();
 
-        $items = [];
-        foreach ($pallets as $plt) {
-            foreach ($plt->activeBoxes as $box) {
-                $items[] = [
-                    'bin_id' => $plt->bin_id,
-                    'rack_id' => $plt->bin && $plt->bin->rack ? $plt->bin->rack->id : '-',
-                    'pallet_id' => $plt->id,
-                    'pallet_capacity' => $plt->max_capacity ?? 72,
-                    'pallet_status' => $plt->status,
-                    'box_id' => $box->id,
-                    'product_id' => $box->product_id,
-                    'product_name' => $box->product->name ?? $box->product_id,
-                    'brand' => $box->product->brand ?? '-',
-                    'qty' => (float) $box->qty,
-                    'uom_base' => $box->uom_base,
-                    'expired_date' => $box->expired_date,
-                    'machine_code' => $box->machine_code,
-                    'notes' => $box->notes,
-                    'conversions' => $box->product ? $box->product->conversions : [],
-                ];
+            $items = [];
+            foreach ($pallets as $plt) {
+                // Lazy Eager Loading jika relasi bertingkat bin.rack belum terisi
+                $plt->loadMissing('bin.rack');
+                foreach ($plt->activeBoxes as $box) {
+                    $items[] = [
+                        'bin_id' => $plt->bin_id,
+                        'rack_id' => $plt->bin && $plt->bin->rack ? $plt->bin->rack->id : '-',
+                        'pallet_id' => $plt->id,
+                        'pallet_capacity' => $plt->max_capacity ?? 72,
+                        'pallet_status' => $plt->status,
+                        'box_id' => $box->id,
+                        'product_id' => $box->product_id,
+                        'product_name' => $box->product->name ?? $box->product_id,
+                        'brand' => $box->product->brand ?? '-',
+                        'qty' => (float) $box->qty,
+                        'uom_base' => $box->uom_base,
+                        'expired_date' => $box->expired_date,
+                        'machine_code' => $box->machine_code,
+                        'notes' => $box->notes,
+                        'conversions' => $box->product ? $box->product->conversions : [],
+                    ];
+                }
             }
-        }
 
-        return response()->json([
-            'status' => 'success',
-            'rack_or_bin_id' => $id,
-            'items_count' => count($items),
-            'items' => $items,
-        ]);
+            return [
+                'status' => 'success',
+                'rack_or_bin_id' => $id,
+                'items_count' => count($items),
+                'items' => $items,
+            ];
+        });
+
+        return response()->json($result);
     }
 
     // --- INBOUND ---
     public function inboundForm()
     {
-        $bins = Bin::with('pallets')->get();
-        $pallets = Pallet::with('activeBoxes.product')->where('is_active', true)->get();
-        $palletTypes = PalletType::all();
-        $products = Product::with('conversions')->get();
-        $warehouses = Warehouse::all();
-        $racks = Rack::with('bins')->get();
+        // 1. Cache master data yang jarang berubah untuk load cepat (<50ms)
+        // Eager loading spesifik kolom pada BIN dan relasi rack
+        $bins = Cache::remember('inbound_bins_cache', 300, function () {
+            return Bin::select('id', 'rack_id', 'max_pallet')
+                ->with('rack:id,warehouse_id')
+                ->withCount(['pallets' => function ($q) {
+                    $q->where('is_active', true);
+                }])
+                ->havingRaw('pallets_count < max_pallet')
+                ->limit(100)
+                ->get();
+        });
 
-        return view('transactions.inbound', compact('bins', 'racks', 'pallets', 'palletTypes', 'products', 'warehouses'));
+        $palletTypes = Cache::remember('inbound_pallet_types_cache', 3600, function () {
+            return PalletType::select('id', 'name')->get();
+        });
+
+        // Eager Loading produk beserta relasi konversi satuannya
+        $products = Cache::remember('inbound_products_cache', 3600, function () {
+            return Product::select('id', 'name', 'brand', 'uom_inventory')
+                ->with(['conversions:id,product_id,uom_convert,qty_convert,uom_base'])
+                ->get();
+        });
+
+        $warehouses = Cache::remember('inbound_warehouses_cache', 3600, function () {
+            return Warehouse::select('id', 'name')->get();
+        });
+
+        // Eager Loading Rak dengan kolom terpilih pada Bins
+        $racks = Cache::remember('inbound_racks_cache', 3600, function () {
+            return Rack::select('id', 'rack_name', 'warehouse_id')
+                ->with(['bins:id,rack_id,max_pallet'])
+                ->get();
+        });
+
+        // 2. Optimasi Palet: Eager Loading selektif + Lazy Eager Loading (loadMissing)
+        $pallets = Cache::remember('inbound_initial_pallets', 60, function () {
+            $list = Pallet::select('id', 'pallet_type_id', 'bin_id', 'status', 'max_capacity', 'is_active')
+                ->with([
+                    'type:id,name',
+                    'activeBoxes' => function ($qb) {
+                        $qb->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base')
+                           ->with('product:id,name,brand');
+                    }
+                ])
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->has('activeBoxes')
+                      ->orWhere('status', 'in_transit');
+                })
+                ->orderByRaw("CASE WHEN bin_id IS NOT NULL THEN 0 ELSE 1 END")
+                ->limit(60)
+                ->get();
+
+            // Lazy Eager Loading: loadMissing untuk memastikan type dan bin ter-cache tanpa query ganda
+            $list->loadMissing(['type:id,name', 'bin:id,rack_id']);
+            return $list;
+        });
+
+        // Daftar palet in_transit khusus untuk tab Putaway (Eager Loading bertingkat terpilih)
+        $putawayPallets = Cache::remember('inbound_putaway_pallets', 30, function () {
+            $list = Pallet::select('id', 'pallet_type_id', 'bin_id', 'status', 'max_capacity')
+                ->where('status', 'in_transit')
+                ->has('activeBoxes')
+                ->with([
+                    'activeBoxes' => function ($qb) {
+                        $qb->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base')
+                           ->with('product:id,name');
+                    }
+                ])
+                ->get();
+
+            // Lazy Eager Loading jika ada atribut belum termuat
+            $list->loadMissing('activeBoxes.product:id,name');
+            return $list;
+        });
+
+        return view('transactions.inbound', compact('bins', 'racks', 'pallets', 'putawayPallets', 'palletTypes', 'products', 'warehouses'));
+    }
+
+    /**
+     * API Pencarian Palet Cepat & Ringan dengan Cache, Eager Loading & Lazy Collection
+     */
+    public function searchPallets(Request $request)
+    {
+        $q = strtoupper(trim($request->get('q', '')));
+        $cacheKey = 'pallets_search_' . md5($q);
+
+        $results = Cache::remember($cacheKey, 60, function () use ($q) {
+            $query = Pallet::select('id', 'pallet_type_id', 'bin_id', 'status', 'max_capacity')
+                ->where('is_active', true);
+
+            if (!empty($q)) {
+                $query->where('id', 'like', "%{$q}%");
+            }
+
+            // Eager Loading terarah + Lazy Collection streaming untuk meminimalkan beban memori
+            return $query->with([
+                    'type:id,name',
+                    'activeBoxes' => function ($qb) {
+                        $qb->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base');
+                    }
+                ])
+                ->orderByRaw("CASE WHEN bin_id IS NOT NULL THEN 0 ELSE 1 END")
+                ->limit(40)
+                ->cursor() // Lazy Collection streaming via Cursor Generator
+                ->map(function ($p) {
+                    $firstBox = $p->activeBoxes->first();
+                    $boxCount = $p->activeBoxes->count();
+                    $totalQty = $p->activeBoxes->sum('qty');
+                    $location = $p->bin_id ? 'Rak ' . $p->bin_id : 'In Transit';
+                    $typeName = $p->type->name ?? $p->pallet_type_id;
+
+                    $label = "Palet: {$p->id} ({$location})";
+                    if ($firstBox) {
+                        $label .= " - SKU: {$firstBox->product_id} ({$totalQty} {$firstBox->uom_base})";
+                    }
+
+                    return [
+                        'id' => $p->id,
+                        'pallet_type_id' => $p->pallet_type_id,
+                        'type_name' => $typeName,
+                        'bin_id' => $p->bin_id,
+                        'location' => $location,
+                        'status' => $p->status,
+                        'max_capacity' => $p->max_capacity ?? 72,
+                        'has_content' => $boxCount > 0,
+                        'product_id' => $firstBox ? $firstBox->product_id : null,
+                        'total_qty' => $totalQty,
+                        'label' => $label,
+                    ];
+                })
+                ->values()
+                ->all();
+        });
+
+        return response()->json($results);
     }
 
     public function inbound(Request $request)
@@ -226,17 +392,108 @@ class TransactionController extends Controller
     // --- OUTBOUND ---
     public function outboundForm()
     {
-        $racks = Rack::with(['bins.pallets' => function ($q) {
-            $q->where('is_active', true)->with('activeBoxes.product.conversions');
-        }])->get();
+        // 1. Optimasi Tinggi: Eager Loading Terarah + Lazy Collection (300 Detik Cache)
+        // Mencegah query ribuan record & alokasi memori berlebih dengan PHP Generator streaming
+        $binsData = Cache::remember('outbound_bins_data', 300, function () {
+            return Bin::select('id', 'rack_id')
+                ->with([
+                    'rack:id,warehouse_id',
+                    'rack.warehouse:id,name',
+                    'pallets' => function ($q) {
+                        $q->select('id', 'bin_id', 'is_active')
+                          ->where('is_active', true)
+                          ->withCount('activeBoxes');
+                    }
+                ])
+                ->where(function ($query) {
+                    $query->whereHas('pallets', function ($p) {
+                        $p->where('is_active', true);
+                    })
+                    ->orWhere('id', 'like', 'A.%')
+                    ->orWhere('id', 'like', 'B.%');
+                })
+                ->limit(100)
+                ->cursor() // Lazy Collection streaming via Cursor Generator
+                ->map(function ($b) {
+                    // Lazy Eager Loading: loadMissing jika relasi rack belum terhidrasi
+                    $b->loadMissing('rack.warehouse');
+                    $activePlts = $b->pallets;
+                    $totalBoxes = $activePlts->sum('active_boxes_count');
+                    return [
+                        'id' => $b->id,
+                        'rack_id' => $b->rack_id ?? ($b->rack->id ?? '-'),
+                        'warehouse_name' => ($b->rack && $b->rack->warehouse) ? $b->rack->warehouse->name : 'Gudang Utama',
+                        'active_pallets_count' => $activePlts->count(),
+                        'total_boxes_count' => $totalBoxes,
+                        'has_stock' => $activePlts->count() > 0,
+                    ];
+                })
+                ->values()
+                ->all();
+        });
 
-        $bins = Bin::with(['pallets' => function ($q) {
-            $q->where('is_active', true)->with('activeBoxes.product.conversions');
-        }])->get();
+        return view('transactions.outbound', compact('binsData'));
+    }
 
-        $products = Product::with('conversions')->get();
+    public function searchBins(Request $request)
+    {
+        $q = trim((string) $request->input('q', ''));
+        $tab = $request->input('tab', 'all');
+        $cacheKey = 'bins_search_' . md5($q . '_' . $tab);
 
-        return view('transactions.outbound', compact('racks', 'bins', 'products'));
+        $results = Cache::remember($cacheKey, 60, function () use ($q, $tab) {
+            $query = Bin::select('id', 'rack_id')
+                ->with([
+                    'rack:id,warehouse_id',
+                    'rack.warehouse:id,name',
+                    'pallets' => function ($p) {
+                        $p->select('id', 'bin_id', 'is_active')
+                          ->where('is_active', true)
+                          ->withCount('activeBoxes');
+                    }
+                ]);
+
+            if (!empty($q)) {
+                $query->where(function ($w) use ($q) {
+                    $w->where('id', 'like', "%{$q}%")
+                      ->orWhere('rack_id', 'like', "%{$q}%");
+                });
+            }
+
+            if ($tab === 'has_stock') {
+                $query->whereHas('pallets', function ($p) {
+                    $p->where('is_active', true);
+                });
+            } elseif ($tab === 'empty') {
+                $query->whereDoesntHave('pallets', function ($p) {
+                    $p->where('is_active', true);
+                });
+            }
+
+            // Lazy Collection streaming via Cursor Generator untuk efisiensi memori
+            return $query->limit(60)
+                ->cursor()
+                ->map(function ($b) {
+                    $b->loadMissing('rack.warehouse');
+                    $activePlts = $b->pallets;
+                    $totalBoxes = $activePlts->sum('active_boxes_count');
+                    return [
+                        'id' => $b->id,
+                        'rack_id' => $b->rack_id ?? ($b->rack->id ?? '-'),
+                        'warehouse_name' => ($b->rack && $b->rack->warehouse) ? $b->rack->warehouse->name : 'Gudang Utama',
+                        'active_pallets_count' => $activePlts->count(),
+                        'total_boxes_count' => $totalBoxes,
+                        'has_stock' => $activePlts->count() > 0,
+                    ];
+                })
+                ->values()
+                ->all();
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'bins' => $results,
+        ]);
     }
 
     public function outbound(Request $request)
@@ -259,6 +516,16 @@ class TransactionController extends Controller
         try {
             $data['bin_id'] = $data['rack_id'];
             $this->transactionService->processOutboundV2($data, auth()->id());
+
+            // Invalidate cache setelah mutasi outbound sukses
+            Cache::forget('outbound_bins_data');
+            Cache::forget('inbound_bins_cache');
+            Cache::forget('inbound_initial_pallets');
+            Cache::forget('inbound_putaway_pallets');
+            if (!empty($data['rack_id'])) {
+                $safeKey = preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $data['rack_id']);
+                Cache::forget('rack_inventory_' . $safeKey);
+            }
 
             if ($data['outbound_type'] === 'ekspedisi') {
                 $msg = "Pengeluaran Ekspedisi Sukses! {$data['qty']} {$data['unit']} telah dikeluarkan untuk pengiriman ekspedisi.";

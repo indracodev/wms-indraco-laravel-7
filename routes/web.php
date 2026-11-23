@@ -67,6 +67,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/master-data/product', [MasterDataController::class, 'storeProduct'])->middleware('permission:master,create')->name('master.product.store');
         Route::put('/master-data/product/{id}', [MasterDataController::class, 'updateProduct'])->middleware('permission:master,update')->name('master.product.update');
         Route::delete('/master-data/product/{id}', [MasterDataController::class, 'destroyProduct'])->middleware('permission:master,delete')->name('master.product.destroy');
+
+        // Pallet
+        Route::post('/master-data/pallet', [MasterDataController::class, 'storePallet'])->middleware('permission:master,create')->name('master.pallet.store');
+        Route::put('/master-data/pallet/{id}', [MasterDataController::class, 'updatePallet'])->middleware('permission:master,update')->name('master.pallet.update');
+        Route::delete('/master-data/pallet/{id}', [MasterDataController::class, 'destroyPallet'])->middleware('permission:master,delete')->name('master.pallet.destroy');
     });
 
     // Stock Locator & Detail Data
@@ -83,11 +88,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Transactions Modul (Inbound, Outbound, Transfer)
     Route::middleware(['permission:inbound,read'])->get('/transaction/inbound', [TransactionController::class, 'inboundForm'])->name('transaction.inbound.form');
+    Route::middleware(['permission:inbound,read'])->get('/transaction/inbound/search-pallets', [TransactionController::class, 'searchPallets'])->name('transaction.inbound.search_pallets');
     Route::middleware(['permission:inbound,create'])->post('/transaction/inbound', [TransactionController::class, 'inbound'])->name('transaction.inbound');
     Route::middleware(['permission:inbound,create'])->post('/transaction/inbound/pallet-to-bin', [TransactionController::class, 'inboundPalletToBin'])->name('transaction.inbound.pallet_to_bin');
     Route::middleware(['permission:inbound,create'])->post('/transaction/inbound/box-to-pallet', [TransactionController::class, 'inboundBoxToPallet'])->name('transaction.inbound.box_to_pallet');
 
     Route::middleware(['permission:outbound,read'])->get('/transaction/outbound', [TransactionController::class, 'outboundForm'])->name('transaction.outbound.form');
+    Route::middleware(['permission:outbound,read'])->get('/transaction/outbound/search-bins', [TransactionController::class, 'searchBins'])->name('transaction.outbound.search_bins');
     Route::middleware(['permission:outbound,create'])->post('/transaction/outbound', [TransactionController::class, 'outbound'])->name('transaction.outbound');
 
     Route::middleware(['permission:transfer,read'])->get('/transaction/transfer', [TransactionController::class, 'transferForm'])->name('transaction.transfer.form');
@@ -97,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
     // API Helper Routes
     Route::get('/api/product/{id}/conversions', [TransactionController::class, 'getProductConversions'])->name('api.product.conversions');
     Route::get('/api/pallet/{id}/info', [TransactionController::class, 'getPalletInfo'])->name('api.pallet.info');
+    Route::get('/api/pallets/search', [TransactionController::class, 'searchPallets'])->name('api.pallets.search');
     Route::get('/api/rack/{id}/inventory', [TransactionController::class, 'getRackInventory'])->name('api.rack.inventory');
 
     // User Management

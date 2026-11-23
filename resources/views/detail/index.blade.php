@@ -31,84 +31,96 @@
     <!-- Page Header Title -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-            <h2 class="text-xl sm:text-2xl font-bold font-display text-white">Stock Locator & Inventory Detail</h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Pelacakan posisi fisik stok per BIN, Palet, Produk, & Masa Expired</p>
+            <h2 class="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white flex items-center gap-2.5">
+                <i class="fa-solid fa-magnifying-glass-location text-[#004b87] dark:text-sky-400"></i>
+                <span>Stock Locator & Inventory Detail</span>
+            </h2>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5">Pelacakan posisi fisik stok per BIN, Palet, Produk, & Masa Expired</p>
         </div>
     </div>
 
-    <!-- Compact Sleek Search & Filter Control Bar -->
-    <div class="glass-panel p-3 sm:p-4 rounded-2xl flex items-center gap-2">
-        <!-- Quick Search Bar -->
-        <div class="relative flex-1">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+    <!-- Search & Filter Control Bar (Matching Gambar Style) -->
+    <div class="glass-panel p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-center gap-3">
+        <!-- Quick Search Bar (Gambar Style: Reset « Orange, Input Tengah, Search 🔍 Blue) -->
+        <div class="search-input-group flex-1">
+            <button type="button" 
+                    @click="searchVal = ''; DetailDataApp.applyQuickSearch()" 
+                    class="btn btn-sm btn-warning search-btn-reset" 
+                    title="Reset Pencarian">
+                «
+            </button>
             <input type="text" 
                    id="stock_locator_quick_search" 
                    x-model="searchVal"
                    @keyup.enter="DetailDataApp.applyQuickSearch()" 
                    placeholder="Cari Barcode, Palet, BIN, SKU Produk..." 
-                   class="w-full pl-9 pr-8 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-white placeholder-slate-400 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                   class="form-control search-input-field">
             <button type="button" 
-                    x-show="searchVal && searchVal.length > 0" 
-                    @click="searchVal = ''; DetailDataApp.applyQuickSearch()" 
-                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 cursor-pointer">
-                <i class="fa-solid fa-xmark text-xs"></i>
+                    @click="DetailDataApp.applyQuickSearch()" 
+                    class="btn btn-sm btn-primary search-btn-submit" 
+                    title="Cari Stok">
+                <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
 
-        <!-- Quick Scan Camera Button -->
-        <button type="button" 
-                onclick="openCameraScanner(val => { const el = document.getElementById('stock_locator_quick_search'); el.value = val; el.dispatchEvent(new Event('input')); DetailDataApp.applyQuickSearch(); })" 
-                class="py-2.5 px-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md shadow-indigo-600/30 flex items-center justify-center cursor-pointer transition active:scale-95 text-xs font-semibold"
-                title="Scan Barcode Kamera">
-            <i class="fa-solid fa-camera text-sm"></i>
-        </button>
+        <!-- Action Buttons: Scan Camera (Cyan #00c0ef) & Filter Modal (Amber #f39c12) -->
+        <div class="flex items-center gap-2 self-stretch sm:self-auto">
+            <!-- Quick Scan Camera Button -->
+            <button type="button" 
+                    onclick="openCameraScanner(val => { const el = document.getElementById('stock_locator_quick_search'); el.value = val; el.dispatchEvent(new Event('input')); DetailDataApp.applyQuickSearch(); })" 
+                    class="btn-cyan py-2.5 px-3.5 bg-[#00c0ef] hover:bg-[#00acd6] text-white rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95 text-[13px] font-semibold gap-1.5"
+                    title="Scan Barcode Kamera">
+                <i class="fa-solid fa-camera text-sm"></i>
+                <span class="hidden sm:inline">Scan</span>
+            </button>
 
-        <!-- Filter Modal Trigger Button -->
-        <button type="button" 
-                @click="filterModalOpen = true" 
-                class="py-2.5 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl flex items-center gap-2 text-xs font-bold transition active:scale-95 cursor-pointer relative"
-                :class="activeFilterCount > 0 ? 'border-indigo-500/70 bg-indigo-950/40 text-indigo-300' : ''">
-            <i class="fa-solid fa-sliders text-indigo-400"></i>
-            <span class="hidden sm:inline">Filter</span>
-            <!-- Active Counter Badge -->
-            <span x-show="activeFilterCount > 0" 
-                  x-text="activeFilterCount" 
-                  class="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center shadow -mr-1"></span>
-        </button>
+            <!-- Filter Modal Trigger Button -->
+            <button type="button" 
+                    @click="filterModalOpen = true" 
+                    class="btn-amber py-2.5 px-3.5 bg-[#f39c12] hover:bg-[#e08e0b] text-white rounded-xl shadow flex items-center gap-2 text-[13px] font-bold transition active:scale-95 cursor-pointer relative"
+                    title="Buka Filter Modal">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Filter</span>
+                <!-- Active Counter Badge -->
+                <span x-show="activeFilterCount > 0" 
+                      x-text="activeFilterCount" 
+                      class="w-4 h-4 rounded-full bg-white text-[#f39c12] text-[11px] font-black flex items-center justify-center shadow -mr-1"></span>
+            </button>
+        </div>
     </div>
 
     <!-- Active Filter Chips / Pills (Tampil hanya jika ada filter aktif) -->
-    <div x-show="activeFilterCount > 0" class="flex flex-wrap items-center gap-1.5 text-xs" x-cloak>
-        <span class="text-[11px] text-slate-400 font-semibold mr-1">Filter Aktif:</span>
+    <div x-show="activeFilterCount > 0" class="flex flex-wrap items-center gap-1.5 text-[13px]" x-cloak>
+        <span class="text-[13px] text-slate-500 dark:text-slate-400 font-semibold mr-1">Filter Aktif:</span>
 
         <!-- Search Chip -->
         <template x-if="searchVal && searchVal.trim() !== ''">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/20 text-[#004b87] dark:text-indigo-300 border border-indigo-500/30 text-[13px] font-medium">
                 <span>Keyword: "<strong x-text="searchVal"></strong>"</span>
-                <button type="button" @click="searchVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-white cursor-pointer ml-0.5">✕</button>
+                <button type="button" @click="searchVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-red-500 cursor-pointer ml-0.5 font-bold">✕</button>
             </span>
         </template>
 
         <!-- Product Chip -->
         <template x-if="productIdVal && productIdVal.trim() !== ''">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-medium">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[13px] font-medium">
                 <span>Produk: <strong x-text="getProductName(productIdVal)"></strong></span>
-                <button type="button" @click="productIdVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-white cursor-pointer ml-0.5">✕</button>
+                <button type="button" @click="productIdVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-red-500 cursor-pointer ml-0.5 font-bold">✕</button>
             </span>
         </template>
 
         <!-- BIN Chip -->
         <template x-if="binIdVal && binIdVal.trim() !== ''">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-medium">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-[13px] font-medium">
                 <span>BIN: <strong x-text="binIdVal"></strong></span>
-                <button type="button" @click="binIdVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-white cursor-pointer ml-0.5">✕</button>
+                <button type="button" @click="binIdVal = ''; DetailDataApp.applyQuickSearch()" class="hover:text-red-500 cursor-pointer ml-0.5 font-bold">✕</button>
             </span>
         </template>
 
         <!-- Clear All Button -->
         <button type="button" 
                 @click="DetailDataApp.resetAllFilters()" 
-                class="text-[11px] text-rose-400 hover:underline font-semibold ml-1 cursor-pointer">
+                class="text-[13px] text-[#dd4b39] hover:underline font-bold ml-1 cursor-pointer">
             Reset Semua
         </button>
     </div>
@@ -139,12 +151,12 @@
             <!-- Modal Header -->
             <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-[#004b87] text-white flex items-center justify-center text-lg font-bold shadow-sm">
                         <i class="fa-solid fa-sliders"></i>
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Filter & Pencarian Stok</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Atur parameter pencarian inventaris</p>
+                        <p class="text-[13px] text-slate-500 dark:text-slate-400">Atur parameter pencarian inventaris</p>
                     </div>
                 </div>
                 <button type="button" 
@@ -156,7 +168,7 @@
 
             <!-- Modal Form Body -->
             <form id="stockLocatorFilterForm" @submit.prevent="DetailDataApp.submitFilterModal()">
-                <div class="space-y-4 text-xs">
+                <div class="space-y-4 text-[13px]">
                     <!-- Filter 1: Kata Kunci / Barcode -->
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -168,10 +180,10 @@
                                    id="modal_search_input"
                                    x-model="searchVal"
                                    placeholder="Ketik PLT-, BOX-, B.10.2, dll..."
-                                   class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                   class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-[13px] font-medium focus:ring-2 focus:ring-[#004b87] focus:outline-none">
                             <button type="button" 
                                     onclick="openCameraScanner(val => { const el = document.getElementById('modal_search_input'); el.value = val; el.dispatchEvent(new Event('input')); })" 
-                                    class="p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95" 
+                                    class="btn-cyan p-3 bg-[#00c0ef] hover:bg-[#00acd6] text-white rounded-xl shadow flex items-center justify-center cursor-pointer transition active:scale-95" 
                                     title="Scan Barcode Kamera">
                                 <i class="fa-solid fa-camera text-sm"></i>
                             </button>
@@ -185,7 +197,7 @@
                         </label>
                         <select name="product_id" 
                                 x-model="productIdVal"
-                                class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer">
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-[13px] font-medium focus:ring-2 focus:ring-[#004b87] focus:outline-none cursor-pointer">
                             <option value="">-- Semua Produk --</option>
                             @foreach($products as $p)
                                 <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->id }})</option>
@@ -200,7 +212,7 @@
                         </label>
                         <select name="bin_id" 
                                 x-model="binIdVal"
-                                class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer">
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-[13px] font-medium focus:ring-2 focus:ring-[#004b87] focus:outline-none cursor-pointer">
                             <option value="">-- Semua BIN Lokasi Rak --</option>
                             @foreach($bins as $b)
                                 <option value="{{ $b->id }}">BIN: {{ $b->id }}</option>
@@ -213,14 +225,17 @@
                 <div class="grid grid-cols-2 gap-3 pt-5 border-t border-slate-200 dark:border-slate-800 mt-5">
                     <button type="button" 
                             @click="DetailDataApp.resetAllFilters()" 
-                            class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl border border-slate-300 dark:border-slate-700 transition cursor-pointer active:scale-95 text-center">
+                            class="btn-amber w-full py-3 px-4 bg-[#f39c12] hover:bg-[#e08e0b] text-white font-bold text-[13px] rounded-xl shadow transition cursor-pointer active:scale-95 text-center">
                         Reset Filter
                     </button>
 
                     <button type="submit" 
-                            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 text-center">
+                            class="btn-blue w-full py-3 px-4 bg-[#3850c9] hover:bg-[#2b3ea6] text-white font-extrabold text-[13px] rounded-xl shadow-lg transition cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 text-center">
                         <i class="fa-solid fa-filter"></i>
                         <span>Terapkan Filter</span>
+                    </button>
+                </div>
+            </form>
                     </button>
                 </div>
             </form>

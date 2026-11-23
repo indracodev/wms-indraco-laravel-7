@@ -75,19 +75,19 @@
     </div>
 
     <!-- MAIN CAMERA MODE PANEL (PROPORTIONAL CENTERED CARD) -->
-    <div class="glass-panel max-w-2xl mx-auto w-full p-5 sm:p-6 rounded-2xl shadow-xl space-y-5 border border-purple-500/30">
+    <div class="glass-panel max-w-2xl mx-auto w-full p-5 sm:p-6 rounded-2xl shadow-xl space-y-5 border border-sky-500/30">
         <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
-            <div class="flex items-center space-x-2 text-purple-400 font-bold text-sm">
+            <div class="flex items-center space-x-2 text-[#004b87] dark:text-sky-400 font-bold text-sm">
                 <i class="fa-solid fa-video text-base"></i>
                 <span>Scanner Kamera HP / Laptop</span>
             </div>
-            <div id="camera-status-text" class="text-xs font-mono text-indigo-300" x-text="cameraStatus">
+            <div id="camera-status-text" class="text-xs font-mono text-sky-400 dark:text-sky-300" x-text="cameraStatus">
                 Menyiapkan kamera...
             </div>
         </div>
 
         <!-- Live Camera Viewfinder Box (Proportional Aspect Ratio) -->
-        <div id="scanner-viewfinder-box" class="relative rounded-2xl border-2 border-purple-500/50 bg-slate-950 overflow-hidden shadow-inner max-w-lg mx-auto w-full aspect-[4/3] sm:aspect-[16/9] max-h-[320px] flex items-center justify-center">
+        <div id="scanner-viewfinder-box" class="relative rounded-2xl border-2 border-sky-500/50 bg-slate-950 overflow-hidden shadow-inner max-w-lg mx-auto w-full aspect-[4/3] sm:aspect-[16/9] max-h-[320px] flex items-center justify-center">
             <!-- Native video element - fully contained -->
             <video id="scanner-video-native"
                    autoplay playsinline muted
@@ -104,8 +104,8 @@
             <!-- Overlay Reticle & Scan Line (When Camera Active) -->
             <div x-show="isCameraActive"
                  class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div class="w-52 sm:w-64 h-32 sm:h-40 border-2 border-dashed border-purple-400/80 rounded-xl relative shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                    <div class="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse top-1/2"></div>
+                <div class="w-52 sm:w-64 h-32 sm:h-40 border-2 border-dashed border-sky-400/80 rounded-xl relative shadow-[0_0_15px_rgba(2,132,199,0.3)]">
+                    <div class="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent animate-pulse top-1/2"></div>
                 </div>
             </div>
 
@@ -117,14 +117,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <!-- Tombol Scan Barcode -->
             <button type="button" @click="triggerScanButton()" 
-                    class="w-full py-3.5 px-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition flex items-center justify-center space-x-2 cursor-pointer text-sm">
+                    class="w-full py-3.5 px-4 bg-[#004b87] hover:bg-[#003661] text-white font-bold rounded-xl shadow-lg shadow-[#004b87]/30 transition flex items-center justify-center gap-2.5 cursor-pointer text-sm">
                 <i class="fa-solid fa-qrcode text-lg"></i>
                 <span>Scan Barcode</span>
             </button>
 
             <!-- Tombol Input Code Manual -->
             <button type="button" @click="openManualModal()" 
-                    class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold rounded-xl border border-indigo-500/40 shadow-lg transition flex items-center justify-center space-x-2 cursor-pointer text-sm">
+                    class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-[#004b87] dark:text-sky-300 font-bold rounded-xl border border-[#004b87]/40 shadow-lg transition flex items-center justify-center gap-2.5 cursor-pointer text-sm">
                 <i class="fa-solid fa-keyboard text-lg"></i>
                 <span>Input Code Manual</span>
             </button>
@@ -172,7 +172,7 @@
                     </span>
                     <input type="text" x-model="manualInput" x-ref="manualInputField" @keydown.enter.prevent="submitManualInput()"
                         class="w-full pl-11 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-base placeholder-slate-500 focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Contoh: PLT-0001, PRD-99812, B.10.2, BOX-0001">
+                        placeholder="Contoh: PLT-0001, PRD-99812, I B.2.10, BOX-0001">
                 </div>
 
                 <!-- Quick Sample Buttons inside Modal -->
@@ -181,7 +181,7 @@
                     <div class="flex flex-wrap gap-2 text-xs font-mono">
                         <button type="button" @click="manualInput = 'PLT-0001'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">PLT-0001</button>
                         <button type="button" @click="manualInput = 'PLT-0002'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">PLT-0002</button>
-                        <button type="button" @click="manualInput = 'B.10.2'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 transition">BIN: B.10.2</button>
+                        <button type="button" @click="manualInput = 'I B.2.10'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 transition">BIN: I B.2.10</button>
                         <button type="button" @click="manualInput = 'PRD-99812'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded-lg border border-slate-700 transition">PRD-99812</button>
                         <button type="button" @click="manualInput = 'BOX-0001'; submitManualInput()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg border border-slate-700 transition">BOX-0001</button>
                     </div>

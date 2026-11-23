@@ -6,73 +6,99 @@
     <title>Login - WMS Indraco</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
         }
     </script>
     <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        body, button, input, select, textarea, .font-sans, .font-display {
+            font-family: 'Poppins', sans-serif !important;
+        }
         body {
             transition: background 0.4s ease, color 0.4s ease;
             min-height: 100vh;
             overflow-x: hidden;
         }
         
-        /* Light Mode Styling (#ECF4E5 & #E1DFEA background) */
+        /* Light Mode Styling (EduMaster Soft Sky & Navy background) */
         html:not(.dark) body {
-            background: radial-gradient(circle at 50% 10%, #ECF4E5 0%, #E1DFEA 100%);
-            color: #111812;
+            background: radial-gradient(circle at 50% 10%, #f0f7ff 0%, #e0f2fe 45%, #bae6fd 100%);
+            color: #0f172a;
         }
         html:not(.dark) .glass-card {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(17, 24, 18, 0.12);
-            box-shadow: 0 20px 40px -15px rgba(17, 24, 18, 0.12);
+            border: 1px solid rgba(0, 75, 135, 0.18);
+            box-shadow: 0 20px 45px -15px rgba(0, 75, 135, 0.15);
+            padding: 32px !important;
         }
-        html:not(.dark) .text-head-title { color: #0B1215; }
+        html:not(.dark) .text-head-title { color: #003661; }
         html:not(.dark) .text-head-sub { color: #334155; }
-        html:not(.dark) .card-header-title { color: #111812; }
-        html:not(.dark) .form-label { color: #111812; }
+        html:not(.dark) .card-header-title { color: #0f172a; }
+        html:not(.dark) .form-label { color: #1e293b; }
         html:not(.dark) .form-input {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-color: rgba(17, 24, 18, 0.2);
-            color: #0B1215;
+            background-color: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            color: #0f172a;
+            border-radius: 8px;
+        }
+        html:not(.dark) .form-input:focus {
+            border-color: #004b87;
+            box-shadow: 0 0 0 3px rgba(0, 75, 135, 0.15);
         }
         html:not(.dark) .form-input::placeholder { color: #64748B; }
         html:not(.dark) .demo-box {
-            background-color: rgba(255, 255, 255, 0.6);
-            border-color: rgba(17, 24, 18, 0.15);
+            background-color: rgba(240, 247, 255, 0.8);
+            border-color: #bae6fd;
         }
 
-        /* Dark Mode Styling (#111812 & #0B1215 background) */
+        /* Dark Mode Styling (EduMaster Deep Navy background) */
         html.dark body {
-            background: radial-gradient(circle at 50% 10%, #111812 0%, #0B1215 100%);
-            color: #ECF4E5;
+            background: radial-gradient(circle at 50% 10%, #003661 0%, #00274d 55%, #001933 100%);
+            color: #f8fafc;
         }
         html.dark .glass-card {
-            background: rgba(11, 18, 21, 0.78);
+            background: rgba(0, 39, 77, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(236, 244, 229, 0.12);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 15, 35, 0.7);
+            padding: 32px !important;
         }
         html.dark .text-head-title { color: #FFFFFF; }
-        html.dark .text-head-sub { color: #94A3B8; }
+        html.dark .text-head-sub { color: #bae6fd; }
         html.dark .card-header-title { color: #FFFFFF; }
-        html.dark .form-label { color: #CBD5E1; }
+        html.dark .form-label { color: #e0f2fe; }
         html.dark .form-input {
-            background-color: rgba(15, 23, 42, 0.8);
-            border-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(0, 27, 54, 0.85);
+            border: 1.5px solid rgba(224, 242, 254, 0.2);
             color: #FFFFFF;
+            border-radius: 8px;
+        }
+        html.dark .form-input:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
         }
         html.dark .form-input::placeholder { color: #64748B; }
         html.dark .demo-box {
-            background-color: rgba(15, 23, 42, 0.6);
-            border-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 27, 54, 0.7);
+            border-color: rgba(224, 242, 254, 0.15);
         }
     </style>
 </head>
@@ -127,19 +153,20 @@
                             <i class="fa-solid fa-lock"></i>
                         </span>
                         <input type="password" name="password" id="password" required
-                            class="w-full pl-10 pr-4 py-3 form-input rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+                            class="w-full pl-10 pr-4 py-3 form-input rounded-xl focus:outline-none focus:ring-2 focus:ring-[#004b87] text-sm transition"
                             placeholder="••••••••">
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between">
                     <label class="flex items-center space-x-2 text-xs form-label cursor-pointer">
-                        <input type="checkbox" name="remember" class="rounded bg-slate-800 border-slate-700 text-emerald-600 focus:ring-emerald-500">
+                        <input type="checkbox" name="remember" class="rounded bg-slate-800 border-slate-700 text-[#004b87] focus:ring-[#004b87]">
                         <span>Ingat saya di perangkat ini</span>
                     </label>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 flex items-center justify-center">
+                <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-[#004b87] to-[#0284c7] hover:from-[#003661] hover:to-[#004b87] text-white font-semibold rounded-xl shadow-lg shadow-[#004b87]/30 transition transform active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer">
+                    <i class="fa-solid fa-right-to-bracket text-sm"></i>
                     <span>Masuk ke Dashboard</span>
                 </button>
             </form>
@@ -148,19 +175,19 @@
             <div class="mt-8 pt-6 border-t border-slate-500/20">
                 <div class="text-xs font-semibold mb-2 flex items-center justify-between form-label">
                     <span>Demo Credentials:</span>
-                    <span class="text-[10px] text-emerald-500 font-medium">Klik untuk isi otomatis</span>
+                    <span class="text-[10px] text-[#004b87] dark:text-sky-400 font-semibold">Klik untuk isi otomatis</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <button type="button" onclick="setDemo('admin', 'admin123')" class="demo-box p-2 rounded-lg border hover:bg-emerald-950/30 hover:border-emerald-500/50 transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-emerald-500 group-hover:text-emerald-400">admin</div>
+                    <button type="button" onclick="setDemo('admin', 'admin123')" class="demo-box p-2.5 rounded-xl border hover:bg-sky-100/60 dark:hover:bg-[#004b87]/40 hover:border-[#004b87] transition cursor-pointer focus:outline-none group">
+                        <div class="font-bold text-[#004b87] dark:text-sky-300 group-hover:text-[#003661] dark:group-hover:text-white">admin</div>
                         <div class="text-[10px] opacity-75">Super Admin</div>
                     </button>
-                    <button type="button" onclick="setDemo('budi', 'budi123')" class="demo-box p-2 rounded-lg border hover:bg-amber-950/30 hover:border-amber-500/50 transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-amber-500 group-hover:text-amber-400">budi</div>
+                    <button type="button" onclick="setDemo('budi', 'budi123')" class="demo-box p-2.5 rounded-xl border hover:bg-amber-100/60 dark:hover:bg-amber-950/40 hover:border-amber-500 transition cursor-pointer focus:outline-none group">
+                        <div class="font-bold text-amber-500 group-hover:text-amber-600 dark:group-hover:text-amber-400">budi</div>
                         <div class="text-[10px] opacity-75">Supervisor</div>
                     </button>
-                    <button type="button" onclick="setDemo('gilang', 'gilang123')" class="demo-box p-2 rounded-lg border hover:bg-indigo-950/30 hover:border-indigo-500/50 transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-indigo-500 group-hover:text-indigo-400">gilang</div>
+                    <button type="button" onclick="setDemo('gilang', 'gilang123')" class="demo-box p-2.5 rounded-xl border hover:bg-sky-100/60 dark:hover:bg-sky-950/40 hover:border-sky-500 transition cursor-pointer focus:outline-none group">
+                        <div class="font-bold text-sky-600 dark:text-sky-400 group-hover:text-sky-700">gilang</div>
                         <div class="text-[10px] opacity-75">Operator</div>
                     </button>
                 </div>
@@ -223,20 +250,21 @@
             getColors() {
                 const isDark = document.documentElement.classList.contains('dark');
                 if (isDark) {
-                    // Dark Mode Colors: Light Custom (#ECF4E5 & #E1DFEA)
+                    // Dark Mode Colors: Light Sky & EduMaster Secondary Highlights
                     return {
-                        node: '236, 244, 229',        // #ECF4E5
-                        line: '225, 223, 234',        // #E1DFEA
-                        polyFill: '236, 244, 229'
+                        node: '224, 242, 254',        // #e0f2fe
+                        line: '2, 132, 199',          // #0284c7
+                        polyFill: '0, 75, 135'        // #004b87
                     };
                 } else {
-                    // Light Mode Colors: Dark Obsidian & Dark Green (#111812 & #0B1215)
+                    // Light Mode Colors: EduMaster Navy & Sky Highlights
                     return {
-                        node: '17, 24, 18',           // #111812
-                        line: '11, 18, 21',           // #0B1215
-                        polyFill: '17, 24, 18'
+                        node: '0, 75, 135',           // #004b87
+                        line: '2, 132, 199',          // #0284c7
+                        polyFill: '224, 242, 254'     // #e0f2fe
                     };
                 }
+            }
             }
 
             init() {

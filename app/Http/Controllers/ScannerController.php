@@ -77,8 +77,22 @@ class ScannerController extends Controller
             }
         }
 
-        // 3. BIN Code pattern e.g., B.10.2, C.1.1
+        // 3. BIN Code pattern e.g., I B.2.10, I A.1.1, or shorthand A.1.1, B.10.2
         $bin = Bin::with(['rack.warehouse', 'pallets.boxes.product'])->find($code);
+        if (!$bin) {
+            // Check with suffix match (e.g. user scanned "A.1.1" -> matches "I A.1.1")
+            $bin = Bin::with(['rack.warehouse', 'pallets.boxes.product'])
+                ->where('id', 'like', "% {$code}")
+                ->orWhere('id', 'like', "%-{$code}")
+                ->first();
+        }
+        if (!$bin && preg_match('/^([A-Za-z]+)\.(\d+)\.(\d+)$/', $code, $mCode)) {
+            // Check swapped format e.g. B.10.2 -> B.2.10
+            $altCode = "{$mCode[1]}.{$mCode[3]}.{$mCode[2]}";
+            $bin = Bin::with(['rack.warehouse', 'pallets.boxes.product'])
+                ->where('id', 'like', "% {$altCode}")
+                ->first();
+        }
         if ($bin) {
             return response()->json([
                 'status' => 'success',

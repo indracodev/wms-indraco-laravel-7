@@ -32,7 +32,7 @@
         font-size: 0.875rem !important;
     }
     .ts-dropdown .option.active, .ts-dropdown .option:hover {
-        background-color: #4f46e5 !important;
+        background-color: #004b87 !important;
         color: #ffffff !important;
     }
     .ts-dropdown .option.selected {
@@ -63,7 +63,7 @@
         color: #334155 !important;
     }
     html.light .ts-dropdown .option.active, html.light .ts-dropdown .option:hover {
-        background-color: #4f46e5 !important;
+        background-color: #004b87 !important;
         color: #ffffff !important;
     }
 
@@ -80,6 +80,64 @@
         background-color: rgba(15, 23, 42, 0.45) !important;
         backdrop-filter: blur(8px) !important;
         -webkit-backdrop-filter: blur(8px) !important;
+    }
+
+    /* CRITICAL OVERRIDE: All text inside #004b87 containers and colored buttons MUST be white */
+    [style*="#004b87"],
+    [style*="#004b87"] *,
+    html.light [style*="#004b87"],
+    html.light [style*="#004b87"] *,
+    html.light [style*="#004b87"] .font-extrabold,
+    html.light [style*="#004b87"] .font-bold,
+    html.light [style*="#004b87"] .font-black,
+    html.light [style*="#004b87"] strong,
+    html.light [style*="#004b87"] span,
+    html.light [style*="#004b87"] div,
+    button.bg-indigo-600,
+    button.bg-indigo-600 *,
+    html.light button.bg-indigo-600,
+    html.light button.bg-indigo-600 *,
+    html.light .btn-primary,
+    html.light .btn-primary * {
+        color: #ffffff !important;
+    }
+
+    /* Exceptions for white elements/buttons inside #004b87 */
+    [style*="#004b87"] .bg-white,
+    [style*="#004b87"] .bg-white *,
+    [style*="#004b87"] [style*="background-color: #ffffff"],
+    [style*="#004b87"] [style*="background-color: #ffffff"] *,
+    html.light [style*="#004b87"] .bg-white,
+    html.light [style*="#004b87"] .bg-white *,
+    html.light [style*="#004b87"] [style*="background-color: #ffffff"],
+    html.light [style*="#004b87"] [style*="background-color: #ffffff"] * {
+        color: #004b87 !important;
+    }
+
+    [style*="#004b87"] .text-sky-100, html.light [style*="#004b87"] .text-sky-100 {
+        color: #e0f2fe !important;
+    }
+    [style*="#004b87"] .text-sky-200, html.light [style*="#004b87"] .text-sky-200 {
+        color: #bae6fd !important;
+    }
+    [style*="#004b87"] .text-amber-300, html.light [style*="#004b87"] .text-amber-300 {
+        color: #fcd34d !important;
+    }
+    [style*="#004b87"] .text-amber-400, html.light [style*="#004b87"] .text-amber-400 {
+        color: #fbbf24 !important;
+    }
+    html.light [style*="#004b87"] .text-sky-300 {
+        color: #7dd3fc !important;
+    }
+
+    /* Yellow / Amber alert cards must always have dark/black text */
+    [style*="#fef3c7"],
+    [style*="#fef3c7"] *,
+    .bg-amber-50, .bg-amber-50 *,
+    .bg-amber-100, .bg-amber-100 *,
+    html.light .bg-amber-500\/10, html.light .bg-amber-500\/10 *,
+    html.light .bg-amber-500\/20, html.light .bg-amber-500\/20 * {
+        color: #000000 !important;
     }
 </style>
 @endsection
@@ -102,7 +160,7 @@
                 @click="switchMode('inbound_flow')" 
                 :class="activeMode === 'inbound_flow' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 font-bold' : 'bg-slate-800/80 text-slate-400 hover:text-slate-200'"
                 class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center justify-center cursor-pointer font-medium">
-            <span>Alur Penerimaan Barang (4 Langkah)</span>
+            <span>Alur Penerimaan Barang</span>
         </button>
 
         <button type="button" 
@@ -126,16 +184,16 @@
                 <button type="button" 
                         @click="goToStep(1)" 
                         class="flex flex-col sm:flex-row items-center justify-center p-2 rounded-xl transition cursor-pointer"
-                        :class="currentStep === 1 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : (currentStep > 1 ? 'bg-indigo-950/50 text-indigo-300 hover:bg-slate-800' : 'bg-slate-900/60 text-slate-500')">
+                        :class="currentStep === 1 ? 'bg-indigo-600 shadow-md shadow-indigo-600/30' : (currentStep > 1 ? 'bg-slate-700/80 hover:bg-slate-700' : 'bg-slate-700/80 hover:bg-slate-700')"
+                        style="color: #ffffff !important;">
                     <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black mr-0 sm:mr-2 mb-1 sm:mb-0 shadow-sm"
-                          :class="currentStep === 1 ? 'bg-white text-indigo-700 dark:text-indigo-600' : (currentStep > 1 ? 'bg-indigo-500/30 text-indigo-300' : 'bg-slate-800 text-slate-400')"
-                          :style="currentStep === 1 ? 'color: #4338ca !important; background-color: #ffffff !important;' : ''">
-                        <template x-if="currentStep > 1"><span>✓</span></template>
-                        <template x-if="currentStep <= 1"><span style="color: inherit !important;">1</span></template>
+                          :style="currentStep === 1 ? 'color: #4338ca !important; background-color: #ffffff !important;' : 'color: #ffffff !important; background-color: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important;'">
+                        <template x-if="currentStep > 1"><span style="color: #ffffff !important;">✓</span></template>
+                        <template x-if="currentStep <= 1"><span :style="currentStep === 1 ? 'color: #4338ca !important;' : 'color: #ffffff !important;'">1</span></template>
                     </span>
                     <div class="text-center sm:text-left">
-                        <div class="text-[10px] sm:text-xs font-bold leading-tight" :class="currentStep === 1 ? 'text-white' : ''">Palet</div>
-                        <div class="hidden md:block text-[9px] text-slate-300/80">Scan Barcode</div>
+                        <div class="text-[10px] sm:text-xs font-bold leading-tight" style="color: #ffffff !important;">Palet</div>
+                        <div class="hidden md:block text-[9px]" style="color: #e2e8f0 !important;">Scan Barcode</div>
                     </div>
                 </button>
 
@@ -143,16 +201,16 @@
                 <button type="button" 
                         @click="goToStep(2)" 
                         class="flex flex-col sm:flex-row items-center justify-center p-2 rounded-xl transition cursor-pointer"
-                        :class="currentStep === 2 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : (currentStep > 2 ? 'bg-indigo-950/50 text-indigo-300 hover:bg-slate-800' : 'bg-slate-900/60 text-slate-500')">
+                        :class="currentStep === 2 ? 'bg-indigo-600 shadow-md shadow-indigo-600/30' : (currentStep > 2 ? 'bg-slate-700/80 hover:bg-slate-700' : 'bg-slate-700/80 hover:bg-slate-700')"
+                        style="color: #ffffff !important;">
                     <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black mr-0 sm:mr-2 mb-1 sm:mb-0 shadow-sm"
-                          :class="currentStep === 2 ? 'bg-white text-indigo-700 dark:text-indigo-600' : (currentStep > 2 ? 'bg-indigo-500/30 text-indigo-300' : 'bg-slate-800 text-slate-400')"
-                          :style="currentStep === 2 ? 'color: #4338ca !important; background-color: #ffffff !important;' : ''">
-                        <template x-if="currentStep > 2"><span>✓</span></template>
-                        <template x-if="currentStep <= 2"><span style="color: inherit !important;">2</span></template>
+                          :style="currentStep === 2 ? 'color: #4338ca !important; background-color: #ffffff !important;' : 'color: #ffffff !important; background-color: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important;'">
+                        <template x-if="currentStep > 2"><span style="color: #ffffff !important;">✓</span></template>
+                        <template x-if="currentStep <= 2"><span :style="currentStep === 2 ? 'color: #4338ca !important;' : 'color: #ffffff !important;'">2</span></template>
                     </span>
                     <div class="text-center sm:text-left">
-                        <div class="text-[10px] sm:text-xs font-bold leading-tight" :class="currentStep === 2 ? 'text-white' : ''">Produk</div>
-                        <div class="hidden md:block text-[9px] text-slate-300/80">Pilih SKU Varian</div>
+                        <div class="text-[10px] sm:text-xs font-bold leading-tight" style="color: #ffffff !important;">Produk</div>
+                        <div class="hidden md:block text-[9px]" style="color: #e2e8f0 !important;">Pilih SKU Varian</div>
                     </div>
                 </button>
 
@@ -160,16 +218,16 @@
                 <button type="button" 
                         @click="goToStep(3)" 
                         class="flex flex-col sm:flex-row items-center justify-center p-2 rounded-xl transition cursor-pointer"
-                        :class="currentStep === 3 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : (currentStep > 3 ? 'bg-indigo-950/50 text-indigo-300 hover:bg-slate-800' : 'bg-slate-900/60 text-slate-500')">
+                        :class="currentStep === 3 ? 'bg-indigo-600 shadow-md shadow-indigo-600/30' : (currentStep > 3 ? 'bg-slate-700/80 hover:bg-slate-700' : 'bg-slate-700/80 hover:bg-slate-700')"
+                        style="color: #ffffff !important;">
                     <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black mr-0 sm:mr-2 mb-1 sm:mb-0 shadow-sm"
-                          :class="currentStep === 3 ? 'bg-white text-indigo-700 dark:text-indigo-600' : (currentStep > 3 ? 'bg-indigo-500/30 text-indigo-300' : 'bg-slate-800 text-slate-400')"
-                          :style="currentStep === 3 ? 'color: #4338ca !important; background-color: #ffffff !important;' : ''">
-                        <template x-if="currentStep > 3"><span>✓</span></template>
-                        <template x-if="currentStep <= 3"><span style="color: inherit !important;">3</span></template>
+                          :style="currentStep === 3 ? 'color: #4338ca !important; background-color: #ffffff !important;' : 'color: #ffffff !important; background-color: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important;'">
+                        <template x-if="currentStep > 3"><span style="color: #ffffff !important;">✓</span></template>
+                        <template x-if="currentStep <= 3"><span :style="currentStep === 3 ? 'color: #4338ca !important;' : 'color: #ffffff !important;'">3</span></template>
                     </span>
                     <div class="text-center sm:text-left">
-                        <div class="text-[10px] sm:text-xs font-bold leading-tight" :class="currentStep === 3 ? 'text-white' : ''">Detail</div>
-                        <div class="hidden md:block text-[9px] text-slate-300/80">Qty, ED & Notes</div>
+                        <div class="text-[10px] sm:text-xs font-bold leading-tight" style="color: #ffffff !important;">Detail</div>
+                        <div class="hidden md:block text-[9px]" style="color: #e2e8f0 !important;">Qty, ED & Notes</div>
                     </div>
                 </button>
 
@@ -177,15 +235,15 @@
                 <button type="button" 
                         @click="goToStep(4)" 
                         class="flex flex-col sm:flex-row items-center justify-center p-2 rounded-xl transition cursor-pointer"
-                        :class="currentStep === 4 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-slate-900/60 text-slate-500'">
+                        :class="currentStep === 4 ? 'bg-indigo-600 shadow-md shadow-indigo-600/30' : 'bg-slate-700/80 hover:bg-slate-700'"
+                        style="color: #ffffff !important;">
                     <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black mr-0 sm:mr-2 mb-1 sm:mb-0 shadow-sm"
-                          :class="currentStep === 4 ? 'bg-white text-indigo-700 dark:text-indigo-600' : 'bg-slate-800 text-slate-400'"
-                          :style="currentStep === 4 ? 'color: #4338ca !important; background-color: #ffffff !important;' : ''">
-                        <span style="color: inherit !important;">4</span>
+                          :style="currentStep === 4 ? 'color: #4338ca !important; background-color: #ffffff !important;' : 'color: #ffffff !important; background-color: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important;'">
+                        <span :style="currentStep === 4 ? 'color: #4338ca !important;' : 'color: #ffffff !important;'">4</span>
                     </span>
                     <div class="text-center sm:text-left">
-                        <div class="text-[10px] sm:text-xs font-bold leading-tight" :class="currentStep === 4 ? 'text-white' : ''">Simpan / Rak</div>
-                        <div class="hidden md:block text-[9px] text-slate-300/80">In Transit / Rak</div>
+                        <div class="text-[10px] sm:text-xs font-bold leading-tight" style="color: #ffffff !important;">Simpan Rak</div>
+                        <div class="hidden md:block text-[9px]" style="color: #e2e8f0 !important;">In Transit / Rak</div>
                     </div>
                 </button>
             </div>
@@ -282,22 +340,49 @@
                             <!-- Method 3: Barcode Bar / Simulator Fast Bar -->
                             <div class="flex items-center space-x-2 pt-0.5">
                                 <a href="{{ route('scanner.index') }}" target="_blank"
-                                   class="w-full py-2.5 px-3 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 rounded-xl flex items-center justify-center text-xs text-purple-300 font-semibold transition active:scale-95">
-                                    <span>Buka Scanner Simulator Barcode Bar</span>
+                                   style="background-color: #facc15 !important; border: 1.5px solid #eab308 !important; color: #000000 !important;"
+                                   class="w-full py-2.5 px-3 hover:bg-yellow-400 rounded-xl flex items-center justify-center text-xs font-bold transition active:scale-95 shadow-sm">
+                                    <span style="color: #000000 !important; font-weight: 800;">Buka Scanner Simulator Barcode Bar</span>
                                 </a>
                             </div>
 
-                            <!-- Method 1 (Search Dropdown): Select Search Palet Terdaftar -->
-                            <div class="pt-1.5">
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Atau Cari & Pilih dari Dropdown (Select Search):</label>
-                                <select id="select_existing_pallet" @change="form.pallet_id = $event.target.value; checkPalletInfo()" class="w-full">
-                                    <option value="">Cari Palet Terdaftar...</option>
+                            <!-- Method 1 (Search Dropdown): Select Search Palet Terdaftar (Desktop) -->
+                            <div class="hidden md:block pt-1.5">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-[11px] font-semibold text-slate-400">Atau Cari & Pilih dari Dropdown (Select Search):</label>
+                                    <span class="text-[10px] text-slate-500">Cari dari 11.000+ palet</span>
+                                </div>
+                                <select id="select_existing_pallet" class="w-full">
+                                    <option value="">Ketik untuk mencari palet (e.g. K125, PLS, LOS)...</option>
                                     @foreach($pallets as $plt)
                                         <option value="{{ $plt->id }}">
                                             Palet: {{ $plt->id }} ({{ $plt->bin_id ? 'Rak ' . $plt->bin_id : 'In Transit' }})
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <!-- Method 1 (Mobile Search Modal Trigger): Khusus Mobile -->
+                            <div class="md:hidden pt-1.5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">Atau Cari & Pilih Palet Terdaftar:</label>
+                                <button type="button" 
+                                        @click.stop="openMobilePalletModal()" 
+                                        style="background-color: #004b87 !important; border: 2px solid #003661 !important;"
+                                        class="w-full p-3.5 rounded-xl flex items-center justify-between text-left text-xs transition active:scale-[0.99] shadow-lg cursor-pointer">
+                                    <div class="truncate mr-3">
+                                        <template x-if="form.pallet_id">
+                                            <span class="text-white font-mono font-black text-sm tracking-wide truncate" x-text="'Palet: ' + form.pallet_id"></span>
+                                        </template>
+                                        <template x-if="!form.pallet_id">
+                                            <span class="text-sky-200 text-xs font-semibold italic">anda belum menentukan palet</span>
+                                        </template>
+                                    </div>
+                                    <span style="background-color: #ffffff !important; color: #004b87 !important;" 
+                                          class="px-4 py-2 rounded-xl text-xs font-black shrink-0 flex items-center gap-1.5 shadow-md hover:bg-sky-50 active:scale-95 transition">
+                                        <i class="fa-solid fa-magnifying-glass text-xs" style="color: #004b87 !important;"></i>
+                                        <span style="color: #004b87 !important;">Cari</span>
+                                    </span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -306,13 +391,15 @@
                     <input type="hidden" name="pallet_type_id" x-model="form.pallet_type_id">
 
                     <!-- Alert Ketentuan 1: Palet Terkunci 1 Produk -->
-                    <div x-show="palletInfo.active_product_id" class="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold text-amber-300">Ketentuan 1: Palet Sudah Berisi Produk</span>
-                            <span class="text-amber-400 font-mono text-[11px]" x-text="'SKU: ' + palletInfo.active_product_id"></span>
+                    <div x-show="palletInfo.active_product_id" 
+                         style="background-color: #fef3c7 !important; border: 1.5px solid #f59e0b !important; color: #000000 !important;"
+                         class="p-3.5 rounded-xl space-y-1 shadow-sm text-slate-900">
+                        <div class="flex items-center justify-between text-xs font-bold" style="color: #000000 !important;">
+                            <span class="font-extrabold" style="color: #000000 !important;">Ketentuan 1: Palet Sudah Berisi Produk</span>
+                            <span class="font-mono text-[11px] font-bold" style="color: #000000 !important;" x-text="'SKU: ' + palletInfo.active_product_id"></span>
                         </div>
-                        <p class="text-xs text-slate-300">
-                            Palet ini sudah memiliki muatan produk <strong class="text-white" x-text="palletInfo.active_product_name"></strong>. Saat penerimaan awal, hanya produk yang sama yang dapat ditambahkan ke palet ini.
+                        <p class="text-xs leading-relaxed" style="color: #000000 !important;">
+                            Palet ini sudah memiliki muatan produk <strong class="font-black" style="color: #000000 !important;" x-text="palletInfo.active_product_name"></strong>. Saat penerimaan awal, hanya produk yang sama yang dapat ditambahkan ke palet ini.
                         </p>
                     </div>
 
@@ -323,15 +410,16 @@
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <template x-for="box in palletInfo.boxes" :key="box.id">
-                                <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1">
+                                <div style="background-color: #ffffff !important; color: #004b87 !important; border: 1.5px solid #cbd5e1 !important;"
+                                     class="p-2.5 rounded-xl text-xs space-y-1 shadow-sm">
                                     <div class="flex justify-between items-center text-[11px]">
-                                        <span class="font-mono text-slate-400" x-text="box.id"></span>
-                                        <span class="font-bold text-sky-400" x-text="box.qty + ' ' + box.uom_base"></span>
+                                        <span class="font-mono font-bold" style="color: #00274d !important;" x-text="box.id"></span>
+                                        <span class="font-black" style="color: #0284c7 !important;" x-text="box.qty + ' ' + box.uom_base"></span>
                                     </div>
-                                    <div class="text-[11px] text-amber-300">
-                                        ED: <span class="font-semibold" x-text="box.expired_date"></span>
+                                    <div class="text-[11px] font-bold" style="color: #d97706 !important;">
+                                        ED: <span class="font-black" x-text="box.expired_date"></span>
                                     </div>
-                                    <div class="text-[10px] text-slate-500 truncate" x-show="box.notes" x-text="'Ket: ' + box.notes"></div>
+                                    <div class="text-[10px] truncate" style="color: #64748b !important;" x-show="box.notes" x-text="'Ket: ' + box.notes"></div>
                                 </div>
                             </template>
                         </div>
@@ -342,9 +430,8 @@
                 <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:justify-end gap-2">
                     <button type="button" 
                             @click="nextStep()" 
-                            class="w-full sm:w-auto px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2 active:scale-95 cursor-pointer">
-                        <span>Lanjut ke Langkah 2: Scan Produk</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                            class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center active:scale-95 cursor-pointer">
+                        <span>Next</span>
                     </button>
                 </div>
             </div>
@@ -358,14 +445,15 @@
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="glass-panel p-5 sm:p-7 rounded-2xl shadow-xl space-y-5">
                 
-                <!-- Pallet Context Summary Banner -->
-                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                    <div>
-                        <span class="text-slate-400">Palet Terpilih:</span>
-                        <strong class="text-indigo-400 font-mono ml-1" x-text="form.pallet_id"></strong>
-                        <span class="text-slate-500 ml-1.5" x-text="'(' + palletStatusLabel + ')'"></span>
+                <!-- Pallet Context Summary Banner (#004b87 Background with White Text) -->
+                <div class="p-3.5 rounded-xl flex items-center justify-between text-xs shadow-md"
+                     style="background-color: #004b87 !important; border: 2px solid #003661 !important;">
+                    <div class="text-white">
+                        <span class="text-sky-100 font-medium">Palet Terpilih:</span>
+                        <strong class="font-mono font-black text-sm ml-1 text-white" x-text="form.pallet_id"></strong>
+                        <span class="text-sky-200 ml-1.5 font-semibold" x-text="'(' + palletStatusLabel + ')'"></span>
                     </div>
-                    <button type="button" @click="goToStep(1)" class="text-indigo-400 hover:underline text-[11px] font-semibold">Ubah Palet</button>
+                    <button type="button" @click="goToStep(1)" class="px-3 py-1.5 bg-white text-[#004b87] rounded-lg text-xs font-black shadow hover:bg-sky-50 transition active:scale-95">Ubah Palet</button>
                 </div>
 
                 <div class="border-b border-slate-800 pb-3">
@@ -419,8 +507,9 @@
                             <!-- Method 3: Barcode Bar / Simulator Fast Bar -->
                             <div class="flex items-center space-x-2 pt-0.5">
                                 <a href="{{ route('scanner.index') }}" target="_blank"
-                                   class="w-full py-2.5 px-3 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 rounded-xl flex items-center justify-center text-xs text-purple-300 font-semibold transition active:scale-95">
-                                    <span>Buka Scanner Simulator Barcode Bar</span>
+                                   style="background-color: #facc15 !important; border: 1.5px solid #eab308 !important; color: #000000 !important;"
+                                   class="w-full py-2.5 px-3 hover:bg-yellow-400 rounded-xl flex items-center justify-center text-xs font-bold transition active:scale-95 shadow-sm">
+                                    <span style="color: #000000 !important; font-weight: 800;">Buka Scanner Simulator Barcode Bar</span>
                                 </a>
                             </div>
 
@@ -442,27 +531,28 @@
                         </div>
                     </div>
 
-                    <!-- Selected Product Details Card -->
-                    <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <!-- Selected Product Details Card (#004b87 Background with White Text) -->
+                    <div class="p-4 rounded-xl space-y-2.5 shadow-md"
+                         style="background-color: #004b87 !important; border: 2px solid #003661 !important;">
+                        <div class="text-xs font-bold text-sky-100 uppercase tracking-wider">
                             Rincian Produk Terpilih:
                         </div>
-                        <div class="text-base font-bold text-white" x-text="selectedProductName"></div>
+                        <div class="text-base font-extrabold text-white" style="color: #ffffff !important;" x-text="selectedProductName"></div>
                         
                         <!-- Varian Satuan UOM Pills -->
-                        <div class="pt-2 border-t border-slate-800 space-y-1.5">
-                            <div class="text-[11px] text-slate-400">Varian Satuan Tersedia:</div>
-                            <div class="flex flex-wrap gap-1.5">
+                        <div class="pt-2.5 border-t border-sky-600/50 space-y-2">
+                            <div class="text-xs text-sky-100 font-semibold">Varian Satuan Tersedia:</div>
+                            <div class="flex flex-wrap gap-2">
                                 <template x-for="(conv, uomName) in availableConversions" :key="uomName">
-                                    <span class="px-2.5 py-1 bg-slate-900 text-slate-200 border border-slate-700 rounded-lg text-xs font-medium"
-                                          :class="uomName === form.unit ? 'border-indigo-400 bg-indigo-900/40 text-indigo-300 font-bold' : ''">
+                                    <span class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm"
+                                          :style="uomName === form.unit ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;'">
                                         <span x-text="uomName"></span>
-                                        <span class="text-[10px] text-slate-400" x-text="'(x' + conv.qty_convert + ' ' + conv.uom_base + ')'"></span>
+                                        <span class="text-[10px] opacity-80" x-text="'(x' + conv.qty_convert + ' ' + conv.uom_base + ')'"></span>
                                     </span>
                                 </template>
                             </div>
-                            <div class="text-[11px] text-slate-400 pt-1">
-                                Satuan Terkecil (Base): <strong class="text-sky-300" x-text="currentBaseUnit"></strong>
+                            <div class="text-xs text-sky-100 pt-1 font-medium">
+                                Satuan Terkecil (Base): <strong class="text-white font-extrabold" style="color: #ffffff !important;" x-text="currentBaseUnit"></strong>
                             </div>
                         </div>
                     </div>
@@ -472,13 +562,14 @@
                 <div class="pt-4 border-t border-slate-800 flex items-center justify-between gap-3">
                     <button type="button" 
                             @click="prevStep()" 
-                            class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
-                        &larr; Kembali (Palet)
+                            style="background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #cbd5e1 !important;"
+                            class="px-6 py-3 hover:bg-slate-100 text-xs sm:text-sm font-black rounded-xl shadow-md transition active:scale-95">
+                        Back
                     </button>
                     <button type="button" 
                             @click="nextStep()" 
-                            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95 cursor-pointer">
-                        <span>Lanjut ke Langkah 3: Qty & ED &rarr;</span>
+                            class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95 cursor-pointer">
+                        <span>Next</span>
                     </button>
                 </div>
             </div>
@@ -492,16 +583,17 @@
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="glass-panel p-5 sm:p-7 rounded-2xl shadow-xl space-y-5">
                 
-                <!-- Pallet & Product Summary Context -->
-                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div>
-                        <span class="text-slate-400">Palet:</span>
-                        <strong class="text-indigo-400 font-mono ml-1" x-text="form.pallet_id"></strong>
-                        <span class="text-slate-500 mx-1">|</span>
-                        <span class="text-slate-400">Produk:</span>
-                        <strong class="text-white ml-1" x-text="selectedProductName"></strong>
+                <!-- Pallet & Product Summary Context (#004b87 Background with White Text) -->
+                <div class="p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-md"
+                     style="background-color: #004b87 !important; border: 2px solid #003661 !important;">
+                    <div class="text-white" style="color: #ffffff !important;">
+                        <span class="text-sky-100 font-medium" style="color: #e0f2fe !important;">Palet:</span>
+                        <strong class="font-mono font-black text-sm ml-1 text-white" style="color: #ffffff !important;" x-text="form.pallet_id"></strong>
+                        <span class="text-sky-200 mx-1.5 font-bold" style="color: #bae6fd !important;">|</span>
+                        <span class="text-sky-100 font-medium" style="color: #e0f2fe !important;">Produk:</span>
+                        <strong class="text-white font-extrabold ml-1" style="color: #ffffff !important;" x-text="selectedProductName"></strong>
                     </div>
-                    <button type="button" @click="goToStep(2)" class="text-indigo-400 hover:underline text-[11px] font-semibold">Ubah Produk</button>
+                    <button type="button" @click="goToStep(2)" style="background-color: #ffffff !important; color: #004b87 !important;" class="px-3 py-1.5 rounded-lg text-xs font-black shadow hover:bg-sky-50 transition active:scale-95">Ubah Produk</button>
                 </div>
 
                 <div class="border-b border-slate-800 pb-3">
@@ -540,21 +632,21 @@
                                 <template x-for="(conv, uomName) in availableConversions" :key="uomName">
                                     <button type="button" 
                                             @click="form.unit = uomName" 
-                                            class="p-3 min-h-[58px] rounded-xl border text-left transition-all active:scale-95 cursor-pointer flex flex-col justify-between"
-                                            :class="form.unit === uomName 
-                                                ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30 ring-2 ring-indigo-500/40' 
-                                                : 'bg-slate-950 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:border-indigo-400'">
+                                            class="p-3 min-h-[58px] rounded-xl border-2 text-left transition-all active:scale-95 cursor-pointer flex flex-col justify-between shadow-sm"
+                                            :style="form.unit === uomName 
+                                                ? 'background-color: #004b87 !important; color: #ffffff !important; border-color: #003661 !important;' 
+                                                : 'background-color: #ffffff !important; color: #004b87 !important; border-color: #cbd5e1 !important;'">
                                         <div class="flex items-center justify-between">
-                                            <span class="font-bold text-sm tracking-wide" 
-                                                  :class="form.unit === uomName ? 'text-white' : 'text-slate-900 dark:text-white'" 
+                                            <span class="font-black text-sm tracking-wide" 
+                                                  :style="form.unit === uomName ? 'color: #ffffff !important;' : 'color: #00274d !important;'" 
                                                   x-text="uomName"></span>
                                             <span class="w-4 h-4 rounded-full border flex items-center justify-center text-[10px]"
-                                                  :class="form.unit === uomName ? 'border-white bg-white font-bold' : 'border-slate-400 dark:border-slate-600'">
-                                                <span x-show="form.unit === uomName" class="text-indigo-600">✓</span>
+                                                  :style="form.unit === uomName ? 'border-color: #ffffff !important; background-color: #ffffff !important;' : 'border-color: #004b87 !important; background-color: transparent !important;'">
+                                                <span x-show="form.unit === uomName" style="color: #004b87 !important; font-weight: 900;">✓</span>
                                             </span>
                                         </div>
-                                        <div class="text-[11px] mt-1 font-medium" 
-                                              :class="form.unit === uomName ? 'text-indigo-100' : 'text-slate-600 dark:text-slate-400'">
+                                        <div class="text-[11px] mt-1 font-semibold" 
+                                              :style="form.unit === uomName ? 'color: #e0f2fe !important;' : 'color: #004b87 !important;'">
                                             <span x-text="'Isi: ' + conv.qty_convert + ' ' + conv.uom_base"></span>
                                         </div>
                                     </button>
@@ -604,15 +696,16 @@
                     <input type="hidden" name="shift" x-model="form.shift">
                     <input type="hidden" name="machine_code" x-model="form.machine_code">
 
-                    <!-- RINGKASAN MUATAN PALET -->
-                    <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2 mt-2">
+                    <!-- RINGKASAN MUATAN PALET (#004b87 Background with White Text) -->
+                    <div class="p-4 rounded-xl space-y-2 mt-2 shadow-md"
+                         style="background-color: #004b87 !important; border: 2px solid #003661 !important;">
                         <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold text-slate-300">Ringkasan Muatan Palet Ini:</span>
-                            <span class="font-mono font-bold text-sky-400" x-text="totalForecastQty + ' ' + currentBaseUnit + ' Total'"></span>
+                            <span class="font-extrabold text-white text-xs" style="color: #ffffff !important;">Ringkasan Muatan Palet Ini:</span>
+                            <span class="font-mono font-black text-sm text-sky-200" style="color: #bae6fd !important;" x-text="totalForecastQty + ' ' + currentBaseUnit + ' Total'"></span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400 pt-1.5 border-t border-slate-800">
-                            <div>Muatan sebelumnya: <strong class="text-slate-200" x-text="(palletInfo.total_qty || 0) + ' ' + currentBaseUnit"></strong></div>
-                            <div>Tambahan input: <strong class="text-sky-300" x-text="calculatedBaseQty + ' ' + currentBaseUnit"></strong></div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-sky-100 pt-2 border-t border-sky-600/50" style="color: #e0f2fe !important;">
+                            <div style="color: #e0f2fe !important;">Muatan sebelumnya: <strong class="text-white font-extrabold" style="color: #ffffff !important;" x-text="(palletInfo.total_qty || 0) + ' ' + currentBaseUnit"></strong></div>
+                            <div style="color: #e0f2fe !important;">Tambahan input: <strong class="text-white font-black" style="color: #ffffff !important;" x-text="calculatedBaseQty + ' ' + currentBaseUnit"></strong></div>
                         </div>
                     </div>
                 </div>
@@ -635,20 +728,23 @@
                         <button type="button" 
                                 @click="nextStep()" 
                                 class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-indigo-600/30 transition flex flex-col items-center justify-center cursor-pointer active:scale-95">
-                            <span class="font-extrabold">Lanjut: Tempatkan ke Rak &rarr;</span>
-                            <span class="text-[10px] text-indigo-100 font-normal mt-0.5">Pilih / scan barcode rak fisik</span>
+                            <span class="font-extrabold text-white" style="color: #ffffff !important;">Next</span>
+                            <span class="text-[10px] text-indigo-100 font-normal mt-0.5" style="color: #e0e7ff !important;">Pilih / scan barcode rak fisik</span>
                         </button>
                     </div>
 
-                    <div class="flex items-center justify-between pt-1">
-                        <button type="button" 
-                                @click="prevStep()" 
-                                class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
-                            &larr; Kembali (Produk)
-                        </button>
-                        <span class="text-[11px] text-slate-400">
-                            Palet In Transit dapat dipindah ke rak kapan saja
-                        </span>
+                    <div class="pt-2 space-y-1.5">
+                        <div class="text-xs font-bold" style="color: #ef4444 !important;">
+                            * Palet In Transit dapat dipindah ke rak kapan saja
+                        </div>
+                        <div class="flex items-center justify-start">
+                            <button type="button" 
+                                    @click="prevStep()" 
+                                    style="background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #cbd5e1 !important;"
+                                    class="px-6 py-2.5 hover:bg-slate-100 text-xs sm:text-sm font-black rounded-xl shadow-md transition active:scale-95">
+                                Back
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -671,48 +767,51 @@
                 </div>
 
                 <!-- Info Alert: Fleksibilitas Status In Transit -->
-                <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2.5 text-xs">
-                    <span class="px-2 py-0.5 bg-amber-500/20 text-amber-400 dark:text-amber-300 font-bold rounded text-[10px] tracking-wide uppercase shrink-0 mt-0.5">
+                <div style="background-color: #fef3c7 !important; border: 1.5px solid #f59e0b !important; color: #000000 !important;"
+                     class="p-3 rounded-xl flex items-start gap-2.5 text-xs shadow-sm">
+                    <span style="background-color: #fde68a !important; color: #000000 !important; border: 1px solid #d97706 !important;"
+                          class="px-2 py-0.5 font-black rounded text-[10px] tracking-wide uppercase shrink-0 mt-0.5">
                         In Transit
                     </span>
-                    <div class="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
-                        Jika palet belum diangkut forklift ke rak, Anda dapat langsung menekan tombol <strong>Simpan Sementara (In Transit)</strong>. Palet tetap tersimpan resmi dan dapat dipindahkan ke rak kapan saja melalui menu <em>"Putaway Palet Transit ke Rak"</em>.
+                    <div style="color: #000000 !important;" class="text-[11px] leading-relaxed">
+                        Jika palet belum diangkut forklift ke rak, Anda dapat langsung menekan tombol <strong style="color: #000000 !important;">Simpan Sementara (In Transit)</strong>. Palet tetap tersimpan resmi dan dapat dipindahkan ke rak kapan saja melalui menu <em>"Putaway Palet Transit ke Rak"</em>.
                     </div>
                 </div>
 
-                <!-- RINGKASAN REVIEW TRANSAKSI -->
-                <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2.5 text-xs text-slate-300">
-                    <div class="font-bold text-slate-200 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-800">
+                <!-- RINGKASAN REVIEW TRANSAKSI (#004b87 Background with White Text) -->
+                <div class="p-4 rounded-xl space-y-3 text-xs shadow-md"
+                     style="background-color: #004b87 !important; border: 2px solid #003661 !important;">
+                    <div class="font-extrabold text-white uppercase tracking-wider text-xs pb-1.5 border-b border-sky-600/50" style="color: #ffffff !important;">
                         Ringkasan Penerimaan Barang:
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                            <span class="text-slate-400">Palet Target:</span>
-                            <div class="font-mono font-bold text-indigo-400 text-sm" x-text="form.pallet_id"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Palet Target:</span>
+                            <div class="font-mono font-black text-white text-base tracking-wide" style="color: #ffffff !important;" x-text="form.pallet_id"></div>
                         </div>
                         <div>
-                            <span class="text-slate-400">Status Palet:</span>
-                            <div class="font-semibold text-indigo-300" x-text="palletStatusLabel"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Status Palet:</span>
+                            <div class="font-bold text-sky-200" style="color: #bae6fd !important;" x-text="palletStatusLabel"></div>
                         </div>
                         <div>
-                            <span class="text-slate-400">Produk SKU:</span>
-                            <div class="font-semibold text-white truncate" x-text="selectedProductName"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Produk SKU:</span>
+                            <div class="font-bold text-white truncate" style="color: #ffffff !important;" x-text="selectedProductName"></div>
                         </div>
                         <div>
-                            <span class="text-slate-400">Jumlah Input:</span>
-                            <div class="font-bold text-amber-400" x-text="form.qty + ' ' + form.unit"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Jumlah Input:</span>
+                            <div class="font-black text-amber-300 text-sm" style="color: #fcd34d !important;" x-text="form.qty + ' ' + form.unit"></div>
                         </div>
                         <div>
-                            <span class="text-slate-400">Setara Satuan Dasar:</span>
-                            <div class="font-bold text-sky-400" x-text="calculatedBaseQty + ' ' + currentBaseUnit"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Setara Satuan Dasar:</span>
+                            <div class="font-bold text-sky-200" style="color: #bae6fd !important;" x-text="calculatedBaseQty + ' ' + currentBaseUnit"></div>
                         </div>
                         <div>
-                            <span class="text-slate-400">Expired Date:</span>
-                            <div class="font-semibold text-slate-200" x-text="form.expired_date"></div>
+                            <span class="text-sky-100 font-semibold" style="color: #e0f2fe !important;">Expired Date:</span>
+                            <div class="font-bold text-white" style="color: #ffffff !important;" x-text="form.expired_date"></div>
                         </div>
                     </div>
-                    <div class="pt-1 text-[11px] text-slate-400" x-show="form.notes">
-                        Keterangan: <span class="text-slate-200" x-text="form.notes"></span>
+                    <div class="pt-2 text-xs text-sky-100 border-t border-sky-600/40" style="color: #e0f2fe !important;" x-show="form.notes">
+                        Catatan: <span class="text-white font-semibold" style="color: #ffffff !important;" x-text="form.notes"></span>
                     </div>
                 </div>
 
@@ -742,7 +841,7 @@
                                    class="w-full p-3.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm uppercase font-bold focus:ring-2 focus:ring-indigo-500 shadow-inner">
                             <datalist id="inbound_bin_datalist">
                                 @foreach($bins as $b)
-                                    @php $count = $b->pallets->where('is_active', true)->count(); @endphp
+                                    @php $count = $b->pallets_count ?? 0; @endphp
                                     <option value="{{ $b->id }}">{{ $b->id }} (Terisi {{ $count }}/{{ $b->max_pallet }} Palet{{ $count >= $b->max_pallet ? ' - FULL' : '' }})</option>
                                 @endforeach
                             </datalist>
@@ -763,7 +862,7 @@
                                 class="w-full p-3.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                             <option value="">-- Biarkan Kosong (Status: In Transit / Belum Masuk Rak) --</option>
                             @foreach($bins as $b)
-                                @php $count = $b->pallets->where('is_active', true)->count(); @endphp
+                                @php $count = $b->pallets_count ?? 0; @endphp
                                 <option value="{{ $b->id }}" {{ $count >= $b->max_pallet ? 'disabled' : '' }}>
                                     BIN: {{ $b->id }} (Terisi {{ $count }}/{{ $b->max_pallet }} Palet{{ $count >= $b->max_pallet ? ' - FULL' : '' }})
                                 </option>
@@ -785,8 +884,13 @@
                         </button>
                     </div>
 
-                    <div x-show="!form.bin_id" class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-[11px] text-slate-400">
-                        Catatan: Jika barang masih berada di area bongkar muat dan belum diangkut forklift ke rak, Anda dapat langsung menekan tombol <strong>Simpan Sementara (In Transit)</strong>.
+                    <div x-show="!form.bin_id" 
+                         style="background-color: #004b87 !important; border: 1.5px solid #003661 !important;"
+                         class="p-3.5 rounded-xl text-xs text-white shadow-sm flex items-start gap-2.5">
+                        <i class="fa-solid fa-circle-info text-sky-300 text-sm mt-0.5 shrink-0"></i>
+                        <div class="text-sky-100 text-xs leading-relaxed">
+                            <strong class="text-white">Catatan:</strong> Jika barang masih berada di area bongkar muat dan belum diangkut forklift ke rak, Anda dapat langsung menekan tombol <strong class="text-white">Simpan Sementara (In Transit)</strong>.
+                        </div>
                     </div>
                 </div>
 
@@ -815,12 +919,13 @@
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" 
                                 @click="prevStep()" 
-                                class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
-                            &larr; Kembali ke Detail
+                                style="background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #cbd5e1 !important;"
+                                class="px-6 py-2.5 hover:bg-slate-100 text-xs sm:text-sm font-black rounded-xl shadow-md transition active:scale-95">
+                            Back
                         </button>
                         <button type="button" 
                                 @click="resetInboundForm()" 
-                                class="text-xs text-slate-500 hover:text-slate-300 underline">
+                                class="text-xs text-slate-500 hover:text-rose-600 font-bold underline cursor-pointer">
                             Reset Form
                         </button>
                     </div>
@@ -860,7 +965,7 @@
                         <label class="block text-[11px] text-slate-400 mb-1">Daftar Palet In-Transit:</label>
                         <select onchange="document.getElementById('putaway_pallet_id').value = this.value" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 text-xs">
                             <option value="">-- Pilih Palet In Transit --</option>
-                            @foreach($pallets->where('status', 'in_transit') as $plt)
+                            @foreach($putawayPallets as $plt)
                                 <option value="{{ $plt->id }}">
                                     Palet: {{ $plt->id }} - {{ $plt->activeBoxes->first() ? $plt->activeBoxes->first()->product->name : 'Palet Kosong' }} ({{ $plt->activeBoxes->sum('qty') }} unit)
                                 </option>
@@ -887,7 +992,7 @@
                         <select onchange="document.getElementById('putaway_bin_id').value = this.value" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 text-xs">
                             <option value="">-- Pilih BIN Tujuan --</option>
                             @foreach($bins as $b)
-                                @php $count = $b->pallets->where('is_active', true)->count(); @endphp
+                                @php $count = $b->pallets_count ?? 0; @endphp
                                 <option value="{{ $b->id }}" {{ $count >= $b->max_pallet ? 'disabled' : '' }}>
                                     BIN: {{ $b->id }} (Terisi {{ $count }}/{{ $b->max_pallet }} Palet {{ $count >= $b->max_pallet ? '- FULL' : '' }})
                                 </option>
@@ -999,10 +1104,12 @@
             </div>
 
             <!-- Notice Banner In Transit -->
-            <div x-show="!form.bin_id" class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl flex items-start gap-2.5 text-xs">
-                <i class="fa-solid fa-circle-info text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
-                <div class="text-amber-900 dark:text-amber-200 text-[11px] leading-relaxed">
-                    Palet akan disimpan dengan status <strong>In Transit</strong> (berada di dock/staging). Anda dapat memindahkannya ke rak fisik sewaktu-waktu melalui tab <em>"Putaway Palet Transit ke Rak"</em>.
+            <div x-show="!form.bin_id" 
+                 style="background-color: #fef3c7 !important; border: 1.5px solid #f59e0b !important; color: #000000 !important;"
+                 class="p-3 rounded-xl flex items-start gap-2.5 text-xs shadow-sm">
+                <i class="fa-solid fa-circle-info text-amber-700 text-sm mt-0.5 shrink-0"></i>
+                <div style="color: #000000 !important;" class="text-[11px] leading-relaxed">
+                    Palet akan disimpan dengan status <strong style="color: #000000 !important;">In Transit</strong> (berada di dock/staging). Anda dapat memindahkannya ke rak fisik sewaktu-waktu melalui tab <em>"Putaway Palet Transit ke Rak"</em>.
                 </div>
             </div>
 
@@ -1023,7 +1130,156 @@
             </div>
         </div>
     </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL PENCARIAN PALET MOBILE (OPTIMAL & FAST)                             -->
+<!-- ========================================================================= -->
+<div x-show="showMobilePalletModal" 
+     x-cloak
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 translate-y-4"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 translate-y-4"
+     class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md" 
+     style="background-color: rgba(15, 23, 42, 0.7) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important;">
+    <div class="w-full sm:max-w-md h-[90vh] sm:h-[80vh] bg-slate-900 border border-slate-700 rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" 
+         @click.away="showMobilePalletModal = false">
+        
+        <!-- Header Modal Mobile (#004b87 Header with White Text) -->
+        <div class="p-4 sticky top-0 z-10 space-y-3" style="background-color: #004b87 !important; border-bottom: 2px solid #003661 !important;">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-base shadow-inner">
+                        <i class="fa-solid fa-pallet"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-extrabold text-white">Cari Palet Terdaftar</h3>
+                        <p class="text-[11px] text-sky-100 font-medium">Database 11.000+ Master Palet Storage</p>
+                    </div>
+                </div>
+                <button type="button" 
+                        @click="showMobilePalletModal = false" 
+                        style="background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;"
+                        class="w-8 h-8 rounded-full hover:bg-white/30 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Input Pencarian Real-Time Mobile -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+                <input type="text" 
+                       x-model="mobileSearchQuery" 
+                       @input.debounce.200ms="searchPalletsMobile()" 
+                       id="mobile_pallet_search_input"
+                       placeholder="Ketik kode (misal: PLS, K125, LOS)..." 
+                       style="background-color: #ffffff !important; color: #00274d !important; border: 2px solid #bae6fd !important;"
+                       class="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs font-mono uppercase font-black placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white shadow-inner">
+                <button x-show="mobileSearchQuery" 
+                        @click="mobileSearchQuery = ''; searchPalletsMobile()" 
+                        type="button" 
+                        class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-xs">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Quick Filter Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+                <button type="button" 
+                        @click="setMobileFilter('')" 
+                        :style="!mobileFilterType ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;'"
+                        class="px-3 py-1.5 rounded-lg shrink-0 transition cursor-pointer font-extrabold text-xs shadow-sm">
+                    Semua
+                </button>
+                <button type="button" 
+                        @click="setMobileFilter('PLS')" 
+                        :style="mobileFilterType === 'PLS' ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;'"
+                        class="px-3 py-1.5 rounded-lg shrink-0 transition cursor-pointer font-extrabold text-xs shadow-sm">
+                    Plastik (PLS)
+                </button>
+                <button type="button" 
+                        @click="setMobileFilter('LOS')" 
+                        :style="mobileFilterType === 'LOS' ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;'"
+                        class="px-3 py-1.5 rounded-lg shrink-0 transition cursor-pointer font-extrabold text-xs shadow-sm">
+                    Loscam (LOS)
+                </button>
+                <button type="button" 
+                        @click="setMobileFilter('K125')" 
+                        :style="mobileFilterType === 'K125' ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;'"
+                        class="px-3 py-1.5 rounded-lg shrink-0 transition cursor-pointer font-extrabold text-xs shadow-sm">
+                    Kayu 125
+                </button>
+                <button type="button" 
+                        @click="setMobileFilter('K135')" 
+                        :style="mobileFilterType === 'K135' ? 'background-color: #ffffff !important; color: #004b87 !important; border: 2px solid #ffffff !important;' : 'background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;'"
+                        class="px-3 py-1.5 rounded-lg shrink-0 transition cursor-pointer font-extrabold text-xs shadow-sm">
+                    Kayu 135
+                </button>
+            </div>
+        </div>
+
+        <!-- Daftar Hasil Pencarian Palet Mobile (White Cards with Dark Blue Text) -->
+        <div class="flex-1 overflow-y-auto p-3.5 space-y-2.5" style="background-color: #f1f5f9 !important;">
+            <div x-show="isSearchingMobile" class="py-8 text-center text-slate-600 text-xs font-bold">
+                <i class="fa-solid fa-spinner fa-spin text-lg text-[#004b87] mb-2"></i>
+                <p>Memuat daftar palet...</p>
+            </div>
+
+            <template x-for="item in mobilePalletResults" :key="item.id">
+                <div @click="selectMobilePallet(item.id)" 
+                     style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important;"
+                     class="p-3.5 rounded-xl transition cursor-pointer active:scale-[0.98] flex items-center justify-between shadow-sm hover:border-[#004b87] hover:shadow-md">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center space-x-2.5">
+                            <!-- Pallet Code (Dark Blue Bold) -->
+                            <span class="font-mono font-black text-base tracking-wider" style="color: #00274d !important;" x-text="item.id"></span>
+                            <!-- Location Badge -->
+                            <span class="px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wide border shadow-sm"
+                                  :class="item.bin_id ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'"
+                                  x-text="item.location"></span>
+                        </div>
+                        <!-- Pallet Type Name (Dark Blue Navy) -->
+                        <div class="text-xs font-bold" style="color: #004b87 !important;" x-text="item.type_name"></div>
+                        <!-- Muatan Info -->
+                        <template x-if="item.has_content">
+                            <div class="text-xs font-black flex items-center gap-1.5" style="color: #0284c7 !important;">
+                                <i class="fa-solid fa-box-open text-[11px]"></i>
+                                <span x-text="'Muatan: SKU ' + item.product_id + ' (' + item.total_qty + ' unit)'"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="text-right shrink-0 ml-3">
+                        <span style="background-color: #004b87 !important; color: #ffffff !important;" 
+                              class="px-3.5 py-2 hover:bg-[#003661] rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 transition active:scale-95">
+                            <span>Pilih</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+            </template>
+
+            <div x-show="!isSearchingMobile && mobilePalletResults.length === 0" class="py-12 text-center text-slate-500 text-xs font-medium">
+                <i class="fa-solid fa-circle-question text-2xl text-slate-400 mb-2"></i>
+                <p>Tidak ada palet yang cocok dengan kata kunci pencarian.</p>
+            </div>
+        </div>
+
+        <!-- Footer Modal Mobile (#004b87 Footer with White Text) -->
+        <div class="p-3.5 flex items-center justify-between text-xs" style="background-color: #004b87 !important; border-top: 2px solid #003661 !important;">
+            <span class="font-bold text-white" x-text="mobilePalletResults.length + ' palet ditemukan'"></span>
+            <button type="button" 
+                    @click="showMobilePalletModal = false" 
+                    style="background-color: #ffffff !important; color: #004b87 !important;"
+                    class="px-5 py-2 rounded-xl font-black text-xs cursor-pointer transition active:scale-95 shadow-md hover:bg-sky-50">
+                Tutup
+            </button>
+        </div>
+    </div>
 </div>
+</div>
+@endsection
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
@@ -1045,6 +1301,64 @@
     };
 
     let tsInstances = {};
+    const palletSearchCache = {};
+
+    function initPalletTomSelect(id, onChangeCallback) {
+        const el = document.getElementById(id);
+        if (!el) return null;
+
+        if (tsInstances[id]) {
+            tsInstances[id].destroy();
+        }
+
+        const ts = new TomSelect(el, {
+            valueField: 'id',
+            labelField: 'label',
+            searchField: ['id', 'label', 'type_name'],
+            maxOptions: 50,
+            loadThrottle: 200,
+            placeholder: 'Ketik untuk mencari palet (e.g. K125, PLS, LOS)...',
+            load: function(query, callback) {
+                query = (query || '').trim().toUpperCase();
+                if (palletSearchCache[query]) {
+                    return callback(palletSearchCache[query]);
+                }
+                const url = '{{ route("transaction.inbound.search_pallets") }}?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        palletSearchCache[query] = data;
+                        callback(data);
+                    })
+                    .catch(() => callback());
+            },
+            render: {
+                option: function(data, escape) {
+                    const statusClass = data.bin_id ? 'text-emerald-400' : 'text-amber-400';
+                    const hasBox = data.has_content ? '<span class="text-sky-300 ml-1.5 font-semibold text-[10px] bg-sky-950 px-1 py-0.5 rounded">Muatan: ' + escape(data.product_id) + '</span>' : '';
+                    return '<div class="py-1.5 px-2.5 flex items-center justify-between text-xs hover:bg-indigo-950/40">' +
+                               '<div>' +
+                                   '<span class="font-mono font-bold text-indigo-300">' + escape(data.id) + '</span>' +
+                                   ' <span class="text-slate-400 text-[11px]">(' + escape(data.type_name || data.pallet_type_id || '') + ')</span>' +
+                                   hasBox +
+                               '</div>' +
+                               '<span class="text-[10px] font-semibold ' + statusClass + '">' + escape(data.location || 'In Transit') + '</span>' +
+                           '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div class="text-xs font-mono font-bold text-indigo-400">Palet: ' + escape(data.id) + ' (' + escape(data.location || 'In Transit') + ')</div>';
+                }
+            },
+            onChange: function(val) {
+                el.value = val;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                if (onChangeCallback) onChangeCallback(val);
+            }
+        });
+
+        tsInstances[id] = ts;
+        return ts;
+    }
 
     function initTomSelect(id, onChangeCallback) {
         const el = document.getElementById(id);
@@ -1079,14 +1393,14 @@
             showConfirmModal: false,
 
             stepTitles: {
-                1: 'Scan Barcode Palet',
-                2: 'Pilih Produk & Varian',
-                3: 'Input Qty, ED & Notes',
-                4: 'Penempatan Rak (Opsional) & Simpan'
+                1: 'Palet',
+                2: 'Produk',
+                3: 'Detail',
+                4: 'Simpan Rak'
             },
 
             form: {
-                pallet_id: 'PLT-' + Math.floor(1000 + Math.random() * 9000),
+                pallet_id: '',
                 pallet_type_id: '{{ $palletTypes->first()->id ?? "wooden" }}',
                 max_capacity: 72,
                 product_id: initialProdId,
@@ -1150,9 +1464,65 @@
                 return Math.round((cap - this.totalForecastQty) * 100) / 100;
             },
 
+            // Mobile Pallet Search Modal State & Methods
+            showMobilePalletModal: false,
+            mobileSearchQuery: '',
+            mobileFilterType: '',
+            mobilePalletResults: [],
+            isSearchingMobile: false,
+
+            openMobilePalletModal() {
+                this.showMobilePalletModal = true;
+                this.mobileSearchQuery = '';
+                this.mobileFilterType = '';
+                this.searchPalletsMobile();
+                this.$nextTick(() => {
+                    const input = document.getElementById('mobile_pallet_search_input');
+                    if (input) input.focus();
+                });
+            },
+
+            setMobileFilter(prefix) {
+                this.mobileFilterType = prefix;
+                this.mobileSearchQuery = prefix;
+                this.searchPalletsMobile();
+            },
+
+            searchPalletsMobile() {
+                this.isSearchingMobile = true;
+                const q = (this.mobileSearchQuery || '').trim();
+                const cacheKey = q.toUpperCase();
+                if (palletSearchCache[cacheKey]) {
+                    this.mobilePalletResults = palletSearchCache[cacheKey];
+                    this.isSearchingMobile = false;
+                    return;
+                }
+                const url = '{{ route("transaction.inbound.search_pallets") }}?q=' + encodeURIComponent(q);
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        palletSearchCache[cacheKey] = data;
+                        this.mobilePalletResults = data;
+                        this.isSearchingMobile = false;
+                    })
+                    .catch(() => {
+                        this.isSearchingMobile = false;
+                    });
+            },
+
+            selectMobilePallet(palletId) {
+                this.form.pallet_id = palletId;
+                this.showMobilePalletModal = false;
+                this.checkPalletInfo();
+                if (tsInstances['select_existing_pallet']) {
+                    tsInstances['select_existing_pallet'].setValue(palletId, true);
+                }
+            },
+
             initSelectSearchAll() {
                 this.$nextTick(() => {
-                    initTomSelect('select_existing_pallet', val => {
+                    initPalletTomSelect('select_existing_pallet', val => {
                         this.form.pallet_id = val;
                         this.checkPalletInfo();
                     });
@@ -1231,6 +1601,10 @@
                             }
                             if (data.pallet_type_id) {
                                 this.form.pallet_type_id = data.pallet_type_id;
+                            }
+                            if (tsInstances['select_existing_pallet'] && tsInstances['select_existing_pallet'].getValue() !== pltId) {
+                                tsInstances['select_existing_pallet'].addOption({ id: pltId, label: 'Palet: ' + pltId + ' (' + (data.bin_id ? 'Rak ' + data.bin_id : 'In Transit') + ')' });
+                                tsInstances['select_existing_pallet'].setValue(pltId, true);
                             }
                             if (data.bin_id) {
                                 this.form.bin_id = data.bin_id;
@@ -1358,7 +1732,7 @@
 
             resetInboundForm() {
                 this.currentStep = 1;
-                this.form.pallet_id = 'PLT-' + Math.floor(1000 + Math.random() * 9000);
+                this.form.pallet_id = '';
                 this.form.box_id = '';
                 this.form.notes = '';
                 this.form.bin_id = '';
@@ -1382,5 +1756,4 @@
         }
     }
 </script>
-@endsection
 @endsection
