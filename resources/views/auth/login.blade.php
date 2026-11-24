@@ -96,10 +96,6 @@
             box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
         }
         html.dark .form-input::placeholder { color: #64748B; }
-        html.dark .demo-box {
-            background-color: rgba(0, 27, 54, 0.7);
-            border-color: rgba(224, 242, 254, 0.15);
-        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 antialiased font-sans relative">
@@ -170,28 +166,6 @@
                     <span>Masuk ke Dashboard</span>
                 </button>
             </form>
-
-            <!-- Quick Demo Credentials Box -->
-            <div class="mt-8 pt-6 border-t border-slate-500/20">
-                <div class="text-xs font-semibold mb-2 flex items-center justify-between form-label">
-                    <span>Demo Credentials:</span>
-                    <span class="text-[10px] text-[#004b87] dark:text-sky-400 font-semibold">Klik untuk isi otomatis</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <button type="button" onclick="setDemo('admin', 'admin123')" class="demo-box p-2.5 rounded-xl border hover:bg-sky-100/60 dark:hover:bg-[#004b87]/40 hover:border-[#004b87] transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-[#004b87] dark:text-sky-300 group-hover:text-[#003661] dark:group-hover:text-white">admin</div>
-                        <div class="text-[10px] opacity-75">Super Admin</div>
-                    </button>
-                    <button type="button" onclick="setDemo('budi', 'budi123')" class="demo-box p-2.5 rounded-xl border hover:bg-amber-100/60 dark:hover:bg-amber-950/40 hover:border-amber-500 transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-amber-500 group-hover:text-amber-600 dark:group-hover:text-amber-400">budi</div>
-                        <div class="text-[10px] opacity-75">Supervisor</div>
-                    </button>
-                    <button type="button" onclick="setDemo('gilang', 'gilang123')" class="demo-box p-2.5 rounded-xl border hover:bg-sky-100/60 dark:hover:bg-sky-950/40 hover:border-sky-500 transition cursor-pointer focus:outline-none group">
-                        <div class="font-bold text-sky-600 dark:text-sky-400 group-hover:text-sky-700">gilang</div>
-                        <div class="text-[10px] opacity-75">Operator</div>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <div class="text-center text-xs opacity-60 mt-6 font-medium">
@@ -414,22 +388,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             new PolygonalParticleEngine('particle-canvas');
         });
-
-        // 3. Quick Demo Filler Helper Function
-        function setDemo(username, password) {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            
-            if (usernameInput && passwordInput) {
-                usernameInput.value = username;
-                passwordInput.value = password;
-                
-                [usernameInput, passwordInput].forEach(el => {
-                    el.classList.add('ring-2', 'ring-emerald-500');
-                    setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 500);
-                });
-            }
-        }
     </script>
 </body>
 </html>
