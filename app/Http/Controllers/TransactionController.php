@@ -542,10 +542,92 @@ class TransactionController extends Controller
     // --- TRANSFER ANTAR PALET (MIXED-PALLET TRANSFER) ---
     public function transferForm()
     {
-        $pallets = Pallet::with(['bin', 'activeBoxes.product'])->where('is_active', true)->get();
-        $bins = Bin::with('pallets')->get();
+        // 1. Optimasi Query Pallet dengan Eager Loading & Limit (Mencegah fetch 11.000 record)
+        $pallets = Cache::remember('transfer_pallets_cache', 60, function () {
+            return Pallet::select('id', 'pallet_type_id', 'bin_id', 'status', 'max_capacity', 'is_active')
+                ->with([
+                    'type:id,name',
+                    'bin:id,rack_id',
+                    'activeBoxes' => function ($qb) {
+                        $qb->select('id', 'pallet_id', 'product_id', 'qty', 'uom_base', 'expired_date')
+                           ->with('product:id,name,brand');
+                    }
+                ])
+                ->where('is_active', true)
+                ->orderByRaw("CASE WHEN bin_id IS NOT NULL THEN 0 ELSE 1 END")
+                ->limit(100)
+                ->get();
+        });
 
-        return view('transactions.transfer', compact('pallets', 'bins'));
+        // 2. Data Awal Slot BIN untuk Modal Pencarian Cepat (Cache 300 Detik)
+        $binsData = Cache::remember('outbound_bins_data', 300, function () {
+            return Bin::select('id', 'rack_id')
+                ->with([
+                    'rack:id,warehouse_id',
+                    'rack.warehouse:id,name',
+                    'pallets' => function ($q) {
+                        $q->select('id', 'bin_id', 'is_active')
+                          ->where('is_active', true)
+                          ->withCount('activeBoxes');
+                    }
+                ])
+                ->where(function ($query) {
+                    $query->whereHas('pallets', function ($p) {
+                        $p->where('is_active', true);
+                    })
+                    ->orWhere('id', 'like', 'A.%')
+                    ->orWhere('id', 'like', 'B.%');
+                })
+                ->limit(100)
+                ->cursor()
+                ->map(function ($b) {
+                    $b->loadMissing('rack.warehouse');
+                    $activePlts = $b->pallets;
+                    $totalBoxes = $activePlts->sum('active_boxes_count');
+                    return [
+                        'id' => $b->id,
+                        'rack_id' => $b->rack_id ?? ($b->rack->id ?? '-'),
+                        'warehouse_name' => ($b->rack && $b->rack->warehouse) ? $b->rack->warehouse->name : 'Gudang Utama',
+                        'active_pallets_count' => $activePlts->count(),
+                        'total_boxes_count' => $totalBoxes,
+                        'has_stock' => $activePlts->count() > 0,
+                    ];
+                })
+                ->values()
+                ->all();
+        });
+
+        // 3. Ringkasan Palet untuk Modal Pencarian Palet Cepat & Mobile-Friendly
+        $palletsData = $pallets->map(function ($p) {
+            $firstBox = $p->activeBoxes->first();
+            $boxCount = $p->activeBoxes->count();
+            $totalQty = $p->activeBoxes->sum('qty');
+            $location = $p->bin_id ? 'Rak ' . $p->bin_id : 'In Transit';
+            $typeName = $p->type->name ?? $p->pallet_type_id;
+
+            $label = "Palet: {$p->id} ({$location})";
+            if ($firstBox) {
+                $label .= " - SKU: {$firstBox->product_id} ({$totalQty} {$firstBox->uom_base})";
+            }
+
+            return [
+                'id' => $p->id,
+                'pallet_type_id' => $p->pallet_type_id,
+                'type_name' => $typeName,
+                'bin_id' => $p->bin_id,
+                'location' => $location,
+                'status' => $p->status,
+                'max_capacity' => $p->max_capacity ?? 72,
+                'has_content' => $boxCount > 0,
+                'box_count' => $boxCount,
+                'product_id' => $firstBox ? $firstBox->product_id : null,
+                'product_name' => ($firstBox && $firstBox->product) ? $firstBox->product->name : ($firstBox ? $firstBox->product_id : '-'),
+                'total_qty' => $totalQty,
+                'label' => $label,
+            ];
+        })->values()->all();
+
+        return view('transactions.transfer', compact('pallets', 'palletsData', 'binsData'));
     }
 
     public function transfer(Request $request)
@@ -557,6 +639,18 @@ class TransactionController extends Controller
 
         try {
             $pallet = $this->transactionService->assignPalletToRack($data['pallet_id'], $data['target_bin_id'], auth()->id());
+            
+            // Invalidate cache
+            Cache::forget('transfer_pallets_cache');
+            Cache::forget('outbound_bins_data');
+            Cache::forget('inbound_bins_cache');
+            Cache::forget('inbound_initial_pallets');
+            Cache::forget('inbound_putaway_pallets');
+            if (!empty($data['target_bin_id'])) {
+                $safeKey = preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $data['target_bin_id']);
+                Cache::forget('rack_inventory_' . $safeKey);
+            }
+
             return redirect()->route('transaction.transfer.form')->with('success', "Relokasi Palet Sukses! Palet {$pallet->id} kini dipindahkan ke BIN {$pallet->bin_id}.");
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
@@ -575,6 +669,13 @@ class TransactionController extends Controller
 
         try {
             $res = $this->transactionService->transferProductBetweenPallets($data, auth()->id());
+            
+            // Invalidate cache
+            Cache::forget('transfer_pallets_cache');
+            Cache::forget('outbound_bins_data');
+            Cache::forget('inbound_initial_pallets');
+            Cache::forget('inbound_putaway_pallets');
+
             return redirect()->route('transaction.transfer.form')->with('success', "Transfer Antar Palet Sukses! {$data['qty']} {$data['unit']} berhasil dipindahkan dari Palet {$data['source_pallet_id']} ke Palet {$data['target_pallet_id']}.");
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());

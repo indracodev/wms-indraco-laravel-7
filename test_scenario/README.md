@@ -30,7 +30,8 @@ test_scenario/
 ├── 7_uom_test.md                  # [TS-MST-006] Master Data Satuan UOM (CRUD)
 ├── 8_produk_test.md               # [TS-MST-007] Master Data Katalog Produk SKU (CRUD)
 ├── 9_palet_test.md                # [TS-MST-008] Master Data Palet Storage (CRUD)
-└── 10_inbound_test.md             # [TS-INB-001] Transaksi Penerimaan Barang Masuk (Inbound V2)
+├── 10_inbound_test.md             # [TS-INB-001] Transaksi Penerimaan Barang Masuk (Inbound V2)
+└── 11_tranfer_test.md             # [TS-TRF-001] Transaksi Transfer Antar Palet & Relokasi BIN
 ```
 
 > **Catatan:** Jika ada modul baru, buat folder baru dengan nama slug huruf kecil (`kebab-case`).
